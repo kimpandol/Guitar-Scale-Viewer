@@ -8,14 +8,17 @@
       gtag('js', new Date());
       gtag('config', 'G-2ZD42Y9WN8');
     </script>
+
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>기타 & 베이스 스케일/코드 뷰어</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: sans-serif;
             background-color: #f4f4f4;
-            padding: 20px;
+            padding: 15px; 
+            margin: 0;
         }
         .controls-container {
             background-color: #fff;
@@ -26,7 +29,7 @@
         }
         .controls-row {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             align-items: center;
             flex-wrap: wrap;
             margin-bottom: 15px;
@@ -38,18 +41,30 @@
             width: 100%;
             height: 1px;
             background-color: #eee;
-            margin: 5px 0 15px 0;
+            margin: 10px 0 15px 0;
         }
         select {
             padding: 8px 12px;
             font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+
+        .fretboard-scroll-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; 
+            margin-bottom: 20px;
+            border-radius: 8px;
         }
         
         #capture-area {
             background-color: #f4f4f4;
-            padding: 20px 10px 10px 10px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            padding: 20px 15px 15px 15px;
+            width: max-content; 
+            min-width: 100%;
+            box-sizing: border-box;
         }
 
         #capture-title {
@@ -67,8 +82,9 @@
             background-color: #3e3e3e;
             padding: 10px 0;
             border-radius: 5px;
-            overflow-x: auto;
             user-select: none;
+            width: max-content;
+            min-width: 100%;
         }
         
         .string {
@@ -97,7 +113,7 @@
         
         .fret {
             flex: 1;
-            min-width: 50px;
+            min-width: 45px;
             height: 100%;
             border-right: 2px solid #a8a8a8;
             display: flex;
@@ -110,19 +126,19 @@
         .fret:hover { background-color: rgba(255, 255, 255, 0.1); }
         .fret:first-child {
             border-left: 6px solid #e0e0e0;
-            min-width: 40px;
+            min-width: 35px;
         }
         
         .note {
-            width: 26px;
-            height: 26px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             background-color: #ff9800;
             color: white;
             display: none;
             justify-content: center;
             align-items: center;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             z-index: 3;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
@@ -154,17 +170,19 @@
             align-items: center;
             color: #333;
             font-weight: bold;
+            width: max-content;
+            min-width: 100%;
         }
         .fret-number {
             flex: 1;
-            min-width: 50px;
+            min-width: 45px;
             text-align: center;
         }
-        .fret-number:first-child { min-width: 40px; }
+        .fret-number:first-child { min-width: 35px; }
 
         .analyzer {
-            margin-top: 20px;
-            padding: 20px;
+            margin-top: 10px;
+            padding: 15px;
             background-color: #fff;
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -175,32 +193,35 @@
             color: #333;
             display: flex;
             align-items: center;
-            gap: 15px;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .analyzer-content { font-size: 15px; color: #555; }
+        .analyzer-content { font-size: 15px; color: #555; word-break: keep-all; }
         
         .btn {
             background-color: #e0e0e0;
             border: none;
-            padding: 8px 15px;
+            padding: 10px 15px; 
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
             font-weight: bold;
             color: #333;
+            touch-action: manipulation;
         }
         .btn:hover { background-color: #ccc; }
         
         .lang-btn { background-color: #333; color: white; }
         .lang-btn:hover { background-color: #111; }
 
-        .instrument-btn { background-color: #616161; color: white; font-size: 14px; }
+        .instrument-btn { background-color: #616161; color: white; }
         .instrument-btn.active { background-color: #4CAF50; box-shadow: 0 0 8px rgba(76,175,80,0.5); }
         
-        .mode-btn { background-color: #616161; color: white; font-size: 14px; }
+        .mode-btn { background-color: #616161; color: white; }
         .mode-btn.active { background-color: #ff9800; box-shadow: 0 0 8px rgba(255,152,0,0.5); }
 
-        .find-note-btn { padding: 6px 10px; font-size: 14px; background-color: #e0e0e0; }
+        .find-note-btn { padding: 8px 12px; font-size: 14px; background-color: #e0e0e0; flex-grow: 1; text-align: center; }
         .find-note-btn.active { background-color: #9c27b0; color: white; box-shadow: 0 0 6px rgba(156, 39, 176, 0.6); }
 
         .capture-btn { background-color: #1a73e8; color: white; margin-left: auto; }
@@ -215,6 +236,52 @@
             margin-bottom: 5px;
         }
         .clickable-scale:hover { color: #1152a3; font-weight: bold; }
+
+        /* 🔥 유튜브 링크 스타일 */
+        .youtube-footer {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+        }
+        .youtube-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            background-color: #fff;
+            transition: all 0.2s ease;
+        }
+        .youtube-link:hover {
+            background-color: #ff0000;
+            color: #fff;
+            border-color: #ff0000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .controls-row { flex-direction: column; align-items: stretch; gap: 8px; }
+            .controls-row > span { display: flex; flex-direction: column; gap: 8px; }
+            .capture-btn { margin-left: 0; }
+            .btn { width: 100%; padding: 12px; font-size: 16px; }
+            select { width: 100%; padding: 12px; }
+            #note-buttons-container { display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+            .find-note-btn { width: 100%; padding: 10px 0; }
+            .analyzer h3 { flex-direction: column; align-items: stretch; }
+            #clear-custom-btn { width: 100%; margin-top: 10px; }
+            .string { height: 28px; }
+            .fret { min-width: 20px; }
+            .fret:first-child { min-width: 15px; border-left-width: 4px; }
+            .fret-number { min-width: 20px; font-size: 10px; }
+            .fret-number:first-child { min-width: 15px; }
+            .note { width: 15px; height: 15px; font-size: 7px; border-width: 1px; }
+        }
     </style>
 </head>
 <body>
@@ -222,13 +289,10 @@
     <div class="controls-container">
         <div class="controls-row">
             <button id="lang-btn" class="btn lang-btn">🌐 English</button>
-            <span style="color:#ccc;">|</span>
             <button id="guitar-btn" class="btn instrument-btn active">🎸 기타 (6줄)</button>
             <button id="bass-btn" class="btn instrument-btn">🎸 베이스 (4줄)</button>
-            <span style="color:#ccc;">|</span>
             <button id="scale-mode-btn" class="btn mode-btn active">🎶 스케일 모드</button>
             <button id="chord-mode-btn" class="btn mode-btn">🎹 코드 모드</button>
-            
             <button id="capture-btn" class="btn capture-btn">📸 지판 이미지 저장</button>
         </div>
 
@@ -259,10 +323,12 @@
         </div>
     </div>
 
-    <div id="capture-area">
-        <h2 id="capture-title">Guitar C Blues</h2>
-        <div class="fret-numbers" id="fret-numbers"></div>
-        <div class="fretboard instrument-guitar" id="fretboard"></div>
+    <div class="fretboard-scroll-wrapper">
+        <div id="capture-area">
+            <h2 id="capture-title">Guitar C Blues</h2>
+            <div class="fret-numbers" id="fret-numbers"></div>
+            <div class="fretboard instrument-guitar" id="fretboard"></div>
+        </div>
     </div>
 
     <div class="analyzer">
@@ -271,11 +337,16 @@
             <button id="clear-custom-btn" class="btn">초록/보라색 초기화</button>
         </h3>
         <div id="scale-analysis-result" class="analyzer-content">
-            </div>
+        </div>
+    </div>
+
+    <div class="youtube-footer">
+        <a href="https://www.youtube.com/@kimpandol123" target="_blank" class="youtube-link">
+            🎬 kimpandol YouTube Channel
+        </a>
     </div>
 
     <script>
-        // 🌐 언어 데이터 사전
         const i18n = {
             ko: {
                 langBtn: "🌐 English",
@@ -290,7 +361,7 @@
                 lblChord: "코드 종류: ",
                 lblFindNote: "특정 음 찾기 (보라색): ",
                 selectDefault: "-- 선택 --",
-                analyzerTitle: "🔍 지판 분석기 (코드 & 스케일)",
+                analyzerTitle: "🔍 지판 분석기",
                 clearBtn: "초록/보라색 초기화",
                 analyzerDefault: "지판을 클릭해서 초록색 음을 추가하면, 어떤 <strong>코드</strong>와 <strong>스케일</strong>인지 여기에 분석해 줄게!",
                 txtCurrentNotes: "현재 찍은 음: ",
@@ -327,13 +398,7 @@
             }
         };
 
-        // 🔥 접속자의 브라우저 언어 감지해서 초기 언어 설정하기
-        let currentLang = 'en'; // 기본값은 영어
-        const browserLang = navigator.language || navigator.userLanguage;
-        // 브라우저 언어 설정에 'ko'가 포함되어 있으면 한국어로 설정
-        if (browserLang && browserLang.toLowerCase().includes('ko')) {
-            currentLang = 'ko';
-        }
+        let currentLang = 'ko'; 
 
         const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
         const tunings = {
@@ -351,19 +416,19 @@
             "Mixolydian": [0, 2, 4, 5, 7, 9, 10],
             "Major Pentatonic": [0, 2, 4, 7, 9],
             "Bebop Major": [0, 2, 4, 5, 7, 8, 9, 11],
-            "Phrygian Dominant": [0, 1, 4, 5, 7, 8, 10],
-            "Lydian Dominant": [0, 2, 4, 6, 7, 9, 10]
+            "Phrygian Dominant": [0, 1, 4, 5, 7, 8, 10], 
+            "Lydian Dominant": [0, 2, 4, 6, 7, 9, 10] 
         };
         
         const minorScales = {
             "Minor (Aeolian)": [0, 2, 3, 5, 7, 8, 10],
             "Dorian": [0, 2, 3, 5, 7, 9, 10],
-            "Phrygian": [0, 1, 3, 5, 7, 8, 10],
+            "Phrygian": [0, 1, 3, 5, 7, 8, 10], 
             "Locrian": [0, 1, 3, 5, 6, 8, 10],
             "Minor Pentatonic": [0, 3, 5, 7, 10],
             "Blues": [0, 3, 5, 6, 7, 10],
-            "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11],
-            "Melodic Minor": [0, 2, 3, 5, 7, 9, 11],
+            "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11], 
+            "Melodic Minor": [0, 2, 3, 5, 7, 9, 11], 
             "Diminished (W-H)": [0, 2, 3, 5, 6, 8, 9, 11],
             "Bebop Minor": [0, 2, 3, 4, 5, 7, 9, 10],
             "Altered": [0, 1, 3, 4, 6, 8, 10]
@@ -429,7 +494,6 @@
         function applyLanguage() {
             const t = i18n[currentLang];
             
-            // 버튼들
             document.getElementById('lang-btn').innerText = t.langBtn;
             document.getElementById('guitar-btn').innerText = t.guitarBtn;
             document.getElementById('bass-btn').innerText = t.bassBtn;
@@ -437,18 +501,15 @@
             document.getElementById('chord-mode-btn').innerText = t.chordModeBtn;
             document.getElementById('capture-btn').innerText = t.captureBtn;
             
-            // 라벨들
             document.getElementById('lbl-key').innerText = t.lblKey;
             document.getElementById('lbl-major').innerText = t.lblMajor;
             document.getElementById('lbl-minor').innerText = t.lblMinor;
             document.getElementById('lbl-chord').innerText = t.lblChord;
             document.getElementById('lbl-find-note').innerText = t.lblFindNote;
             
-            // 분석기 제목 및 초기화 버튼
             document.getElementById('lbl-analyzer-title').innerText = t.analyzerTitle;
             document.getElementById('clear-custom-btn').innerText = t.clearBtn;
 
-            // 셀렉트 박스 기본 문구 업데이트
             document.querySelectorAll('select option[value=""]').forEach(opt => opt.innerText = t.selectDefault);
 
             analyzeCustomNotes(); 
