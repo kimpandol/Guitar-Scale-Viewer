@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>기타 & 베이스 스케일/코드 뷰어</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .controls-container {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .controls-row:last-child {
+            margin-bottom: 0;
+        }
+        .divider {
+            width: 100%;
+            height: 1px;
+            background-color: #eee;
+            margin: 5px 0 15px 0;
+        }
+        select {
+            padding: 8px 12px;
+            font-size: 16px;
+        }
+        
+        #capture-area {
+            background-color: #f4f4f4;
+            padding: 20px 10px 10px 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        #capture-title {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .fretboard {
+            display: flex;
+            flex-direction: column;
+            background-color: #3e3e3e;
+            padding: 10px 0;
+            border-radius: 5px;
+            overflow-x: auto;
+            user-select: none;
+        }
+        
+        .string {
+            display: flex;
+            height: 40px;
+            position: relative;
+            align-items: center;
+        }
+        .string::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #b0b0b0;
+            z-index: 1;
+        }
+        
+        .fretboard.instrument-guitar .string:nth-last-child(1)::before { height: 4px; } 
+        .fretboard.instrument-guitar .string:nth-last-child(2)::before { height: 3px; }
+
+        .fretboard.instrument-bass .string:nth-last-child(1)::before { height: 5px; } 
+        .fretboard.instrument-bass .string:nth-last-child(2)::before { height: 4px; } 
+        .fretboard.instrument-bass .string:nth-last-child(3)::before { height: 3px; } 
+        .fretboard.instrument-bass .string:nth-last-child(4)::before { height: 2px; } 
+        
+        .fret {
+            flex: 1;
+            min-width: 50px;
+            height: 100%;
+            border-right: 2px solid #a8a8a8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+        }
+        .fret:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .fret:first-child {
+            border-left: 6px solid #e0e0e0;
+            min-width: 40px;
+        }
+        
+        .note {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background-color: #ff9800;
+            color: white;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 3;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+        
+        .note.active { display: flex; }
+        .note.root { background-color: #f44336; }
+        
+        .note.custom {
+            display: flex !important;
+            background-color: #4CAF50 !important; 
+            color: white;
+            border: 2px solid #fff;
+        }
+
+        .note.highlight {
+            display: flex !important;
+            background-color: #9c27b0 !important; 
+            color: white;
+            border: 2px solid #fff;
+            z-index: 4;
+            box-shadow: 0 0 8px rgba(156, 39, 176, 0.8);
+        }
+
+        .fret-numbers {
+            display: flex;
+            height: 30px;
+            align-items: center;
+            color: #333;
+            font-weight: bold;
+        }
+        .fret-number {
+            flex: 1;
+            min-width: 50px;
+            text-align: center;
+        }
+        .fret-number:first-child { min-width: 40px; }
+
+        .analyzer {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            line-height: 1.6;
+        }
+        .analyzer h3 {
+            margin-top: 0;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .analyzer-content { font-size: 15px; color: #555; }
+        
+        .btn {
+            background-color: #e0e0e0;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+        .btn:hover { background-color: #ccc; }
+        
+        .lang-btn { background-color: #333; color: white; }
+        .lang-btn:hover { background-color: #111; }
+
+        .instrument-btn { background-color: #616161; color: white; font-size: 14px; }
+        .instrument-btn.active { background-color: #4CAF50; box-shadow: 0 0 8px rgba(76,175,80,0.5); }
+        
+        .mode-btn { background-color: #616161; color: white; font-size: 14px; }
+        .mode-btn.active { background-color: #ff9800; box-shadow: 0 0 8px rgba(255,152,0,0.5); }
+
+        .find-note-btn { padding: 6px 10px; font-size: 14px; background-color: #e0e0e0; }
+        .find-note-btn.active { background-color: #9c27b0; color: white; box-shadow: 0 0 6px rgba(156, 39, 176, 0.6); }
+
+        .capture-btn { background-color: #1a73e8; color: white; margin-left: auto; }
+        .capture-btn:hover { background-color: #1152a3; }
+
+        .clickable-scale {
+            cursor: pointer;
+            color: #1a73e8;
+            text-decoration: underline;
+            display: inline-block;
+            margin-right: 15px;
+            margin-bottom: 5px;
+        }
+        .clickable-scale:hover { color: #1152a3; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="controls-container">
+        <div class="controls-row">
+            <button id="lang-btn" class="btn lang-btn">🌐 English</button>
+            <span style="color:#ccc;">|</span>
+            <button id="guitar-btn" class="btn instrument-btn active">🎸 기타 (6줄)</button>
+            <button id="bass-btn" class="btn instrument-btn">🎸 베이스 (4줄)</button>
+            <span style="color:#ccc;">|</span>
+            <button id="scale-mode-btn" class="btn mode-btn active">🎶 스케일 모드</button>
+            <button id="chord-mode-btn" class="btn mode-btn">🎹 코드 모드</button>
+            
+            <button id="capture-btn" class="btn capture-btn">📸 지판 이미지 저장</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="controls-row">
+            <label id="lbl-key">조(Key/Root): </label>
+            <select id="key-select"></select>
+            
+            <span id="scale-controls">
+                <label id="lbl-major">메이저 계열: </label>
+                <select id="major-select"><option value="">-- 선택 --</option></select>
+                <label id="lbl-minor">마이너 계열: </label>
+                <select id="minor-select"><option value="">-- 선택 --</option></select>
+            </span>
+
+            <span id="chord-controls" style="display:none;">
+                <label id="lbl-chord">코드 종류: </label>
+                <select id="chord-select"><option value="">-- 선택 --</option></select>
+            </span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="controls-row">
+            <label id="lbl-find-note">특정 음 찾기 (보라색): </label>
+            <div id="note-buttons-container" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+        </div>
+    </div>
+
+    <div id="capture-area">
+        <h2 id="capture-title">Guitar C Blues</h2>
+        <div class="fret-numbers" id="fret-numbers"></div>
+        <div class="fretboard instrument-guitar" id="fretboard"></div>
+    </div>
+
+    <div class="analyzer">
+        <h3>
+            <span id="lbl-analyzer-title">🔍 지판 분석기 (코드 & 스케일)</span>
+            <button id="clear-custom-btn" class="btn">초록/보라색 초기화</button>
+        </h3>
+        <div id="scale-analysis-result" class="analyzer-content">
+            </div>
+    </div>
+
+    <script>
+        // 🌐 언어 데이터 사전
+        const i18n = {
+            ko: {
+                langBtn: "🌐 English",
+                guitarBtn: "🎸 기타 (6줄)",
+                bassBtn: "🎸 베이스 (4줄)",
+                scaleModeBtn: "🎶 스케일 모드",
+                chordModeBtn: "🎹 코드 모드",
+                captureBtn: "📸 지판 이미지 저장",
+                lblKey: "조(Key/Root): ",
+                lblMajor: "메이저 계열: ",
+                lblMinor: "마이너 계열: ",
+                lblChord: "코드 종류: ",
+                lblFindNote: "특정 음 찾기 (보라색): ",
+                selectDefault: "-- 선택 --",
+                analyzerTitle: "🔍 지판 분석기 (코드 & 스케일)",
+                clearBtn: "초록/보라색 초기화",
+                analyzerDefault: "지판을 클릭해서 초록색 음을 추가하면, 어떤 <strong>코드</strong>와 <strong>스케일</strong>인지 여기에 분석해 줄게!",
+                txtCurrentNotes: "현재 찍은 음: ",
+                txtExactChords: "🎹 <strong>일치하는 코드:</strong>",
+                txtExactScales: "🎯 <strong>정확히 일치하는 스케일:</strong>",
+                txtPartialScales: "🧩 <strong>이 음들을 포함하는 스케일 (일부 일치):</strong>",
+                txtNone: "없음",
+                txtEtc: " 등등...",
+                txtCustom: "커스텀"
+            },
+            en: {
+                langBtn: "🌐 한국어",
+                guitarBtn: "🎸 Guitar (6-string)",
+                bassBtn: "🎸 Bass (4-string)",
+                scaleModeBtn: "🎶 Scale Mode",
+                chordModeBtn: "🎹 Chord Mode",
+                captureBtn: "📸 Save Image",
+                lblKey: "Key/Root: ",
+                lblMajor: "Major Scales: ",
+                lblMinor: "Minor Scales: ",
+                lblChord: "Chord Type: ",
+                lblFindNote: "Find Notes (Purple): ",
+                selectDefault: "-- Select --",
+                analyzerTitle: "🔍 Fretboard Analyzer",
+                clearBtn: "Clear Highlights",
+                analyzerDefault: "Click the fretboard to add green notes, and I'll analyze the <strong>Chord</strong> and <strong>Scale</strong> for you!",
+                txtCurrentNotes: "Current Notes: ",
+                txtExactChords: "🎹 <strong>Exact Chords:</strong>",
+                txtExactScales: "🎯 <strong>Exact Scales:</strong>",
+                txtPartialScales: "🧩 <strong>Scales Containing These Notes:</strong>",
+                txtNone: "None",
+                txtEtc: " etc...",
+                txtCustom: "Custom"
+            }
+        };
+
+        let currentLang = 'ko'; 
+
+        const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const tunings = {
+            'guitar': [4, 11, 7, 2, 9, 4], 
+            'bass': [7, 2, 9, 4]             
+        };
+        
+        let currentInstrument = 'guitar'; 
+        let currentMode = 'scale'; 
+        let highlightedNotes = new Set(); 
+
+        const majorScales = {
+            "Major (Ionian)": [0, 2, 4, 5, 7, 9, 11],
+            "Lydian": [0, 2, 4, 6, 7, 9, 11],
+            "Mixolydian": [0, 2, 4, 5, 7, 9, 10],
+            "Major Pentatonic": [0, 2, 4, 7, 9],
+            "Bebop Major": [0, 2, 4, 5, 7, 8, 9, 11]
+        };
+        const minorScales = {
+            "Minor (Aeolian)": [0, 2, 3, 5, 7, 8, 10],
+            "Dorian": [0, 2, 3, 5, 7, 9, 10],
+            "Locrian": [0, 1, 3, 5, 6, 8, 10],
+            "Minor Pentatonic": [0, 3, 5, 7, 10],
+            "Blues": [0, 3, 5, 6, 7, 10],
+            "Diminished (W-H)": [0, 2, 3, 5, 6, 8, 9, 11],
+            "Bebop Minor": [0, 2, 3, 4, 5, 7, 9, 10],
+            "Altered": [0, 1, 3, 4, 6, 8, 10]
+        };
+        const allScales = { ...majorScales, ...minorScales };
+
+        const allChords = {
+            "Major (M)": [0, 4, 7],
+            "Minor (m)": [0, 3, 7],
+            "Dominant 7 (7)": [0, 4, 7, 10],
+            "Major 7 (maj7)": [0, 4, 7, 11],
+            "Minor 7 (m7)": [0, 3, 7, 10],
+            "Sus 4 (sus4)": [0, 5, 7],
+            "Sus 2 (sus2)": [0, 2, 7],
+            "Diminished (dim)": [0, 3, 6],
+            "Augmented (aug)": [0, 4, 8],
+            "Half Diminished (m7b5)": [0, 3, 6, 10],
+            "Diminished 7 (dim7)": [0, 3, 6, 9],
+            "Minor Major 7 (mM7)": [0, 3, 7, 11]
+        };
+
+        const totalFrets = 21;
+
+        function init() {
+            setupSelects();
+            setupNoteButtons(); 
+            renderFretboard(); 
+            updateFretboard();
+            applyLanguage(); // 초기 언어 세팅
+
+            document.getElementById('lang-btn').addEventListener('click', toggleLanguage);
+            document.getElementById('key-select').addEventListener('change', updateFretboard);
+            document.getElementById('major-select').addEventListener('change', function() {
+                document.getElementById('minor-select').value = "";
+                updateFretboard();
+            });
+            document.getElementById('minor-select').addEventListener('change', function() {
+                document.getElementById('major-select').value = "";
+                updateFretboard();
+            });
+            document.getElementById('chord-select').addEventListener('change', updateFretboard);
+
+            document.getElementById('clear-custom-btn').addEventListener('click', function() {
+                document.querySelectorAll('.note.custom').forEach(el => el.classList.remove('custom'));
+                highlightedNotes.clear();
+                document.querySelectorAll('.find-note-btn').forEach(btn => btn.classList.remove('active'));
+                applyHighlights();
+                analyzeCustomNotes();
+            });
+
+            document.getElementById('guitar-btn').addEventListener('click', () => switchInstrument('guitar'));
+            document.getElementById('bass-btn').addEventListener('click', () => switchInstrument('bass'));
+            document.getElementById('scale-mode-btn').addEventListener('click', () => switchMode('scale'));
+            document.getElementById('chord-mode-btn').addEventListener('click', () => switchMode('chord'));
+            document.getElementById('capture-btn').addEventListener('click', captureFretboard);
+        }
+
+        // 🌐 언어 토글 함수
+        function toggleLanguage() {
+            currentLang = currentLang === 'ko' ? 'en' : 'ko';
+            applyLanguage();
+        }
+
+        // 🌐 UI 텍스트 업데이트 함수
+        function applyLanguage() {
+            const t = i18n[currentLang];
+            
+            document.getElementById('lang-btn').innerText = t.langBtn;
+            document.getElementById('guitar-btn').innerText = t.guitarBtn;
+            document.getElementById('bass-btn').innerText = t.bassBtn;
+            document.getElementById('scale-mode-btn').innerText = t.scaleModeBtn;
+            document.getElementById('chord-mode-btn').innerText = t.chordModeBtn;
+            document.getElementById('capture-btn').innerText = t.captureBtn;
+            
+            document.getElementById('lbl-key').innerText = t.lblKey;
+            document.getElementById('lbl-major').innerText = t.lblMajor;
+            document.getElementById('lbl-minor').innerText = t.lblMinor;
+            document.getElementById('lbl-chord').innerText = t.lblChord;
+            document.getElementById('lbl-find-note').innerText = t.lblFindNote;
+            
+            document.getElementById('lbl-analyzer-title').innerText = t.analyzerTitle;
+            document.getElementById('clear-custom-btn').innerText = t.clearBtn;
+
+            // 셀렉트 박스의 기본 '-- 선택 --' 텍스트 변경
+            document.querySelectorAll('select option[value=""]').forEach(opt => opt.innerText = t.selectDefault);
+
+            analyzeCustomNotes(); // 분석기 텍스트 새로고침
+            updateFretboard();    // 타이틀 텍스트 새로고침
+        }
+
+        function setupNoteButtons() {
+            const container = document.getElementById('note-buttons-container');
+            notes.forEach((note, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn find-note-btn';
+                btn.textContent = note;
+                
+                btn.addEventListener('click', function() {
+                    if (highlightedNotes.has(index)) {
+                        highlightedNotes.delete(index);
+                        this.classList.remove('active');
+                    } else {
+                        highlightedNotes.add(index);
+                        this.classList.add('active');
+                    }
+                    applyHighlights(); 
+                });
+                container.appendChild(btn);
+            });
+        }
+        
+        function applyHighlights() {
+            document.querySelectorAll('.note').forEach(noteEl => {
+                const noteIdx = parseInt(noteEl.dataset.noteIndex);
+                if (highlightedNotes.has(noteIdx)) {
+                    noteEl.classList.add('highlight');
+                } else {
+                    noteEl.classList.remove('highlight');
+                }
+            });
+        }
+
+        function switchInstrument(instrument) {
+            if (currentInstrument === instrument) return;
+            currentInstrument = instrument;
+            
+            document.getElementById('guitar-btn').classList.toggle('active', instrument === 'guitar');
+            document.getElementById('bass-btn').classList.toggle('active', instrument === 'bass');
+            
+            document.getElementById('fretboard').className = `fretboard instrument-${instrument}`;
+            resetSelections();
+            renderFretboard();
+            updateFretboard();
+            analyzeCustomNotes();
+        }
+
+        function switchMode(mode) {
+            if (currentMode === mode) return;
+            currentMode = mode;
+
+            document.getElementById('scale-mode-btn').classList.toggle('active', mode === 'scale');
+            document.getElementById('chord-mode-btn').classList.toggle('active', mode === 'chord');
+
+            document.getElementById('scale-controls').style.display = mode === 'scale' ? 'inline' : 'none';
+            document.getElementById('chord-controls').style.display = mode === 'chord' ? 'inline' : 'none';
+
+            resetSelections();
+            updateFretboard();
+        }
+
+        function resetSelections() {
+            document.querySelectorAll('.note.custom').forEach(el => el.classList.remove('custom'));
+            highlightedNotes.clear();
+            document.querySelectorAll('.find-note-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById('major-select').value = "";
+            document.getElementById('minor-select').value = "";
+            document.getElementById('chord-select').value = "";
+            
+            if (currentMode === 'scale') {
+                document.getElementById('minor-select').value = "Blues";
+            }
+        }
+
+        function setupSelects() {
+            const keySelect = document.getElementById('key-select');
+            notes.forEach((note, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = note;
+                keySelect.appendChild(option);
+            });
+
+            const majorSelect = document.getElementById('major-select');
+            for (let scale in majorScales) {
+                majorSelect.appendChild(new Option(scale, scale));
+            }
+
+            const minorSelect = document.getElementById('minor-select');
+            for (let scale in minorScales) {
+                const option = new Option(scale, scale);
+                if(scale === "Blues") option.selected = true;
+                minorSelect.appendChild(option);
+            }
+
+            const chordSelect = document.getElementById('chord-select');
+            for (let chord in allChords) {
+                chordSelect.appendChild(new Option(chord, chord));
+            }
+        }
+
+        function renderFretboard() {
+            const fretboard = document.getElementById('fretboard');
+            fretboard.innerHTML = ""; 
+
+            const fretNumbersDiv = document.getElementById('fret-numbers');
+            if (fretNumbersDiv.innerHTML === "") { 
+                for (let i = 0; i <= totalFrets; i++) {
+                    const numDiv = document.createElement('div');
+                    numDiv.className = 'fret-number';
+                    numDiv.textContent = i;
+                    fretNumbersDiv.appendChild(numDiv);
+                }
+            }
+            
+            const currentTuning = tunings[currentInstrument];
+
+            currentTuning.forEach((openNoteIndex) => {
+                const stringDiv = document.createElement('div');
+                stringDiv.className = 'string';
+
+                for (let fret = 0; fret <= totalFrets; fret++) {
+                    const fretDiv = document.createElement('div');
+                    fretDiv.className = 'fret';
+
+                    const currentNoteIndex = (openNoteIndex + fret) % 12;
+                    
+                    const noteDiv = document.createElement('div');
+                    noteDiv.className = 'note';
+                    noteDiv.dataset.noteIndex = currentNoteIndex;
+                    noteDiv.textContent = notes[currentNoteIndex];
+
+                    fretDiv.addEventListener('click', function() {
+                        noteDiv.classList.toggle('custom');
+                        analyzeCustomNotes();
+                    });
+
+                    fretDiv.appendChild(noteDiv);
+                    stringDiv.appendChild(fretDiv);
+                }
+                fretboard.appendChild(stringDiv);
+            });
+            applyHighlights();
+        }
+
+        function updateFretboard() {
+            const rootIndex = parseInt(document.getElementById('key-select').value);
+            const rootName = notes[rootIndex];
+            const t = i18n[currentLang];
+            
+            let intervals = [];
+            let displayTitle = "";
+            const instrumentLabel = currentInstrument === 'guitar' ? 'Guitar' : 'Bass';
+
+            if (currentMode === 'scale') {
+                const majorVal = document.getElementById('major-select').value;
+                const minorVal = document.getElementById('minor-select').value;
+                const selectedScale = majorVal || minorVal;
+                
+                if (selectedScale) {
+                    intervals = allScales[selectedScale];
+                    displayTitle = `${instrumentLabel} ${rootName} ${selectedScale}`;
+                } else {
+                    displayTitle = `${instrumentLabel} ${rootName} ${t.txtCustom}`;
+                }
+            } else {
+                const chordVal = document.getElementById('chord-select').value;
+                if (chordVal) {
+                    intervals = allChords[chordVal];
+                    let cleanChordName = chordVal.split(' (')[0];
+                    displayTitle = `${instrumentLabel} ${rootName} ${cleanChordName} Chord`;
+                } else {
+                    displayTitle = `${instrumentLabel} ${rootName} ${t.txtCustom}`;
+                }
+            }
+
+            document.getElementById('capture-title').innerText = displayTitle;
+
+            const activeNotes = intervals.map(interval => (rootIndex + interval) % 12);
+
+            document.querySelectorAll('.note').forEach(noteEl => {
+                const noteIdx = parseInt(noteEl.dataset.noteIndex);
+                noteEl.classList.remove('active', 'root');
+
+                if (intervals.length > 0 && activeNotes.includes(noteIdx)) {
+                    noteEl.classList.add('active');
+                    if (noteIdx === rootIndex) {
+                        noteEl.classList.add('root');
+                    }
+                }
+            });
+        }
+
+        window.applyView = function(rootIndex, name, type) {
+            document.getElementById('key-select').value = rootIndex;
+            
+            if (type === 'scale') {
+                switchMode('scale');
+                if (majorScales.hasOwnProperty(name)) {
+                    document.getElementById('major-select').value = name;
+                    document.getElementById('minor-select').value = "";
+                } else {
+                    document.getElementById('minor-select').value = name;
+                    document.getElementById('major-select').value = "";
+                }
+            } else if (type === 'chord') {
+                switchMode('chord');
+                document.getElementById('chord-select').value = name;
+            }
+            
+            updateFretboard();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        function analyzeCustomNotes() {
+            const resultDiv = document.getElementById('scale-analysis-result');
+            const customElements = document.querySelectorAll('.note.custom');
+            const selectedNotesSet = new Set();
+            const t = i18n[currentLang];
+            
+            customElements.forEach(el => selectedNotesSet.add(parseInt(el.dataset.noteIndex)));
+            const selectedArr = Array.from(selectedNotesSet).sort((a, b) => a - b);
+
+            if (selectedArr.length === 0) {
+                resultDiv.innerHTML = t.analyzerDefault;
+                return;
+            }
+
+            let exactChords = [];
+            let exactScales = [];
+            let partialScales = [];
+
+            for (let root = 0; root < 12; root++) {
+                let rootName = notes[root];
+                
+                for (let chordName in allChords) {
+                    let chordNotes = allChords[chordName].map(i => (root + i) % 12).sort((a, b) => a - b);
+                    if (JSON.stringify(chordNotes) === JSON.stringify(selectedArr)) {
+                        let shortName = chordName.match(/\(([^)]+)\)/)[1];
+                        exactChords.push(`<span class="clickable-scale" onclick="applyView(${root}, '${chordName}', 'chord')"><strong>${rootName}${shortName}</strong> (${chordName})</span>`);
+                    }
+                }
+
+                for (let scaleName in allScales) {
+                    let scaleNotes = allScales[scaleName].map(i => (root + i) % 12).sort((a, b) => a - b);
+                    if (JSON.stringify(scaleNotes) === JSON.stringify(selectedArr)) {
+                        exactScales.push(`<span class="clickable-scale" onclick="applyView(${root}, '${scaleName}', 'scale')"><strong>${rootName}</strong> ${scaleName}</span>`);
+                    }
+                    else if (selectedArr.length >= 3) {
+                        let isSubset = selectedArr.every(val => scaleNotes.includes(val));
+                        if (isSubset) {
+                            partialScales.push(`<span class="clickable-scale" onclick="applyView(${root}, '${scaleName}', 'scale')">${rootName} ${scaleName}</span>`);
+                        }
+                    }
+                }
+            }
+
+            let selectedNoteNames = selectedArr.map(n => notes[n]).join(', ');
+            let html = `${t.txtCurrentNotes}<strong>[ ${selectedNoteNames} ]</strong><br><br>`;
+
+            html += `${t.txtExactChords}<br>`;
+            html += exactChords.length > 0 ? exactChords.join('<br>') + '<br><br>' : t.txtNone + '<br><br>';
+
+            html += `${t.txtExactScales}<br>`;
+            html += exactScales.length > 0 ? exactScales.join('<br>') + '<br><br>' : t.txtNone + '<br><br>';
+
+            if (partialScales.length > 0) {
+                let displayPartial = partialScales.slice(0, 15).join('');
+                if (partialScales.length > 15) displayPartial += t.txtEtc;
+                html += `${t.txtPartialScales}<br>${displayPartial}`;
+            }
+
+            resultDiv.innerHTML = html;
+        }
+
+        function captureFretboard() {
+            const captureArea = document.getElementById('capture-area');
+            const btn = document.getElementById('capture-btn');
+            const titleText = document.getElementById('capture-title').innerText;
+            
+            const originalText = btn.innerHTML;
+            // 캡처 중 텍스트는 임시로 한국어로 고정 (또는 필요시 번역)
+            btn.innerHTML = currentLang === 'ko' ? '저장 중...' : 'Saving...';
+            btn.disabled = true;
+
+            const safeFileName = titleText.replace(/ /g, '_').replace(/[()]/g, '') + '_fretboard.png';
+
+            html2canvas(captureArea, { backgroundColor: "#f4f4f4", scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = safeFileName; 
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+                
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
