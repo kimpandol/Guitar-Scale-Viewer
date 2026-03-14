@@ -341,19 +341,27 @@
         let currentMode = 'scale'; 
         let highlightedNotes = new Set(); 
 
+        // 🔥 메이저 계열에 Phrygian Dominant, Lydian Dominant 추가
         const majorScales = {
             "Major (Ionian)": [0, 2, 4, 5, 7, 9, 11],
             "Lydian": [0, 2, 4, 6, 7, 9, 11],
             "Mixolydian": [0, 2, 4, 5, 7, 9, 10],
             "Major Pentatonic": [0, 2, 4, 7, 9],
-            "Bebop Major": [0, 2, 4, 5, 7, 8, 9, 11]
+            "Bebop Major": [0, 2, 4, 5, 7, 8, 9, 11],
+            "Phrygian Dominant": [0, 1, 4, 5, 7, 8, 10], // 추가됨
+            "Lydian Dominant": [0, 2, 4, 6, 7, 9, 10] // 추가됨
         };
+        
+        // 🔥 마이너 계열에 Phrygian, Harmonic Minor, Melodic Minor 추가
         const minorScales = {
             "Minor (Aeolian)": [0, 2, 3, 5, 7, 8, 10],
             "Dorian": [0, 2, 3, 5, 7, 9, 10],
+            "Phrygian": [0, 1, 3, 5, 7, 8, 10], // 추가됨
             "Locrian": [0, 1, 3, 5, 6, 8, 10],
             "Minor Pentatonic": [0, 3, 5, 7, 10],
             "Blues": [0, 3, 5, 6, 7, 10],
+            "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11], // 추가됨
+            "Melodic Minor": [0, 2, 3, 5, 7, 9, 11], // 추가됨
             "Diminished (W-H)": [0, 2, 3, 5, 6, 8, 9, 11],
             "Bebop Minor": [0, 2, 3, 4, 5, 7, 9, 10],
             "Altered": [0, 1, 3, 4, 6, 8, 10]
@@ -382,7 +390,7 @@
             setupNoteButtons(); 
             renderFretboard(); 
             updateFretboard();
-            applyLanguage(); // 초기 언어 세팅
+            applyLanguage(); 
 
             document.getElementById('lang-btn').addEventListener('click', toggleLanguage);
             document.getElementById('key-select').addEventListener('change', updateFretboard);
@@ -411,13 +419,11 @@
             document.getElementById('capture-btn').addEventListener('click', captureFretboard);
         }
 
-        // 🌐 언어 토글 함수
         function toggleLanguage() {
             currentLang = currentLang === 'ko' ? 'en' : 'ko';
             applyLanguage();
         }
 
-        // 🌐 UI 텍스트 업데이트 함수
         function applyLanguage() {
             const t = i18n[currentLang];
             
@@ -437,11 +443,10 @@
             document.getElementById('lbl-analyzer-title').innerText = t.analyzerTitle;
             document.getElementById('clear-custom-btn').innerText = t.clearBtn;
 
-            // 셀렉트 박스의 기본 '-- 선택 --' 텍스트 변경
             document.querySelectorAll('select option[value=""]').forEach(opt => opt.innerText = t.selectDefault);
 
-            analyzeCustomNotes(); // 분석기 텍스트 새로고침
-            updateFretboard();    // 타이틀 텍스트 새로고침
+            analyzeCustomNotes(); 
+            updateFretboard();    
         }
 
         function setupNoteButtons() {
@@ -725,7 +730,6 @@
             const titleText = document.getElementById('capture-title').innerText;
             
             const originalText = btn.innerHTML;
-            // 캡처 중 텍스트는 임시로 한국어로 고정 (또는 필요시 번역)
             btn.innerHTML = currentLang === 'ko' ? '저장 중...' : 'Saving...';
             btn.disabled = true;
 
