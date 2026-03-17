@@ -122,11 +122,16 @@
             position: relative;
             z-index: 2;
             cursor: pointer;
+            transition: background-color 0.2s ease;
         }
         .fret:hover { background-color: rgba(255, 255, 255, 0.1); }
         .fret:first-child {
             border-left: 6px solid #e0e0e0;
             min-width: 35px;
+        }
+
+        .fret.anchor-highlight {
+            background-color: rgba(255, 255, 255, 0.18); 
         }
         
         .note {
@@ -180,6 +185,18 @@
         }
         .fret-number:first-child { min-width: 35px; }
 
+        .fret-number.highlight-12 span {
+            background-color: #888; 
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .fret-number.inlay-mark span {
+            border-bottom: 3px solid #999;
+            padding-bottom: 1px;
+        }
+
         .analyzer {
             margin-top: 10px;
             padding: 15px;
@@ -221,7 +238,8 @@
         .mode-btn { background-color: #616161; color: white; }
         .mode-btn.active { background-color: #ff9800; box-shadow: 0 0 8px rgba(255,152,0,0.5); }
 
-        .find-note-btn { padding: 8px 12px; font-size: 14px; background-color: #e0e0e0; flex-grow: 1; text-align: center; }
+        /* 🔥 PC 환경에서 음표 찾기 버튼 오밀조밀하게 수정 */
+        .find-note-btn { padding: 6px 12px; font-size: 14px; background-color: #e0e0e0; text-align: center; }
         .find-note-btn.active { background-color: #9c27b0; color: white; box-shadow: 0 0 6px rgba(156, 39, 176, 0.6); }
 
         .capture-btn { background-color: #1a73e8; color: white; margin-left: auto; }
@@ -237,7 +255,6 @@
         }
         .clickable-scale:hover { color: #1152a3; font-weight: bold; }
 
-        /* 🔥 유튜브 링크 스타일 */
         .youtube-footer {
             margin-top: 30px;
             text-align: center;
@@ -291,6 +308,10 @@
             <button id="lang-btn" class="btn lang-btn">🌐 English</button>
             <button id="guitar-btn" class="btn instrument-btn active">🎸 기타 (6줄)</button>
             <button id="bass-btn" class="btn instrument-btn">🎸 베이스 (4줄)</button>
+            
+            <label id="lbl-tuning">튜닝: </label>
+            <select id="tuning-select" style="min-width: 120px;"></select>
+            
             <button id="scale-mode-btn" class="btn mode-btn active">🎶 스케일 모드</button>
             <button id="chord-mode-btn" class="btn mode-btn">🎹 코드 모드</button>
             <button id="capture-btn" class="btn capture-btn">📸 지판 이미지 저장</button>
@@ -314,13 +335,6 @@
                 <select id="chord-select"><option value="">-- 선택 --</option></select>
             </span>
         </div>
-
-        <div class="divider"></div>
-
-        <div class="controls-row">
-            <label id="lbl-find-note">특정 음 찾기 (보라색): </label>
-            <div id="note-buttons-container" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
-        </div>
     </div>
 
     <div class="fretboard-scroll-wrapper">
@@ -340,6 +354,27 @@
         </div>
     </div>
 
+    <div class="controls-container" style="margin-top: 20px;">
+        <div class="controls-row">
+            <label id="lbl-find-note" style="min-width: 160px;">특정 음 찾기 (보라색): </label>
+            <div id="note-buttons-container" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="controls-row">
+            <label id="lbl-form-toggle">🎸 폼(포지션) 영역 표시: </label>
+            <button id="toggle-form-btn" class="btn" style="background-color: #e0e0e0; color: #333;">OFF</button>
+            <select id="form-select" style="display:none;">
+                <option value="1">1번 폼 (Root-6)</option>
+                <option value="2">2번 폼</option>
+                <option value="3">3번 폼</option>
+                <option value="4">4번 폼</option>
+                <option value="5">5번 폼 (Root-5)</option>
+            </select>
+        </div>
+    </div>
+
     <div class="youtube-footer">
         <a href="https://www.youtube.com/@kimpandol123" target="_blank" class="youtube-link">
             🎬 kimpandol YouTube Channel
@@ -352,6 +387,7 @@
                 langBtn: "🌐 English",
                 guitarBtn: "🎸 기타 (6줄)",
                 bassBtn: "🎸 베이스 (4줄)",
+                lblTuning: "튜닝: ",
                 scaleModeBtn: "🎶 스케일 모드",
                 chordModeBtn: "🎹 코드 모드",
                 captureBtn: "📸 지판 이미지 저장",
@@ -360,6 +396,14 @@
                 lblMinor: "마이너 계열: ",
                 lblChord: "코드 종류: ",
                 lblFindNote: "특정 음 찾기 (보라색): ",
+                lblFormToggle: "🎸 폼(포지션) 영역 표시: ",
+                btnOff: "OFF",
+                btnOn: "ON",
+                form1: "1번 폼 (Root-6)",
+                form2: "2번 폼",
+                form3: "3번 폼",
+                form4: "4번 폼",
+                form5: "5번 폼 (Root-5)",
                 selectDefault: "-- 선택 --",
                 analyzerTitle: "🔍 지판 분석기",
                 clearBtn: "초록/보라색 초기화",
@@ -376,6 +420,7 @@
                 langBtn: "🌐 한국어",
                 guitarBtn: "🎸 Guitar (6-string)",
                 bassBtn: "🎸 Bass (4-string)",
+                lblTuning: "Tuning: ",
                 scaleModeBtn: "🎶 Scale Mode",
                 chordModeBtn: "🎹 Chord Mode",
                 captureBtn: "📸 Save Image",
@@ -384,6 +429,14 @@
                 lblMinor: "Minor Scales: ",
                 lblChord: "Chord Type: ",
                 lblFindNote: "Find Notes (Purple): ",
+                lblFormToggle: "🎸 Position Highlight: ",
+                btnOff: "OFF",
+                btnOn: "ON",
+                form1: "Form 1 (Root-6)",
+                form2: "Form 2",
+                form3: "Form 3",
+                form4: "Form 4",
+                form5: "Form 5 (Root-5)",
                 selectDefault: "-- Select --",
                 analyzerTitle: "🔍 Fretboard Analyzer",
                 clearBtn: "Clear Highlights",
@@ -398,7 +451,11 @@
             }
         };
 
-        let currentLang = 'ko'; 
+        let currentLang = 'en'; 
+        const browserLang = navigator.language || navigator.userLanguage;
+        if (browserLang && browserLang.toLowerCase().includes('ko')) {
+            currentLang = 'ko';
+        }
 
         const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
         const tunings = {
@@ -406,9 +463,36 @@
             'bass': [7, 2, 9, 4]             
         };
         
+        const tuningPresets = {
+            'guitar': {
+                'standard': { offset: [0, 0, 0, 0, 0, 0], ko: "스탠다드", en: "Standard" },
+                'halfDown': { offset: [-1, -1, -1, -1, -1, -1], ko: "하프 다운 (Eb)", en: "Half Step Down" },
+                'wholeDown': { offset: [-2, -2, -2, -2, -2, -2], ko: "홀 다운 (D)", en: "Whole Step Down" },
+                'dropD': { offset: [0, 0, 0, 0, 0, -2], ko: "드롭 D", en: "Drop D" },
+                'dropC': { offset: [-2, -2, -2, -2, -2, -4], ko: "드롭 C", en: "Drop C" },
+                'upHalf': { offset: [1, 1, 1, 1, 1, 1], ko: "하프 업 (F)", en: "Half Step Up" }
+            },
+            'bass': {
+                'standard': { offset: [0, 0, 0, 0], ko: "스탠다드", en: "Standard" },
+                'halfDown': { offset: [-1, -1, -1, -1], ko: "하프 다운 (Eb)", en: "Half Step Down" },
+                'wholeDown': { offset: [-2, -2, -2, -2], ko: "홀 다운 (D)", en: "Whole Step Down" },
+                'dropD': { offset: [0, 0, 0, -2], ko: "드롭 D", en: "Drop D" }
+            }
+        };
+
         let currentInstrument = 'guitar'; 
         let currentMode = 'scale'; 
         let highlightedNotes = new Set(); 
+        
+        let showFormHighlight = false;
+        
+        const formOffsets = {
+            '1': [0, 1, 2, 3],       
+            '2': [2, 3, 4, 5],       
+            '3': [4, 5, 6, 7, 8],    
+            '4': [7, 8, 9, 10],      
+            '5': [-3, -2, -1, 0]     
+        };
 
         const majorScales = {
             "Major (Ionian)": [0, 2, 4, 5, 7, 9, 11],
@@ -454,6 +538,7 @@
 
         function init() {
             setupSelects();
+            updateTuningOptions();
             setupNoteButtons(); 
             renderFretboard(); 
             updateFretboard();
@@ -470,6 +555,24 @@
                 updateFretboard();
             });
             document.getElementById('chord-select').addEventListener('change', updateFretboard);
+            
+            document.getElementById('tuning-select').addEventListener('change', function() {
+                renderFretboard();
+                updateFretboard();
+                analyzeCustomNotes();
+            });
+
+            document.getElementById('toggle-form-btn').addEventListener('click', function() {
+                showFormHighlight = !showFormHighlight;
+                const t = i18n[currentLang];
+                this.textContent = showFormHighlight ? t.btnOn : t.btnOff;
+                this.style.backgroundColor = showFormHighlight ? '#4CAF50' : '#e0e0e0';
+                this.style.color = showFormHighlight ? '#fff' : '#333';
+                document.getElementById('form-select').style.display = showFormHighlight ? 'inline-block' : 'none';
+                updateFretboard();
+            });
+
+            document.getElementById('form-select').addEventListener('change', updateFretboard);
 
             document.getElementById('clear-custom-btn').addEventListener('click', function() {
                 document.querySelectorAll('.note.custom').forEach(el => el.classList.remove('custom'));
@@ -486,6 +589,26 @@
             document.getElementById('capture-btn').addEventListener('click', captureFretboard);
         }
 
+        function updateTuningOptions() {
+            const select = document.getElementById('tuning-select');
+            const currentVal = select.value;
+            select.innerHTML = ''; 
+            
+            const presets = tuningPresets[currentInstrument];
+            for (let key in presets) {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = presets[key][currentLang];
+                select.appendChild(opt);
+            }
+            
+            if (presets[currentVal]) {
+                select.value = currentVal;
+            } else {
+                select.value = 'standard';
+            }
+        }
+
         function toggleLanguage() {
             currentLang = currentLang === 'ko' ? 'en' : 'ko';
             applyLanguage();
@@ -497,6 +620,7 @@
             document.getElementById('lang-btn').innerText = t.langBtn;
             document.getElementById('guitar-btn').innerText = t.guitarBtn;
             document.getElementById('bass-btn').innerText = t.bassBtn;
+            document.getElementById('lbl-tuning').innerText = t.lblTuning;
             document.getElementById('scale-mode-btn').innerText = t.scaleModeBtn;
             document.getElementById('chord-mode-btn').innerText = t.chordModeBtn;
             document.getElementById('capture-btn').innerText = t.captureBtn;
@@ -507,11 +631,23 @@
             document.getElementById('lbl-chord').innerText = t.lblChord;
             document.getElementById('lbl-find-note').innerText = t.lblFindNote;
             
+            document.getElementById('lbl-form-toggle').innerText = t.lblFormToggle;
+            const toggleBtn = document.getElementById('toggle-form-btn');
+            toggleBtn.textContent = showFormHighlight ? t.btnOn : t.btnOff;
+            
+            const formSelect = document.getElementById('form-select');
+            formSelect.options[0].text = t.form1;
+            formSelect.options[1].text = t.form2;
+            formSelect.options[2].text = t.form3;
+            formSelect.options[3].text = t.form4;
+            formSelect.options[4].text = t.form5;
+
             document.getElementById('lbl-analyzer-title').innerText = t.analyzerTitle;
             document.getElementById('clear-custom-btn').innerText = t.clearBtn;
 
             document.querySelectorAll('select option[value=""]').forEach(opt => opt.innerText = t.selectDefault);
 
+            updateTuningOptions(); 
             analyzeCustomNotes(); 
             updateFretboard();    
         }
@@ -557,6 +693,7 @@
             
             document.getElementById('fretboard').className = `fretboard instrument-${instrument}`;
             resetSelections();
+            updateTuningOptions(); 
             renderFretboard();
             updateFretboard();
             analyzeCustomNotes();
@@ -626,22 +763,36 @@
                 for (let i = 0; i <= totalFrets; i++) {
                     const numDiv = document.createElement('div');
                     numDiv.className = 'fret-number';
-                    numDiv.textContent = i;
+                    
+                    const span = document.createElement('span');
+                    span.textContent = i;
+                    numDiv.appendChild(span);
+
+                    if (i === 12) {
+                        numDiv.classList.add('highlight-12');
+                    } else if ([3, 5, 7, 9, 15, 17, 19, 21].includes(i)) {
+                        numDiv.classList.add('inlay-mark');
+                    }
+
                     fretNumbersDiv.appendChild(numDiv);
                 }
             }
             
             const currentTuning = tunings[currentInstrument];
+            const tuningKey = document.getElementById('tuning-select').value || 'standard';
+            const tuningOffsets = tuningPresets[currentInstrument][tuningKey].offset;
 
-            currentTuning.forEach((openNoteIndex) => {
+            currentTuning.forEach((openNoteIndex, stringIndex) => {
                 const stringDiv = document.createElement('div');
                 stringDiv.className = 'string';
 
                 for (let fret = 0; fret <= totalFrets; fret++) {
                     const fretDiv = document.createElement('div');
                     fretDiv.className = 'fret';
+                    
+                    fretDiv.dataset.fretIndex = fret;
 
-                    const currentNoteIndex = (openNoteIndex + fret) % 12;
+                    const currentNoteIndex = (openNoteIndex + tuningOffsets[stringIndex] + fret + 120) % 12;
                     
                     const noteDiv = document.createElement('div');
                     noteDiv.className = 'note';
@@ -668,7 +819,13 @@
             
             let intervals = [];
             let displayTitle = "";
-            const instrumentLabel = currentInstrument === 'guitar' ? 'Guitar' : 'Bass';
+            let instrumentLabel = currentInstrument === 'guitar' ? 'Guitar' : 'Bass';
+            
+            const tuningVal = document.getElementById('tuning-select').value;
+            if (tuningVal !== 'standard') {
+                const tuningName = tuningPresets[currentInstrument][tuningVal][currentLang];
+                instrumentLabel += ` [${tuningName}]`;
+            }
 
             if (currentMode === 'scale') {
                 const majorVal = document.getElementById('major-select').value;
@@ -694,8 +851,63 @@
 
             document.getElementById('capture-title').innerText = displayTitle;
 
-            const activeNotes = intervals.map(interval => (rootIndex + interval) % 12);
+            let anchorFrets = [];
+            if (showFormHighlight && intervals.length > 0) {
+                let useRelativeMinor = false;
+                
+                if (currentMode === 'scale') {
+                    const majorVal = document.getElementById('major-select').value;
+                    if (majorVal && !majorVal.includes("Phrygian")) {
+                        useRelativeMinor = true;
+                    }
+                } else {
+                    const chordVal = document.getElementById('chord-select').value;
+                    if (chordVal && (chordVal.includes("Major") || chordVal.includes("Dominant") || chordVal === "Sus 2 (sus2)" || chordVal === "Sus 4 (sus4)")) {
+                        useRelativeMinor = true;
+                    }
+                }
 
+                const anchorNote = useRelativeMinor ? (rootIndex - 3 + 12) % 12 : rootIndex;
+                
+                const tuningKey = document.getElementById('tuning-select').value || 'standard';
+                const tuningOffsets = tuningPresets[currentInstrument][tuningKey].offset;
+                const lowestStringIdx = tunings[currentInstrument].length - 1;
+                const lowestStringOpenNote = (tunings[currentInstrument][lowestStringIdx] + tuningOffsets[lowestStringIdx] + 120) % 12;
+
+                let f1 = (anchorNote - lowestStringOpenNote + 12) % 12;
+                
+                const selectedForm = document.getElementById('form-select').value;
+                let offsets = [...formOffsets[selectedForm]];
+
+                if (currentInstrument === 'bass' && selectedForm === '3') {
+                    offsets = [4, 5, 6, 7]; 
+                }
+                
+                let baseFrets = offsets.map(offset => f1 + offset);
+
+                baseFrets.forEach(f => {
+                    [-24, -12, 0, 12, 24].forEach(shift => {
+                        let shiftedFret = f + shift;
+                        if (shiftedFret >= 0 && shiftedFret <= totalFrets) {
+                            if (!anchorFrets.includes(shiftedFret)) {
+                                anchorFrets.push(shiftedFret);
+                            }
+                        }
+                    });
+                });
+            }
+
+            document.querySelectorAll('.fret').forEach(fretEl => {
+                fretEl.classList.remove('anchor-highlight');
+                if (fretEl.dataset.fretIndex) {
+                    const idx = parseInt(fretEl.dataset.fretIndex);
+                    if (anchorFrets.includes(idx)) {
+                        fretEl.classList.add('anchor-highlight');
+                    }
+                }
+            });
+
+            const activeNotes = intervals.map(interval => (rootIndex + interval) % 12);
             document.querySelectorAll('.note').forEach(noteEl => {
                 const noteIdx = parseInt(noteEl.dataset.noteIndex);
                 noteEl.classList.remove('active', 'root');
