@@ -279,7 +279,6 @@
             .analyzer h3 { flex-direction: column; align-items: stretch; }
             #clear-custom-btn { width: 100%; margin-top: 10px; }
             
-            /* 기타/베이스 모바일 대응 */
             .string { height: 28px; }
             .fret { min-width: 20px; }
             .fret:first-child { min-width: 15px; border-left-width: 4px; }
@@ -287,12 +286,10 @@
             .fret-number:first-child { min-width: 15px; }
             .note { width: 15px; height: 15px; font-size: 7px; border-width: 1px; }
 
-            /* 키보드 모바일 대응 */
             .white-key { width: 35px; height: 150px; padding-bottom: 10px; }
             .black-key { width: 24px; height: 90px; right: -12px; padding-bottom: 10px; }
         }
         
-        /* 🔥 드래그 앤 드롭 시 효과를 위한 CSS */
         .chord-item {
             transition: opacity 0.2s;
         }
@@ -301,6 +298,9 @@
             border-radius: 12px;
             opacity: 0.7;
         }
+        
+        .custom-click-zone { fill: transparent; }
+        .custom-click-zone:hover { fill: rgba(255, 255, 255, 0.15); }
     </style>
 </head>
 <body>
@@ -339,6 +339,12 @@
                 <label id="lbl-chord">코드 종류: </label>
                 <select id="chord-select"><option value="">-- 선택 --</option></select>
                 <button id="add-chord-btn" class="btn" style="background-color:#4CAF50; color:white; display:none;">➕ 악보에 추가</button>
+                <button id="add-custom-btn" class="btn" style="background-color:#2196F3; color:white; display:none;">➕ 빈 지판 추가</button>
+                
+                <button id="save-json-btn" class="btn" style="background-color:#FF9800; color:white; display:none;">💾 악보 저장</button>
+                <button id="load-json-btn" class="btn" style="background-color:#00BCD4; color:white; display:none;">📂 불러오기</button>
+                <input type="file" id="load-json-input" accept=".json" style="display:none;">
+
                 <button id="clear-chords-btn" class="btn" style="background-color:#f44336; color:white; display:none;">🗑️ 비우기</button>
                 <button id="toggle-diagram-btn" class="btn" style="background-color:#9c27b0; color:white; display:none;">📋 코드표로 보기</button>
             </span>
@@ -418,6 +424,9 @@
                 btnDiagram: "📋 코드표로 보기",
                 btnFretboard: "🎸 지판으로 보기",
                 btnAddChord: "➕ 악보에 추가",
+                btnAddCustom: "➕ 빈 지판 추가",
+                btnSaveJson: "💾 악보 저장",
+                btnLoadJson: "📂 불러오기",
                 btnClearChords: "🗑️ 비우기",
                 titleProgression: "코드 진행 악보",
                 form1: "1번 폼 (Root-6)",
@@ -435,7 +444,10 @@
                 txtPartialScales: "🧩 <strong>이 음들을 포함하는 스케일 (일부 일치):</strong>",
                 txtNone: "없음",
                 txtEtc: " 등등...",
-                txtCustom: "커스텀"
+                txtCustom: "커스텀",
+                promptCustomTitle: "표시할 코드/스케일 이름을 입력하세요:",
+                msgNoChords: "저장할 악보가 없습니다.",
+                msgLoadFail: "악보 파일을 불러오는 데 실패했습니다."
             },
             en: {
                 langBtn: "🌐 한국어",
@@ -457,6 +469,9 @@
                 btnDiagram: "📋 View Diagram",
                 btnFretboard: "🎸 View Fretboard",
                 btnAddChord: "➕ Add to Sheet",
+                btnAddCustom: "➕ Blank Diagram",
+                btnSaveJson: "💾 Save JSON",
+                btnLoadJson: "📂 Load JSON",
                 btnClearChords: "🗑️ Clear All",
                 titleProgression: "Chord Progression",
                 form1: "Form 1 (Root-6)",
@@ -474,7 +489,10 @@
                 txtPartialScales: "🧩 <strong>Scales Containing These Notes:</strong>",
                 txtNone: "None",
                 txtEtc: " etc...",
-                txtCustom: "Custom"
+                txtCustom: "Custom",
+                promptCustomTitle: "Enter chord/scale name:",
+                msgNoChords: "No chords to save.",
+                msgLoadFail: "Failed to load the progression file."
             }
         };
 
@@ -616,6 +634,48 @@
             updateFretboard();
         };
 
+        window.shiftCustomFret = function(idx, dir) {
+            const item = chordProgression[idx];
+            if (!item || item.type !== 'custom') return;
+            let newFret = item.startFret + dir;
+            if (newFret >= 1 && newFret <= 21) {
+                item.startFret = newFret;
+                updateFretboard();
+            }
+        };
+
+        window.editCustomTitle = function(idx) {
+            const item = chordProgression[idx];
+            if (!item || item.type !== 'custom') return;
+            const t = i18n[currentLang];
+            let newTitle = prompt(t.promptCustomTitle, item.title);
+            if (newTitle !== null) {
+                item.title = newTitle;
+                updateFretboard();
+            }
+        };
+
+        window.toggleCustomDiagramNote = function(progIdx, strIdx, relFret) {
+            const item = chordProgression[progIdx];
+            if (!item || item.type !== 'custom') return;
+
+            let currentVal = item.voicing[strIdx];
+
+            if (relFret === 0) { 
+                if (currentVal === 'x') item.voicing[strIdx] = 0;
+                else if (currentVal === 0) item.voicing[strIdx] = 'x';
+                else item.voicing[strIdx] = 'x'; 
+            } else {
+                let actualFret = item.startFret + relFret - 1;
+                if (currentVal === actualFret) {
+                    item.voicing[strIdx] = 'x'; 
+                } else {
+                    item.voicing[strIdx] = actualFret; 
+                }
+            }
+            updateFretboard();
+        };
+
         function init() {
             setupSelects();
             updateTuningOptions();
@@ -663,9 +723,62 @@
                 const rootIdx = parseInt(document.getElementById('key-select').value);
                 const chordVal = document.getElementById('chord-select').value;
                 if (chordVal) {
-                    chordProgression.push({ rootIdx: rootIdx, chordName: chordVal });
+                    chordProgression.push({ type: 'preset', rootIdx: rootIdx, chordName: chordVal });
                     updateFretboard();
                 }
+            });
+
+            document.getElementById('add-custom-btn').addEventListener('click', function() {
+                chordProgression.push({ 
+                    type: 'custom', 
+                    title: 'Custom', 
+                    startFret: 1, 
+                    voicing: ['x', 'x', 'x', 'x', 'x', 'x'] 
+                });
+                updateFretboard();
+            });
+
+            // 🔥 JSON 저장 기능 추가
+            document.getElementById('save-json-btn').addEventListener('click', function() {
+                const t = i18n[currentLang];
+                if (chordProgression.length === 0) {
+                    alert(t.msgNoChords);
+                    return;
+                }
+                const dataStr = JSON.stringify(chordProgression, null, 2);
+                const blob = new Blob([dataStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = "chord_progression.json";
+                link.click();
+                URL.revokeObjectURL(url);
+            });
+
+            // 🔥 JSON 불러오기 기능 추가
+            document.getElementById('load-json-btn').addEventListener('click', function() {
+                document.getElementById('load-json-input').click();
+            });
+
+            document.getElementById('load-json-input').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const parsed = JSON.parse(e.target.result);
+                        if (Array.isArray(parsed)) {
+                            chordProgression = parsed;
+                            updateFretboard();
+                        } else {
+                            throw new Error("Invalid Format");
+                        }
+                    } catch (err) {
+                        alert(i18n[currentLang].msgLoadFail);
+                    }
+                };
+                reader.readAsText(file);
+                this.value = ''; // 같은 파일 다시 불러올 수 있게 초기화
             });
 
             document.getElementById('clear-chords-btn').addEventListener('click', function() {
@@ -723,22 +836,23 @@
             return null;
         }
 
-        function generateChordDiagramSVG(voicing, rootIdx, chordName) {
+        function generateChordDiagramSVG(voicing, titleText, isCustom = false, progIdx = -1, customStartFret = 1) {
             const validFrets = voicing.filter(f => f !== 'x' && f > 0);
             let minFret = validFrets.length ? Math.min(...validFrets) : 1;
             let maxFret = validFrets.length ? Math.max(...validFrets) : 1;
             
             let startFret = 1;
-            if (maxFret > 5) {
-                startFret = minFret;
+            if (isCustom) {
+                startFret = customStartFret;
+            } else {
+                if (maxFret > 5) startFret = minFret;
             }
             
             let svg = `<svg width="220" height="300" viewBox="0 0 220 300" xmlns="http://www.w3.org/2000/svg" style="background:#222; border-radius:12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">`;
             
-            let cleanName = chordName.split(' (')[0];
-            let shortSymbol = chordName.match(/\(([^)]+)\)/)[1];
-            if (shortSymbol === 'M') shortSymbol = '';
-            svg += `<text x="110" y="40" fill="white" font-size="24" font-family="sans-serif" text-anchor="middle">${notes[rootIdx]}${shortSymbol}</text>`;
+            let titleStyle = isCustom ? 'cursor:pointer; text-decoration:underline;' : '';
+            let titleClick = isCustom ? `onclick="editCustomTitle(${progIdx})"` : '';
+            svg += `<text x="110" y="40" fill="white" font-size="24" font-family="sans-serif" text-anchor="middle" style="${titleStyle}" ${titleClick}>${titleText}</text>`;
             
             const startX = 45;
             const startY = 85;
@@ -761,22 +875,38 @@
                 svg += `<text x="22" y="${startY + gapY/2}" fill="white" font-size="14" font-weight="bold" font-family="sans-serif" text-anchor="middle" dominant-baseline="central">${startFret}fr</text>`;
             }
             
-            const stringOpenNotes = [4, 9, 2, 7, 11, 4]; 
+            const tuningVal = document.getElementById('tuning-select') ? document.getElementById('tuning-select').value : 'standard';
+            const tuningOffsets = tuningPresets['guitar'][tuningVal].offset;
+            const guitarOpenNotes = [4, 11, 7, 2, 9, 4]; 
+            const stringOpenNotes = guitarOpenNotes.map((open, i) => (open + tuningOffsets[i] + 120) % 12);
             
             voicing.forEach((fret, strIdx) => {
                 let x = startX + strIdx * gapX;
                 if (fret === 'x') {
-                    svg += `<text x="${x}" y="${startY - 15}" fill="#fff" font-size="16" font-family="sans-serif" text-anchor="middle">X</text>`; 
+                    svg += `<text x="${x}" y="${startY - 15}" fill="#fff" font-size="16" font-family="sans-serif" text-anchor="middle" pointer-events="none">X</text>`; 
                 } else if (fret === 0) {
-                    svg += `<circle cx="${x}" cy="${startY - 20}" r="6" fill="none" stroke="white" stroke-width="2"/>`;
+                    svg += `<circle cx="${x}" cy="${startY - 20}" r="6" fill="none" stroke="white" stroke-width="2" pointer-events="none"/>`;
                 } else {
-                    let rf = fret - startFret + 1;
-                    let y = startY + (rf - 0.5) * gapY;
-                    svg += `<circle cx="${x}" cy="${y}" r="12" fill="white" stroke="#ff9800" stroke-width="2"/>`;
-                    let noteIdx = (stringOpenNotes[strIdx] + fret) % 12;
-                    svg += `<text x="${x}" y="${y}" fill="#333" font-size="11" font-weight="bold" font-family="sans-serif" text-anchor="middle" dominant-baseline="central">${notes[noteIdx]}</text>`;
+                    if (fret >= startFret && fret <= startFret + 4) {
+                        let rf = fret - startFret + 1;
+                        let y = startY + (rf - 0.5) * gapY;
+                        svg += `<circle cx="${x}" cy="${y}" r="12" fill="white" stroke="#ff9800" stroke-width="2" pointer-events="none"/>`;
+                        let noteIdx = (stringOpenNotes[strIdx] + fret) % 12;
+                        svg += `<text x="${x}" y="${y}" fill="#333" font-size="11" font-weight="bold" font-family="sans-serif" text-anchor="middle" dominant-baseline="central" pointer-events="none">${notes[noteIdx]}</text>`;
+                    }
                 }
             });
+
+            if (isCustom) {
+                for (let strIdx = 0; strIdx <= 5; strIdx++) {
+                    let x = startX + strIdx * gapX;
+                    svg += `<rect class="custom-click-zone" x="${x-10}" y="${startY - 35}" width="20" height="30" style="cursor:pointer;" onclick="toggleCustomDiagramNote(${progIdx}, ${strIdx}, 0)" />`;
+                    for (let relFret = 1; relFret <= 5; relFret++) {
+                        let y = startY + (relFret - 1) * gapY;
+                        svg += `<rect class="custom-click-zone" x="${x-10}" y="${y}" width="20" height="${gapY}" style="cursor:pointer;" onclick="toggleCustomDiagramNote(${progIdx}, ${strIdx}, ${relFret})" />`;
+                    }
+                }
+            }
             
             svg += `</svg>`;
             return svg;
@@ -831,7 +961,11 @@
             document.getElementById('toggle-form-btn').textContent = showFormHighlight ? t.btnOn : t.btnOff;
             document.getElementById('toggle-diagram-btn').textContent = showChordDiagram ? t.btnFretboard : t.btnDiagram;
             
+            // 번역 업데이트
             document.getElementById('add-chord-btn').textContent = t.btnAddChord;
+            document.getElementById('add-custom-btn').textContent = t.btnAddCustom;
+            document.getElementById('save-json-btn').textContent = t.btnSaveJson;
+            document.getElementById('load-json-btn').textContent = t.btnLoadJson;
             document.getElementById('clear-chords-btn').textContent = t.btnClearChords;
             
             const formSelect = document.getElementById('form-select');
@@ -1142,15 +1276,18 @@
 
             if (currentMode === 'chord' && showChordDiagram && chordProgression.length > 0) {
                 displayTitle = `${instrumentLabel} ${t.titleProgression}`;
-                captureTitleEl.classList.add('no-capture'); // 🔥 캡처 시 제목 숨기기
+                captureTitleEl.classList.add('no-capture');
             } else {
-                captureTitleEl.classList.remove('no-capture'); // 🔥 일반 모드에선 제목 보이기
+                captureTitleEl.classList.remove('no-capture');
             }
 
             captureTitleEl.innerText = displayTitle;
 
             const diagramBtn = document.getElementById('toggle-diagram-btn');
             const addChordBtn = document.getElementById('add-chord-btn');
+            const addCustomBtn = document.getElementById('add-custom-btn');
+            const saveJsonBtn = document.getElementById('save-json-btn');
+            const loadJsonBtn = document.getElementById('load-json-btn');
             const clearChordsBtn = document.getElementById('clear-chords-btn');
             
             const diagramView = document.getElementById('chord-diagram-view');
@@ -1161,11 +1298,14 @@
                 
                 if (showChordDiagram) {
                     addChordBtn.style.display = 'inline-block';
+                    addCustomBtn.style.display = 'inline-block'; 
+                    loadJsonBtn.style.display = 'inline-block';
+                    saveJsonBtn.style.display = chordProgression.length > 0 ? 'inline-block' : 'none';
                     clearChordsBtn.style.display = chordProgression.length > 0 ? 'inline-block' : 'none';
 
                     diagramView.style.display = 'flex';
                     diagramView.style.flexWrap = 'wrap';
-                    diagramView.style.gap = '15px';
+                    diagramView.style.gap = '25px'; 
                     diagramView.style.justifyContent = 'center';
                     diagramView.style.alignItems = 'flex-start';
                     fretboardView.style.display = 'none';
@@ -1173,10 +1313,32 @@
                     let html = '';
                     
                     chordProgression.forEach((c, idx) => {
-                        const voicing = getChordVoicing(c.rootIdx, c.chordName);
-                        if (voicing) {
+                        let svgContent = '';
+                        let customControls = '';
+
+                        if (c.type === 'preset') {
+                            const voicing = getChordVoicing(c.rootIdx, c.chordName);
+                            if (voicing) {
+                                let cleanName = c.chordName.split(' (')[0];
+                                let shortSymbol = c.chordName.match(/\(([^)]+)\)/)[1];
+                                if (shortSymbol === 'M') shortSymbol = '';
+                                let titleStr = `${notes[c.rootIdx]}${shortSymbol}`;
+                                svgContent = generateChordDiagramSVG(voicing, titleStr, false, idx);
+                            }
+                        } else if (c.type === 'custom') {
+                            svgContent = generateChordDiagramSVG(c.voicing, c.title, true, idx, c.startFret);
+                            customControls = `
+                                <div class="no-capture" style="position:absolute; top: 120px; left: -25px; display:flex; flex-direction:column; gap:5px;">
+                                    <button onclick="shiftCustomFret(${idx}, -1)" style="border:none; background:#555; color:white; cursor:pointer; border-radius:4px; padding:4px 6px;">▲</button>
+                                    <button onclick="shiftCustomFret(${idx}, 1)" style="border:none; background:#555; color:white; cursor:pointer; border-radius:4px; padding:4px 6px;">▼</button>
+                                </div>
+                            `;
+                        }
+
+                        if (svgContent) {
                             html += `<div class="chord-item" draggable="true" data-index="${idx}" style="position:relative; margin-bottom: 10px; cursor: grab;">
-                                ${generateChordDiagramSVG(voicing, c.rootIdx, c.chordName)}
+                                ${svgContent}
+                                ${customControls}
                                 <button class="no-capture" onclick="removeChord(${idx})" style="position:absolute; top:-10px; right:-10px; background:#f44336; color:white; border:none; border-radius:50%; width:28px; height:28px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display:flex; justify-content:center; align-items:center;">X</button>
                             </div>`;
                         }
@@ -1186,9 +1348,13 @@
                         const voicing = getChordVoicing(rootIndex, chordVal);
                         if (voicing) {
                             const previewText = currentLang === 'ko' ? '미리보기 (Preview)' : 'Preview';
+                            let shortSymbol = chordVal.match(/\(([^)]+)\)/)[1];
+                            if (shortSymbol === 'M') shortSymbol = '';
+                            let titleStr = `${notes[rootIndex]}${shortSymbol}`;
+                            
                             html += `<div class="no-capture" style="position:relative; opacity:0.8; border: 2px dashed #9c27b0; border-radius: 12px; padding: 5px; margin-bottom: 10px; box-sizing:border-box;">
                                 <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:#9c27b0; color:white; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:bold; white-space:nowrap;">${previewText}</div>
-                                ${generateChordDiagramSVG(voicing, rootIndex, chordVal)}
+                                ${generateChordDiagramSVG(voicing, titleStr, false, -1)}
                             </div>`;
                         } else {
                             html += `<p class="no-capture" style="color:#666; align-self:center; width:100%; text-align:center; padding: 20px;">해당 코드의 다이어그램을 찾을 수 없습니다.</p>`;
@@ -1228,6 +1394,9 @@
                     diagramView.style.display = 'none';
                     fretboardView.style.display = 'block';
                     addChordBtn.style.display = 'none';
+                    addCustomBtn.style.display = 'none';
+                    saveJsonBtn.style.display = 'none';
+                    loadJsonBtn.style.display = 'none';
                     clearChordsBtn.style.display = 'none';
                 }
             } else {
@@ -1235,6 +1404,9 @@
                 diagramView.style.display = 'none';
                 fretboardView.style.display = 'block';
                 addChordBtn.style.display = 'none';
+                addCustomBtn.style.display = 'none';
+                saveJsonBtn.style.display = 'none';
+                loadJsonBtn.style.display = 'none';
                 clearChordsBtn.style.display = 'none';
             }
 
@@ -1395,7 +1567,11 @@
             const titleText = document.getElementById('capture-title').innerText;
             
             const hideElements = document.querySelectorAll('.no-capture');
-            hideElements.forEach(el => el.style.display = 'none');
+            const originalDisplays = []; 
+            hideElements.forEach((el, i) => {
+                originalDisplays[i] = el.style.display;
+                el.style.display = 'none';
+            });
 
             const originalBg = captureArea.style.backgroundColor;
             captureArea.style.backgroundColor = 'transparent';
@@ -1413,13 +1589,13 @@
                 link.click();
                 
                 captureArea.style.backgroundColor = originalBg;
-                hideElements.forEach(el => el.style.display = '');
+                hideElements.forEach((el, i) => el.style.display = originalDisplays[i]); 
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }).catch(err => {
                 console.error('캡처 실패:', err);
                 captureArea.style.backgroundColor = originalBg;
-                hideElements.forEach(el => el.style.display = '');
+                hideElements.forEach((el, i) => el.style.display = originalDisplays[i]); 
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             });
