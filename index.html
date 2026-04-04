@@ -13,105 +13,21 @@
     <title>기타 & 베이스 & 키보드 스케일/코드 뷰어</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body { 
-            font-family: sans-serif; 
-            background-color: #f4f4f4; 
-            padding: 15px; 
-            margin: 0; 
-        }
-        .controls-container { 
-            background-color: #fff; 
-            padding: 15px; 
-            border-radius: 8px; 
-            border: 1px solid #ddd; 
-            margin-bottom: 20px; 
-        }
-        .controls-row { 
-            display: flex; 
-            gap: 10px; 
-            align-items: center; 
-            flex-wrap: wrap; 
-            margin-bottom: 15px; 
-        }
-        .controls-row:last-child { 
-            margin-bottom: 0; 
-        }
-        .divider { 
-            width: 100%; 
-            height: 1px; 
-            background-color: #eee; 
-            margin: 10px 0 15px 0; 
-        }
-        select { 
-            padding: 8px 12px; 
-            font-size: 16px; 
-            border: 1px solid #ccc; 
-            border-radius: 4px; 
-            background-color: #fff; 
-        }
-        .fretboard-scroll-wrapper { 
-            width: 100%; 
-            overflow-x: auto; 
-            -webkit-overflow-scrolling: touch; 
-            margin-bottom: 20px; 
-            border-radius: 8px; 
-        }
-        #capture-area { 
-            background-color: #f4f4f4; 
-            padding: 20px 15px 15px 15px; 
-            width: max-content; 
-            min-width: 100%; 
-            box-sizing: border-box; 
-        }
+        body { font-family: sans-serif; background-color: #f4f4f4; padding: 15px; margin: 0; }
+        .controls-container { background-color: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px; }
+        .controls-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px; }
+        .controls-row:last-child { margin-bottom: 0; }
+        .divider { width: 100%; height: 1px; background-color: #eee; margin: 10px 0 15px 0; }
+        select { padding: 8px 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; background-color: #fff; }
+        .fretboard-scroll-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px; border-radius: 8px; }
+        #capture-area { background-color: #f4f4f4; padding: 20px 15px 15px 15px; width: max-content; min-width: 100%; box-sizing: border-box; }
         
-        /* 🔥 제목 디자인 공통 적용 */
-        #capture-title, #fretboard-title { 
-            text-align: center; 
-            color: #333; 
-            margin-top: 0; 
-            margin-bottom: 15px; 
-            font-size: 24px; 
-            font-weight: bold; 
-        }
-
-        /* 🔥 메인 지판 뷰를 하나의 하얀색 카드 모양으로 묶음 */
-        #fretboard-view { 
-            background-color: #fff; 
-            padding: 20px 15px; 
-            border-radius: 8px; 
-            border: 1px solid #ddd; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
-            box-sizing: border-box; 
-            width: max-content; 
-            min-width: 100%; 
-        }
+        #capture-title, #fretboard-title { text-align: center; color: #333; margin-top: 0; margin-bottom: 15px; font-size: 24px; font-weight: bold; }
+        #fretboard-view { background-color: #fff; padding: 20px 15px; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; width: max-content; min-width: 100%; }
         
-        /* 악기 디자인 */
-        .fretboard { 
-            display: flex; 
-            flex-direction: column; 
-            background-color: #3e3e3e; 
-            padding: 10px 0; 
-            border-radius: 5px; 
-            user-select: none; 
-            width: max-content; 
-            min-width: 100%; 
-        }
-        .string { 
-            display: flex; 
-            height: 40px; 
-            position: relative; 
-            align-items: center; 
-        }
-        .string::before { 
-            content: ''; 
-            position: absolute; 
-            left: 0; 
-            right: 0; 
-            height: 2px; 
-            background-color: #b0b0b0; 
-            z-index: 1; 
-        }
+        .fretboard { display: flex; flex-direction: column; background-color: #3e3e3e; padding: 10px 0; border-radius: 5px; user-select: none; width: max-content; min-width: 100%; }
+        .string { display: flex; height: 40px; position: relative; align-items: center; }
+        .string::before { content: ''; position: absolute; left: 0; right: 0; height: 2px; background-color: #b0b0b0; z-index: 1; }
         .fretboard.instrument-guitar .string:nth-last-child(1)::before { height: 4px; } 
         .fretboard.instrument-guitar .string:nth-last-child(2)::before { height: 3px; }
         .fretboard.instrument-bass .string:nth-last-child(1)::before { height: 5px; } 
@@ -119,161 +35,35 @@
         .fretboard.instrument-bass .string:nth-last-child(3)::before { height: 3px; } 
         .fretboard.instrument-bass .string:nth-last-child(4)::before { height: 2px; } 
         
-        .fret { 
-            flex: 1; 
-            min-width: 45px; 
-            height: 100%; 
-            border-right: 2px solid #a8a8a8; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            position: relative; 
-            z-index: 2; 
-            cursor: pointer; 
-            transition: background-color 0.2s ease; 
-        }
+        .fret { flex: 1; min-width: 45px; height: 100%; border-right: 2px solid #a8a8a8; display: flex; justify-content: center; align-items: center; position: relative; z-index: 2; cursor: pointer; transition: background-color 0.2s ease; }
         .fret:hover { background-color: rgba(255, 255, 255, 0.1); }
-        .fret:first-child { 
-            border-left: 6px solid #e0e0e0; 
-            min-width: 35px; 
-        }
+        .fret:first-child { border-left: 6px solid #e0e0e0; min-width: 35px; }
         .fret.anchor-highlight { background-color: rgba(255, 255, 255, 0.18); }
         
-        .fret-numbers { 
-            display: flex; 
-            height: 30px; 
-            align-items: center; 
-            color: #333; 
-            font-weight: bold; 
-            width: max-content; 
-            min-width: 100%; 
-        }
-        .fret-number { 
-            flex: 1; 
-            min-width: 45px; 
-            text-align: center; 
-        }
+        .fret-numbers { display: flex; height: 30px; align-items: center; color: #333; font-weight: bold; width: max-content; min-width: 100%; }
+        .fret-number { flex: 1; min-width: 45px; text-align: center; }
         .fret-number:first-child { min-width: 35px; }
-        .fret-number.highlight-12 span { 
-            background-color: #888; 
-            color: #fff; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3); 
-        }
-        .fret-number.inlay-mark span { 
-            border-bottom: 3px solid #999; 
-            padding-bottom: 1px; 
-        }
+        .fret-number.highlight-12 span { background-color: #888; color: #fff; padding: 2px 6px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .fret-number.inlay-mark span { border-bottom: 3px solid #999; padding-bottom: 1px; }
 
-        .keyboard-container { 
-            display: flex; 
-            background-color: #333; 
-            padding: 10px; 
-            border-radius: 5px; 
-            width: max-content; 
-            min-width: 100%; 
-            box-sizing: border-box; 
-            user-select: none; 
-        }
+        .keyboard-container { display: flex; background-color: #333; padding: 10px; border-radius: 5px; width: max-content; min-width: 100%; box-sizing: border-box; user-select: none; }
         .piano-key-wrapper { position: relative; }
-        .white-key { 
-            width: 45px; 
-            height: 200px; 
-            background-color: #fff; 
-            border: 1px solid #ccc; 
-            border-radius: 0 0 4px 4px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-end; 
-            padding-bottom: 15px; 
-            cursor: pointer; 
-            z-index: 1; 
-        }
+        .white-key { width: 45px; height: 200px; background-color: #fff; border: 1px solid #ccc; border-radius: 0 0 4px 4px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 15px; cursor: pointer; z-index: 1; }
         .white-key:hover { background-color: #eaeaea; }
-        .black-key { 
-            width: 30px; 
-            height: 120px; 
-            background-color: #222; 
-            position: absolute; 
-            top: 0; 
-            right: -15px; 
-            z-index: 2; 
-            border-radius: 0 0 4px 4px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-end; 
-            padding-bottom: 15px; 
-            cursor: pointer; 
-        }
+        .black-key { width: 30px; height: 120px; background-color: #222; position: absolute; top: 0; right: -15px; z-index: 2; border-radius: 0 0 4px 4px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 15px; cursor: pointer; }
         .black-key:hover { background-color: #444; }
 
-        .note { 
-            width: 24px; 
-            height: 24px; 
-            border-radius: 50%; 
-            background-color: #ff9800; 
-            color: white; 
-            display: none; 
-            justify-content: center; 
-            align-items: center; 
-            font-size: 11px; 
-            font-weight: bold; 
-            z-index: 3; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3); 
-            pointer-events: none; 
-        }
+        .note { width: 24px; height: 24px; border-radius: 50%; background-color: #ff9800; color: white; display: none; justify-content: center; align-items: center; font-size: 11px; font-weight: bold; z-index: 3; box-shadow: 0 2px 4px rgba(0,0,0,0.3); pointer-events: none; }
         .note.active { display: flex; }
         .note.root { background-color: #f44336; }
-        .note.custom { 
-            display: flex !important; 
-            background-color: #4CAF50 !important; 
-            color: white; 
-            border: 2px solid #fff; 
-        }
-        .note.highlight { 
-            display: flex !important; 
-            background-color: #9c27b0 !important; 
-            color: white; 
-            border: 2px solid #fff; 
-            z-index: 4; 
-            box-shadow: 0 0 8px rgba(156, 39, 176, 0.8); 
-        }
+        .note.custom { display: flex !important; background-color: #4CAF50 !important; color: white; border: 2px solid #fff; }
+        .note.highlight { display: flex !important; background-color: #9c27b0 !important; color: white; border: 2px solid #fff; z-index: 4; box-shadow: 0 0 8px rgba(156, 39, 176, 0.8); }
 
-        .analyzer { 
-            margin-top: 10px; 
-            padding: 15px; 
-            background-color: #fff; 
-            border: 1px solid #ddd; 
-            border-radius: 5px; 
-            line-height: 1.6; 
-        }
-        .analyzer h3 { 
-            margin-top: 0; 
-            color: #333; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            flex-wrap: wrap; 
-            gap: 10px; 
-        }
-        .analyzer-content { 
-            font-size: 15px; 
-            color: #555; 
-            word-break: keep-all; 
-        }
+        .analyzer { margin-top: 10px; padding: 15px; background-color: #fff; border: 1px solid #ddd; border-radius: 5px; line-height: 1.6; }
+        .analyzer h3 { margin-top: 0; color: #333; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+        .analyzer-content { font-size: 15px; color: #555; word-break: keep-all; }
         
-        .btn { 
-            background-color: #e0e0e0; 
-            border: none; 
-            padding: 10px 15px; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-size: 14px; 
-            font-weight: bold; 
-            color: #333; 
-            touch-action: manipulation; 
-        }
+        .btn { background-color: #e0e0e0; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; color: #333; touch-action: manipulation; }
         .btn:hover { background-color: #ccc; }
         .lang-btn { background-color: #333; color: white; }
         .lang-btn:hover { background-color: #111; }
@@ -298,98 +88,54 @@
         .custom-click-zone { fill: transparent; }
         .custom-click-zone:hover { fill: rgba(255, 255, 255, 0.15); }
 
-        /* 🔥 초소형 모바일 (< 480px) */
         @media (max-width: 479px) {
             body { padding: 10px; }
             .controls-container { padding: 12px; margin-bottom: 15px; }
             .controls-row { flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 12px; }
             .controls-row > span { display: flex; flex-direction: column; gap: 8px; }
             .divider { margin: 8px 0 12px 0; }
-            
             select, .btn { width: 100%; padding: 12px; font-size: 16px; }
             #note-buttons-container { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 5px; }
             .find-note-btn { width: 100%; padding: 10px 0; }
-            
-            /* 지판 초소형 최적화 */
             .string { height: 24px; }
             .fret { min-width: 18px; border-right-width: 1px; }
             .fret:first-child { min-width: 13px; border-left-width: 3px; }
             .fret-number { min-width: 18px; font-size: 9px; }
             .fret-number:first-child { min-width: 13px; }
             .note { width: 12px; height: 12px; font-size: 6px; border-width: 1px; }
-            
-            /* 키보드 초소형 */
             .white-key { width: 30px; height: 120px; padding-bottom: 8px; }
             .black-key { width: 20px; height: 75px; right: -10px; padding-bottom: 8px; }
-            
-            /* 제목 축소 */
             #capture-title, #fretboard-title { font-size: 18px; margin-bottom: 12px; }
-            
-            /* 코드 다이어그램 모바일 최적화 */
             #diagram-view { gap: 15px !important; }
             .chord-item { margin-bottom: 8px !important; }
             .chord-item svg { max-width: 100%; height: auto; }
-            
-            /* 터치 친화적인 UI 개선 */
             .btn, select { min-height: 48px; }
             .note { cursor: pointer; transition: all 0.15s ease; }
             .note:active { transform: scale(1.2); }
         }
 
-        /* 🔥 소형 태블릿 (480px ~ 768px) */
         @media (min-width: 480px) and (max-width: 768px) {
             body { padding: 12px; }
             .controls-container { padding: 14px; margin-bottom: 18px; }
             .controls-row { flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 14px; }
             .controls-row > span { display: flex; flex-direction: column; gap: 10px; }
             .divider { margin: 10px 0 14px 0; }
-            
             select, .btn { width: 100%; padding: 13px; font-size: 15px; }
             #note-buttons-container { display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 6px; }
             .find-note-btn { width: 100%; padding: 11px 0; }
-            
-            /* 지판 소형 태블릿 최적화 */
             .string { height: 32px; }
             .fret { min-width: 28px; }
             .fret:first-child { min-width: 22px; border-left-width: 4px; }
             .fret-number { min-width: 28px; font-size: 11px; }
             .fret-number:first-child { min-width: 22px; }
             .note { width: 16px; height: 16px; font-size: 8px; border-width: 1px; }
-            
-            /* 키보드 소형 태블릿 */
             .white-key { width: 38px; height: 160px; padding-bottom: 12px; }
             .black-key { width: 26px; height: 100px; right: -13px; padding-bottom: 10px; }
-            
-            /* 제목 */
             #capture-title, #fretboard-title { font-size: 20px; margin-bottom: 14px; }
-            
-            /* 터치 친화적인 UI */
             .btn, select { min-height: 44px; }
             .note:active { transform: scale(1.15); }
         }
 
-        /* 🔥 기존 태블릿 미디어쿼리 개선 (768px 이상) */
-        @media (max-width: 768px) {
-            .controls-row { flex-direction: column; align-items: stretch; gap: 8px; }
-            .controls-row > span { display: flex; flex-direction: column; gap: 8px; }
-            .capture-btn { margin-left: 0; }
-            .btn { width: 100%; padding: 12px; font-size: 16px; }
-            select { width: 100%; padding: 12px; }
-            #note-buttons-container { display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 5px; }
-            .find-note-btn { width: 100%; padding: 10px 0; }
-            .analyzer h3 { flex-direction: column; align-items: stretch; }
-            #clear-custom-btn { width: 100%; margin-top: 10px; }
-            .string { height: 28px; }
-            .fret { min-width: 20px; }
-            .fret:first-child { min-width: 15px; border-left-width: 4px; }
-            .fret-number { min-width: 20px; font-size: 10px; }
-            .fret-number:first-child { min-width: 15px; }
-            .note { width: 15px; height: 15px; font-size: 7px; border-width: 1px; }
-            .white-key { width: 35px; height: 150px; padding-bottom: 10px; }
-            .black-key { width: 24px; height: 90px; right: -12px; padding-bottom: 10px; }
-        }
-
-        /* 🔥 대형 태블릿 & 데스크탑 (1024px 이상) */
         @media (min-width: 1024px) {
             .string { height: 45px; }
             .fret { min-width: 50px; }
@@ -399,11 +145,9 @@
             .note { width: 20px; height: 20px; font-size: 10px; border-width: 2px; }
             .white-key { width: 45px; height: 200px; padding-bottom: 15px; }
             .black-key { width: 30px; height: 120px; right: -15px; padding-bottom: 15px; }
-            
             #capture-title, #fretboard-title { font-size: 24px; }
         }
 
-        /* 🔥 매우 큰 화면 (1440px 이상) */
         @media (min-width: 1440px) {
             .string { height: 50px; }
             .fret { min-width: 55px; }
@@ -513,12 +257,16 @@
     </div>
 
     <script>
+        // =========================================================================
         // [1] 환경 설정 및 매직 넘버 상수화
+        // =========================================================================
         const KEYBOARD_WHITE_NOTES = [0, 2, 4, 5, 7, 9, 11];
         const KEYBOARD_BLACK_MAP = {0: 1, 2: 3, 4: null, 5: 6, 7: 8, 9: 10, 11: null};
         const INLAY_FRETS = [3, 5, 7, 9, 15, 17, 19, 21];
         const TOTAL_FRETS = 21;
         const OCTAVE_FRET = 12;
+        const FRET_OCTAVE_SHIFTS = [-24, -12, 0, 12, 24];
+        const BASS_FORM_SPECIAL_OFFSETS = { '3': [4, 5, 6, 7] };
 
         const i18n = {
             ko: {
@@ -557,7 +305,86 @@
 
         function getSafeI18n() { return i18n[currentLang] || i18n['en']; }
 
-        // [2] 음악 이론 데이터
+        // =========================================================================
+        // [2] 🚀 DOM_CACHE: 전체 DOM 요소를 캐싱하여 성능 극대화 (리팩토링 핵심)
+        // =========================================================================
+        const DOM_CACHE = {
+            // Views & Containers
+            fretboardView: null, diagramView: null, scaleProgView: null,
+            captureArea: null, captureTitle: null, fretboardTitle: null,
+            fretboard: null, fretNumbers: null, analyzerResult: null,
+            scaleControls: null, chordControls: null, tuningControls: null,
+            formToggleRow: null, formToggleDivider: null, noteButtonsContainer: null,
+
+            // Buttons
+            langBtn: null, guitarBtn: null, bassBtn: null, keyboardBtn: null,
+            scaleModeBtn: null, chordModeBtn: null, captureBtn: null,
+            toggleDiagramBtn: null, addChordBtn: null, addCustomBtn: null,
+            addScaleBtn: null, saveJsonBtn: null, loadJsonBtn: null, clearProgBtn: null,
+            clearCustomBtn: null, formToggleBtn: null,
+
+            // Inputs & Selects
+            loadJsonInput: null, tuningSelect: null, keySelect: null, 
+            majorSelect: null, minorSelect: null, chordSelect: null, formSelect: null,
+
+            // Dynamic Elements
+            allNoteElements: [],
+            allFretElements: [],
+            findNoteBtns: [],
+
+            init() {
+                this.fretboardView = document.getElementById('fretboard-view');
+                this.diagramView = document.getElementById('chord-diagram-view');
+                this.scaleProgView = document.getElementById('scale-progression-view');
+                this.captureArea = document.getElementById('capture-area');
+                this.captureTitle = document.getElementById('capture-title');
+                this.fretboardTitle = document.getElementById('fretboard-title');
+                this.fretboard = document.getElementById('fretboard');
+                this.fretNumbers = document.getElementById('fret-numbers');
+                this.analyzerResult = document.getElementById('scale-analysis-result');
+                this.scaleControls = document.getElementById('scale-controls');
+                this.chordControls = document.getElementById('chord-controls');
+                this.tuningControls = document.getElementById('tuning-controls');
+                this.formToggleRow = document.getElementById('form-toggle-row');
+                this.formToggleDivider = document.getElementById('form-toggle-divider');
+                this.noteButtonsContainer = document.getElementById('note-buttons-container');
+
+                this.langBtn = document.getElementById('lang-btn');
+                this.guitarBtn = document.getElementById('guitar-btn');
+                this.bassBtn = document.getElementById('bass-btn');
+                this.keyboardBtn = document.getElementById('keyboard-btn');
+                this.scaleModeBtn = document.getElementById('scale-mode-btn');
+                this.chordModeBtn = document.getElementById('chord-mode-btn');
+                this.captureBtn = document.getElementById('capture-btn');
+                this.toggleDiagramBtn = document.getElementById('toggle-diagram-btn');
+                this.addChordBtn = document.getElementById('add-chord-btn');
+                this.addCustomBtn = document.getElementById('add-custom-btn');
+                this.addScaleBtn = document.getElementById('add-scale-btn');
+                this.saveJsonBtn = document.getElementById('save-json-btn');
+                this.loadJsonBtn = document.getElementById('load-json-btn');
+                this.clearProgBtn = document.getElementById('clear-progression-btn');
+                this.clearCustomBtn = document.getElementById('clear-custom-btn');
+                this.formToggleBtn = document.getElementById('toggle-form-btn');
+                this.loadJsonInput = document.getElementById('load-json-input');
+
+                this.tuningSelect = document.getElementById('tuning-select');
+                this.keySelect = document.getElementById('key-select');
+                this.majorSelect = document.getElementById('major-select');
+                this.minorSelect = document.getElementById('minor-select');
+                this.chordSelect = document.getElementById('chord-select');
+                this.formSelect = document.getElementById('form-select');
+            },
+
+            updateDynamicElements() {
+                // renderFretboard() 호출 후 DOM이 재생성될 때만 호출
+                this.allNoteElements = this.fretboardView.querySelectorAll('.note');
+                this.allFretElements = this.fretboardView.querySelectorAll('.fret');
+            }
+        };
+
+        // =========================================================================
+        // [3] 음악 이론 데이터
+        // =========================================================================
         const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
         const tunings = { 'guitar': [4, 11, 7, 2, 9, 4], 'bass': [7, 2, 9, 4] };
         
@@ -613,7 +440,7 @@
             "Half Diminished (m7b5)": { E: [0, 'x', 0, 0, -1, 'x'], A: ['x', 0, 1, 0, 1, 'x'] }, "Diminished 7 (dim7)": { E: [0, 'x', -1, 0, -1, 'x'], A: ['x', 0, 1, 2, 1, 2] }, "Minor Major 7 (mM7)": { E: [0, 'x', 1, 0, 0, 'x'], A: ['x', 0, 2, 1, 1, 0] }
         };
 
-        // [3] 상태 변수
+        // [4] 상태 변수
         let currentInstrument = 'guitar'; 
         let currentMode = 'scale'; 
         let highlightedNotes = new Set(); 
@@ -622,7 +449,7 @@
         let chordProgression = []; 
         let scaleProgression = []; 
 
-        // [4] 렌더링 헬퍼 함수
+        // [5] 렌더링 헬퍼 함수
         function generateKeyboardHTML(activeNotes = [], rootIdx = -1) {
             let html = `<div class="keyboard-container" style="margin: 0 auto;">`;
             for(let oct = 0; oct < 3; oct++) {
@@ -667,7 +494,7 @@
             return html;
         }
 
-        // [5] 악보 조작 함수
+        // [6] 악보 조작 함수
         window.removeChord = function(idx) { chordProgression.splice(idx, 1); updateFretboard(); };
         window.removeScale = function(idx) { scaleProgression.splice(idx, 1); updateFretboard(); };
         window.shiftCustomFret = function(idx, dir) {
@@ -686,9 +513,8 @@
             updateFretboard();
         };
 
-        // 🔥 모바일/태블릿 감지 및 최적화 헬퍼
+        // 모바일/태블릿 감지
         const isMobile = () => window.innerWidth < 768;
-        const isTablet = () => window.innerWidth >= 480 && window.innerWidth < 1024;
         const getDeviceType = () => {
             if (window.innerWidth < 480) return 'small-mobile';
             if (window.innerWidth < 768) return 'mobile';
@@ -697,64 +523,96 @@
             return 'large-desktop';
         };
 
-        // 🔥 모바일 환경에서 초기 확대 제한
         window.addEventListener('load', () => {
             if (isMobile()) {
-                document.querySelector('meta[name="viewport"]').setAttribute(
-                    'content', 
-                    'width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3'
-                );
+                document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3');
             }
         });
 
-        // 🔥 윈도우 리사이징시 동적 재조정
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                const currentDevice = getDeviceType();
-                // 필요시 동적 조정 (예: 폰트 크기 등)
-                console.log('Device changed to:', currentDevice);
-            }, 250);
-        });
+        // 🚀 [리팩토링] 선택적 업데이트 함수 (전체 리렌더링 방지)
+        function updateNoteHighlights(activeNotesArray, rootIndex) {
+            const activeNotesSet = new Set(activeNotesArray);
+            DOM_CACHE.allNoteElements.forEach(noteEl => {
+                const noteIdx = parseInt(noteEl.dataset.noteIndex);
+                const shouldBeActive = activeNotesSet.has(noteIdx);
+                noteEl.classList.toggle('active', shouldBeActive);
+                noteEl.classList.toggle('root', shouldBeActive && noteIdx === rootIndex);
+            });
+        }
 
-        // [6] 초기화 로직
+        function updateAnchorFrets(anchorFrets) {
+            DOM_CACHE.allFretElements.forEach(fretEl => {
+                const fretIdx = parseInt(fretEl.dataset.fretIndex);
+                fretEl.classList.toggle('anchor-highlight', anchorFrets.has(fretIdx));
+            });
+        }
+
+        // 🚀 [리팩토링] 버튼 표시/숨김 헬퍼 (DOM_CACHE 활용)
+        function setButtonVisibility(buttons) {
+            Object.entries(buttons).forEach(([cacheKey, visible]) => {
+                if (DOM_CACHE[cacheKey]) {
+                    DOM_CACHE[cacheKey].style.display = visible ? 'inline-block' : 'none';
+                }
+            });
+        }
+
+        // [7] 초기화 로직
         function init() {
-            setupSelects(); updateTuningOptions(); setupNoteButtons(); 
-            setupMainFretboardEvents(); setupDragAndDropEvents();
-            renderFretboard(); updateFretboard(); applyLanguage(); 
+            // 🚀 DOM_CACHE 초기화
+            DOM_CACHE.init();
+            
+            setupSelects(); 
+            updateTuningOptions(); 
+            setupNoteButtons(); 
+            setupMainFretboardEvents(); 
+            setupDragAndDropEvents();
+            
+            renderFretboard(); 
+            DOM_CACHE.updateDynamicElements(); // 🚀 동적 요소 캐싱
+            
+            updateFretboard(); 
+            applyLanguage(); 
 
-            document.getElementById('lang-btn').addEventListener('click', toggleLanguage);
-            document.getElementById('key-select').addEventListener('change', updateFretboard);
-            document.getElementById('major-select').addEventListener('change', function() { document.getElementById('minor-select').value = ""; updateFretboard(); });
-            document.getElementById('minor-select').addEventListener('change', function() { document.getElementById('major-select').value = ""; updateFretboard(); });
-            document.getElementById('chord-select').addEventListener('change', updateFretboard);
-            document.getElementById('tuning-select').addEventListener('change', function() { renderFretboard(); updateFretboard(); analyzeCustomNotes(); });
-            document.getElementById('toggle-form-btn').addEventListener('click', function() {
+            // 🚀 DOM_CACHE 사용 이벤트 바인딩
+            DOM_CACHE.langBtn.addEventListener('click', toggleLanguage);
+            DOM_CACHE.keySelect.addEventListener('change', updateFretboard);
+            DOM_CACHE.majorSelect.addEventListener('change', function() { DOM_CACHE.minorSelect.value = ""; updateFretboard(); });
+            DOM_CACHE.minorSelect.addEventListener('change', function() { DOM_CACHE.majorSelect.value = ""; updateFretboard(); });
+            DOM_CACHE.chordSelect.addEventListener('change', updateFretboard);
+            DOM_CACHE.tuningSelect.addEventListener('change', function() { 
+                renderFretboard(); 
+                DOM_CACHE.updateDynamicElements(); 
+                updateFretboard(); 
+                analyzeCustomNotes(); 
+            });
+            DOM_CACHE.formToggleBtn.addEventListener('click', function() {
                 showFormHighlight = !showFormHighlight;
                 this.textContent = showFormHighlight ? getSafeI18n().btnOn : getSafeI18n().btnOff;
                 this.style.backgroundColor = showFormHighlight ? '#4CAF50' : '#e0e0e0';
                 this.style.color = showFormHighlight ? '#fff' : '#333';
-                document.getElementById('form-select').style.display = showFormHighlight ? 'inline-block' : 'none'; updateFretboard();
+                DOM_CACHE.formSelect.style.display = showFormHighlight ? 'inline-block' : 'none'; 
+                updateFretboard();
             });
-            document.getElementById('toggle-diagram-btn').addEventListener('click', function() {
-                showChordDiagram = !showChordDiagram; this.textContent = showChordDiagram ? getSafeI18n().btnFretboard : getSafeI18n().btnDiagram; updateFretboard();
+            DOM_CACHE.toggleDiagramBtn.addEventListener('click', function() {
+                showChordDiagram = !showChordDiagram; 
+                this.textContent = showChordDiagram ? getSafeI18n().btnFretboard : getSafeI18n().btnDiagram; 
+                updateFretboard();
             });
-            document.getElementById('add-scale-btn').addEventListener('click', function() {
-                const rootIdx = parseInt(document.getElementById('key-select').value);
-                const scaleVal = document.getElementById('major-select').value || document.getElementById('minor-select').value;
-                const tuningVal = document.getElementById('tuning-select') ? document.getElementById('tuning-select').value : 'standard';
+            DOM_CACHE.addScaleBtn.addEventListener('click', function() {
+                const rootIdx = parseInt(DOM_CACHE.keySelect.value);
+                const scaleVal = DOM_CACHE.majorSelect.value || DOM_CACHE.minorSelect.value;
+                const tuningVal = DOM_CACHE.tuningSelect ? DOM_CACHE.tuningSelect.value : 'standard';
                 if (scaleVal) { scaleProgression.push({ instrument: currentInstrument, tuningVal: tuningVal, rootIdx: rootIdx, scaleName: scaleVal }); updateFretboard(); }
             });
-            document.getElementById('add-chord-btn').addEventListener('click', function() {
-                const rootIdx = parseInt(document.getElementById('key-select').value);
-                const chordVal = document.getElementById('chord-select').value;
+            DOM_CACHE.addChordBtn.addEventListener('click', function() {
+                const rootIdx = parseInt(DOM_CACHE.keySelect.value);
+                const chordVal = DOM_CACHE.chordSelect.value;
                 if (chordVal) { chordProgression.push({ type: 'preset', rootIdx: rootIdx, chordName: chordVal }); updateFretboard(); }
             });
-            document.getElementById('add-custom-btn').addEventListener('click', function() {
+            DOM_CACHE.addCustomBtn.addEventListener('click', function() {
                 chordProgression.push({ type: 'custom', title: 'Custom', startFret: 1, voicing: ['x', 'x', 'x', 'x', 'x', 'x'] }); updateFretboard();
             });
-            document.getElementById('save-json-btn').addEventListener('click', function() {
+            DOM_CACHE.saveJsonBtn.addEventListener('click', function() {
                 let dataToSave = currentMode === 'chord' ? chordProgression : scaleProgression;
                 if (dataToSave.length === 0) { alert(getSafeI18n().msgNoData); return; }
                 const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: "application/json" });
@@ -762,8 +620,8 @@
                 const link = document.createElement('a'); link.href = url; link.download = currentMode === 'chord' ? "chord_progression.json" : "scale_progression.json";
                 link.click(); URL.revokeObjectURL(url);
             });
-            document.getElementById('load-json-btn').addEventListener('click', function() { document.getElementById('load-json-input').click(); });
-            document.getElementById('load-json-input').addEventListener('change', function(e) {
+            DOM_CACHE.loadJsonBtn.addEventListener('click', function() { DOM_CACHE.loadJsonInput.click(); });
+            DOM_CACHE.loadJsonInput.addEventListener('change', function(e) {
                 const file = e.target.files[0]; if (!file) return;
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -777,25 +635,28 @@
                 };
                 reader.readAsText(file); this.value = ''; 
             });
-            document.getElementById('clear-progression-btn').addEventListener('click', function() {
+            DOM_CACHE.clearProgBtn.addEventListener('click', function() {
                 currentMode === 'scale' ? scaleProgression = [] : chordProgression = []; updateFretboard();
             });
-            document.getElementById('form-select').addEventListener('change', updateFretboard);
-            document.getElementById('clear-custom-btn').addEventListener('click', function() {
-                document.querySelectorAll('.note.custom').forEach(el => el.classList.remove('custom')); highlightedNotes.clear(); 
-                document.querySelectorAll('.find-note-btn').forEach(btn => btn.classList.remove('active')); applyHighlights(); analyzeCustomNotes();
+            DOM_CACHE.formSelect.addEventListener('change', updateFretboard);
+            DOM_CACHE.clearCustomBtn.addEventListener('click', function() {
+                // 🚀 Array.from 활용 (DOM_CACHE 재사용)
+                Array.from(DOM_CACHE.allNoteElements).filter(el => el.classList.contains('custom')).forEach(el => el.classList.remove('custom')); 
+                highlightedNotes.clear(); 
+                DOM_CACHE.findNoteBtns.forEach(btn => btn.classList.remove('active')); 
+                applyHighlights(); analyzeCustomNotes();
             });
-            document.getElementById('guitar-btn').addEventListener('click', () => switchInstrument('guitar'));
-            document.getElementById('bass-btn').addEventListener('click', () => switchInstrument('bass'));
-            document.getElementById('keyboard-btn').addEventListener('click', () => switchInstrument('keyboard'));
-            document.getElementById('scale-mode-btn').addEventListener('click', () => switchMode('scale'));
-            document.getElementById('chord-mode-btn').addEventListener('click', () => switchMode('chord'));
-            document.getElementById('capture-btn').addEventListener('click', captureFretboard);
+            DOM_CACHE.guitarBtn.addEventListener('click', () => switchInstrument('guitar'));
+            DOM_CACHE.bassBtn.addEventListener('click', () => switchInstrument('bass'));
+            DOM_CACHE.keyboardBtn.addEventListener('click', () => switchInstrument('keyboard'));
+            DOM_CACHE.scaleModeBtn.addEventListener('click', () => switchMode('scale'));
+            DOM_CACHE.chordModeBtn.addEventListener('click', () => switchMode('chord'));
+            DOM_CACHE.captureBtn.addEventListener('click', captureFretboard);
         }
 
-        // [7] 이벤트 위임
+        // [8] 이벤트 위임 셋업
         function setupMainFretboardEvents() {
-            document.getElementById('fretboard-view').addEventListener('click', function(e) {
+            DOM_CACHE.fretboardView.addEventListener('click', function(e) {
                 let noteEl = null;
                 if (e.target.classList.contains('note')) noteEl = e.target;
                 else if (e.target.classList.contains('fret') || e.target.classList.contains('white-key') || e.target.classList.contains('black-key')) noteEl = e.target.querySelector('.note');
@@ -811,14 +672,20 @@
                 const draggedIdx = parseInt(e.dataTransfer.getData('text/plain')), targetIdx = parseInt(item.dataset.index);
                 if (!isNaN(draggedIdx) && draggedIdx !== targetIdx) { const arr = type === 'chord' ? chordProgression : scaleProgression; arr.splice(targetIdx, 0, arr.splice(draggedIdx, 1)[0]); updateFretboard(); }
             };
-            const bindEvents = (viewId, type) => {
-                const view = document.getElementById(viewId);
+            const bindEvents = (view, type) => {
                 view.addEventListener('dragstart', handleDragStart); view.addEventListener('dragend', handleDragEnd); view.addEventListener('dragover', handleDragOver); view.addEventListener('drop', (e) => handleDrop(e, type));
             };
-            bindEvents('chord-diagram-view', 'chord'); bindEvents('scale-progression-view', 'scale');
+            bindEvents(DOM_CACHE.diagramView, 'chord'); 
+            bindEvents(DOM_CACHE.scaleProgView, 'scale');
         }
 
-        // [8] 기타 유틸리티
+        // [9] 기타 유틸리티
+        function extractChordSymbol(chordName) {
+            const match = chordName.match(/\(([^)]+)\)/);
+            let symbol = match ? match[1] : '';
+            return symbol === 'M' ? '' : symbol;
+        }
+
         function getChordVoicing(rootIdx, chordName) {
             const key = `${rootIdx}_${chordName}`; if (openChords[key]) return openChords[key]; 
             const shape = chordShapes[chordName]; if (!shape) return null;
@@ -836,7 +703,6 @@
             let minFret = validFrets.length ? Math.min(...validFrets) : 1, maxFret = validFrets.length ? Math.max(...validFrets) : 1;
             let startFret = isCustom ? customStartFret : (maxFret > 5 ? minFret : 1);
             
-            // 🔥 모바일 환경에서 다이어그램 크기 동적 조정
             const deviceType = getDeviceType();
             let svgWidth = 220, svgHeight = 300;
             if (deviceType === 'small-mobile') { svgWidth = 160; svgHeight = 220; }
@@ -854,7 +720,7 @@
                 let x = startX + i * gapX; svg += `<line x1="${x}" y1="${startY}" x2="${x}" y2="${startY + 5 * gapY}" stroke="#ccc" stroke-width="1.5" />`;
             }
             if (startFret > 1) svg += `<text x="22" y="${startY + gapY/2}" fill="white" font-size="14" font-weight="bold" font-family="sans-serif" text-anchor="middle" dominant-baseline="central">${startFret}fr</text>`;
-            const tuningVal = document.getElementById('tuning-select') ? document.getElementById('tuning-select').value : 'standard';
+            const tuningVal = DOM_CACHE.tuningSelect ? DOM_CACHE.tuningSelect.value : 'standard';
             const tuningOffsets = tuningPresets['guitar'][tuningVal].offset;
             const stringOpenNotes = [4, 11, 7, 2, 9, 4].map((open, i) => (open + tuningOffsets[i] + 120) % 12);
             voicing.forEach((fret, strIdx) => {
@@ -898,9 +764,9 @@
                     const tuningOffsets = tuningPresets[item.instrument][item.tuningVal].offset;
                     const lowestStrIdx = tunings[item.instrument].length - 1;
                     let f1 = ((item.rootIdx - 3 + 12) % 12 - ((tunings[item.instrument][lowestStrIdx] + tuningOffsets[lowestStrIdx] + 120) % 12) + 12) % 12;
-                    let offsets = [...formOffsets[document.getElementById('form-select').value]];
-                    if (item.instrument === 'bass' && document.getElementById('form-select').value === '3') offsets = [4, 5, 6, 7]; 
-                    offsets.map(o => f1 + o).forEach(f => [-24, -12, 0, 12, 24].forEach(s => { if (f+s >= 0 && f+s <= TOTAL_FRETS) anchorFrets.add(f+s); }));
+                    let offsets = [...formOffsets[DOM_CACHE.formSelect.value]];
+                    if (item.instrument === 'bass' && DOM_CACHE.formSelect.value === '3') offsets = [4, 5, 6, 7]; 
+                    offsets.map(o => f1 + o).forEach(f => FRET_OCTAVE_SHIFTS.forEach(s => { if (f+s >= 0 && f+s <= TOTAL_FRETS) anchorFrets.add(f+s); }));
                 }
                 html += generateFretboardHTML(item.instrument, item.tuningVal, activeNotes, item.rootIdx, anchorFrets);
             }
@@ -909,101 +775,108 @@
 
         function updateTuningOptions() {
             if (currentInstrument === 'keyboard') return; 
-            const select = document.getElementById('tuning-select'); const currentVal = select.value; select.innerHTML = ''; 
+            const currentVal = DOM_CACHE.tuningSelect.value; 
+            DOM_CACHE.tuningSelect.innerHTML = ''; 
             const presets = tuningPresets[currentInstrument]; const safeLang = currentLang === 'ko' ? 'ko' : 'en';
-            for (let key in presets) select.appendChild(new Option(presets[key][safeLang], key));
-            select.value = presets[currentVal] ? currentVal : 'standard';
+            for (let key in presets) DOM_CACHE.tuningSelect.appendChild(new Option(presets[key][safeLang], key));
+            DOM_CACHE.tuningSelect.value = presets[currentVal] ? currentVal : 'standard';
         }
 
         function toggleLanguage() { currentLang = currentLang === 'ko' ? 'en' : 'ko'; applyLanguage(); }
 
         function applyLanguage() {
             const t = getSafeI18n();
-            document.getElementById('lang-btn').textContent = t.langBtn; document.getElementById('guitar-btn').textContent = t.guitarBtn;
-            document.getElementById('bass-btn').textContent = t.bassBtn; document.getElementById('keyboard-btn').textContent = t.keyboardBtn;
-            document.getElementById('lbl-tuning').textContent = t.lblTuning; document.getElementById('scale-mode-btn').textContent = t.scaleModeBtn;
-            document.getElementById('chord-mode-btn').textContent = t.chordModeBtn; document.getElementById('capture-btn').textContent = t.captureBtn;
+            DOM_CACHE.langBtn.textContent = t.langBtn; DOM_CACHE.guitarBtn.textContent = t.guitarBtn;
+            DOM_CACHE.bassBtn.textContent = t.bassBtn; DOM_CACHE.keyboardBtn.textContent = t.keyboardBtn;
+            document.getElementById('lbl-tuning').textContent = t.lblTuning; DOM_CACHE.scaleModeBtn.textContent = t.scaleModeBtn;
+            DOM_CACHE.chordModeBtn.textContent = t.chordModeBtn; DOM_CACHE.captureBtn.textContent = t.captureBtn;
             document.getElementById('lbl-key').textContent = t.lblKey; document.getElementById('lbl-major').textContent = t.lblMajor;
             document.getElementById('lbl-minor').textContent = t.lblMinor; document.getElementById('lbl-chord').textContent = t.lblChord;
             document.getElementById('lbl-find-note').textContent = t.lblFindNote; document.getElementById('lbl-form-toggle').textContent = t.lblFormToggle;
-            document.getElementById('toggle-form-btn').textContent = showFormHighlight ? t.btnOn : t.btnOff;
-            document.getElementById('toggle-diagram-btn').textContent = showChordDiagram ? t.btnFretboard : t.btnDiagram;
-            document.getElementById('add-scale-btn').textContent = t.btnAddScale; document.getElementById('add-chord-btn').textContent = t.btnAddChord;
-            document.getElementById('add-custom-btn').textContent = t.btnAddCustom; document.getElementById('save-json-btn').textContent = t.btnSaveJson;
-            document.getElementById('load-json-btn').textContent = t.btnLoadJson; document.getElementById('clear-progression-btn').textContent = t.btnClear;
+            DOM_CACHE.formToggleBtn.textContent = showFormHighlight ? t.btnOn : t.btnOff;
+            DOM_CACHE.toggleDiagramBtn.textContent = showChordDiagram ? t.btnFretboard : t.btnDiagram;
+            DOM_CACHE.addScaleBtn.textContent = t.btnAddScale; DOM_CACHE.addChordBtn.textContent = t.btnAddChord;
+            DOM_CACHE.addCustomBtn.textContent = t.btnAddCustom; DOM_CACHE.saveJsonBtn.textContent = t.btnSaveJson;
+            DOM_CACHE.loadJsonBtn.textContent = t.btnLoadJson; DOM_CACHE.clearProgBtn.textContent = t.btnClear;
             
-            const formSelect = document.getElementById('form-select');
-            formSelect.options[0].text = t.form1; formSelect.options[1].text = t.form2; formSelect.options[2].text = t.form3; formSelect.options[3].text = t.form4; formSelect.options[4].text = t.form5;
-            document.getElementById('lbl-analyzer-title').innerHTML = t.analyzerTitle; document.getElementById('clear-custom-btn').innerText = t.clearBtn;
+            DOM_CACHE.formSelect.options[0].text = t.form1; DOM_CACHE.formSelect.options[1].text = t.form2; DOM_CACHE.formSelect.options[2].text = t.form3; DOM_CACHE.formSelect.options[3].text = t.form4; DOM_CACHE.formSelect.options[4].text = t.form5;
+            document.getElementById('lbl-analyzer-title').innerHTML = t.analyzerTitle; DOM_CACHE.clearCustomBtn.innerText = t.clearBtn;
             document.querySelectorAll('select option[value=""]').forEach(opt => opt.innerText = t.selectDefault);
             updateTuningOptions(); updateFretboard();
         }
 
         function setupNoteButtons() {
-            const container = document.getElementById('note-buttons-container');
+            DOM_CACHE.noteButtonsContainer.innerHTML = '';
+            DOM_CACHE.findNoteBtns = []; // 🚀 초기화 및 캐시 보관
             notes.forEach((note, index) => {
                 const btn = document.createElement('button'); btn.className = 'btn find-note-btn'; btn.textContent = note;
                 btn.addEventListener('click', function() { highlightedNotes.has(index) ? (highlightedNotes.delete(index), this.classList.remove('active')) : (highlightedNotes.add(index), this.classList.add('active')); applyHighlights(); });
-                container.appendChild(btn);
+                DOM_CACHE.noteButtonsContainer.appendChild(btn);
+                DOM_CACHE.findNoteBtns.push(btn);
             });
         }
         
         function applyHighlights() {
-            document.querySelectorAll('#fretboard-view .note').forEach(noteEl => { highlightedNotes.has(parseInt(noteEl.dataset.noteIndex)) ? noteEl.classList.add('highlight') : noteEl.classList.remove('highlight'); });
+            DOM_CACHE.allNoteElements.forEach(noteEl => { highlightedNotes.has(parseInt(noteEl.dataset.noteIndex)) ? noteEl.classList.add('highlight') : noteEl.classList.remove('highlight'); });
         }
 
         function switchInstrument(instrument) {
             if (currentInstrument === instrument) return; currentInstrument = instrument;
-            document.getElementById('guitar-btn').classList.toggle('active', instrument === 'guitar'); document.getElementById('bass-btn').classList.toggle('active', instrument === 'bass'); document.getElementById('keyboard-btn').classList.toggle('active', instrument === 'keyboard');
-            if (instrument === 'keyboard') { document.getElementById('tuning-controls').style.display = 'none'; document.getElementById('form-toggle-row').style.display = 'none'; document.getElementById('form-toggle-divider').style.display = 'none'; } 
-            else { document.getElementById('tuning-controls').style.display = 'inline-flex'; document.getElementById('form-toggle-row').style.display = 'flex'; document.getElementById('form-toggle-divider').style.display = 'block'; }
-            resetSelections(); updateTuningOptions(); renderFretboard(); updateFretboard(); analyzeCustomNotes();
+            DOM_CACHE.guitarBtn.classList.toggle('active', instrument === 'guitar'); DOM_CACHE.bassBtn.classList.toggle('active', instrument === 'bass'); DOM_CACHE.keyboardBtn.classList.toggle('active', instrument === 'keyboard');
+            if (instrument === 'keyboard') { DOM_CACHE.tuningControls.style.display = 'none'; DOM_CACHE.formToggleRow.style.display = 'none'; DOM_CACHE.formToggleDivider.style.display = 'none'; } 
+            else { DOM_CACHE.tuningControls.style.display = 'inline-flex'; DOM_CACHE.formToggleRow.style.display = 'flex'; DOM_CACHE.formToggleDivider.style.display = 'block'; }
+            resetSelections(); updateTuningOptions(); 
+            renderFretboard(); DOM_CACHE.updateDynamicElements(); 
+            updateFretboard(); analyzeCustomNotes();
         }
 
         function switchMode(mode) {
             if (currentMode === mode) return; currentMode = mode;
-            document.getElementById('scale-mode-btn').classList.toggle('active', mode === 'scale'); document.getElementById('chord-mode-btn').classList.toggle('active', mode === 'chord');
-            document.getElementById('scale-controls').style.display = mode === 'scale' ? 'inline-flex' : 'none'; document.getElementById('chord-controls').style.display = mode === 'chord' ? 'inline-flex' : 'none';
-            if (mode !== 'chord') { showChordDiagram = false; document.getElementById('toggle-diagram-btn').textContent = getSafeI18n().btnDiagram; }
+            DOM_CACHE.scaleModeBtn.classList.toggle('active', mode === 'scale'); DOM_CACHE.chordModeBtn.classList.toggle('active', mode === 'chord');
+            DOM_CACHE.scaleControls.style.display = mode === 'scale' ? 'inline-flex' : 'none'; DOM_CACHE.chordControls.style.display = mode === 'chord' ? 'inline-flex' : 'none';
+            if (mode !== 'chord') { showChordDiagram = false; DOM_CACHE.toggleDiagramBtn.textContent = getSafeI18n().btnDiagram; }
             resetSelections(); updateFretboard();
         }
 
         function resetSelections() {
-            document.querySelectorAll('.note.custom').forEach(el => el.classList.remove('custom')); highlightedNotes.clear();
-            document.querySelectorAll('.find-note-btn').forEach(btn => btn.classList.remove('active')); document.querySelectorAll('.note.highlight').forEach(el => el.classList.remove('highlight'));
-            document.getElementById('major-select').value = ""; document.getElementById('minor-select').value = ""; document.getElementById('chord-select').value = "";
-            if (currentMode === 'scale') document.getElementById('minor-select').value = "Blues";
+            Array.from(DOM_CACHE.allNoteElements).filter(el => el.classList.contains('custom')).forEach(el => el.classList.remove('custom')); 
+            highlightedNotes.clear();
+            DOM_CACHE.findNoteBtns.forEach(btn => btn.classList.remove('active')); 
+            Array.from(DOM_CACHE.allNoteElements).filter(el => el.classList.contains('highlight')).forEach(el => el.classList.remove('highlight'));
+            DOM_CACHE.majorSelect.value = ""; DOM_CACHE.minorSelect.value = ""; DOM_CACHE.chordSelect.value = "";
+            if (currentMode === 'scale') DOM_CACHE.minorSelect.value = "Blues";
         }
 
         function setupSelects() {
-            const keySelect = document.getElementById('key-select'); notes.forEach((note, index) => keySelect.appendChild(new Option(note, index)));
-            const majorSelect = document.getElementById('major-select'); for (let scale in majorScales) majorSelect.appendChild(new Option(scale, scale));
-            const minorSelect = document.getElementById('minor-select'); for (let scale in minorScales) { const option = new Option(scale, scale); if (scale === "Blues") option.selected = true; minorSelect.appendChild(option); }
-            const chordSelect = document.getElementById('chord-select'); for (let chord in allChords) chordSelect.appendChild(new Option(chord, chord));
+            notes.forEach((note, index) => DOM_CACHE.keySelect.appendChild(new Option(note, index)));
+            for (let scale in majorScales) DOM_CACHE.majorSelect.appendChild(new Option(scale, scale));
+            for (let scale in minorScales) { const option = new Option(scale, scale); if (scale === "Blues") option.selected = true; DOM_CACHE.minorSelect.appendChild(option); }
+            for (let chord in allChords) DOM_CACHE.chordSelect.appendChild(new Option(chord, chord));
         }
 
         function renderFretboard() {
-            const fretboard = document.getElementById('fretboard'); const fretNumbersDiv = document.getElementById('fret-numbers'); 
             if (currentInstrument === 'keyboard') {
-                fretNumbersDiv.style.display = 'none'; fretboard.className = 'keyboard-container'; fretboard.innerHTML = generateKeyboardHTML(); 
+                DOM_CACHE.fretNumbers.style.display = 'none'; DOM_CACHE.fretboard.className = 'keyboard-container'; DOM_CACHE.fretboard.innerHTML = generateKeyboardHTML(); 
             } else {
-                fretNumbersDiv.style.display = 'flex'; fretboard.className = `fretboard instrument-${currentInstrument}`;
-                const tuningVal = document.getElementById('tuning-select').value || 'standard';
+                DOM_CACHE.fretNumbers.style.display = 'flex'; DOM_CACHE.fretboard.className = `fretboard instrument-${currentInstrument}`;
+                const tuningVal = DOM_CACHE.tuningSelect.value || 'standard';
                 const tempDiv = document.createElement('div'); tempDiv.innerHTML = generateFretboardHTML(currentInstrument, tuningVal);
-                fretNumbersDiv.innerHTML = tempDiv.querySelector('.fret-numbers').innerHTML; fretboard.innerHTML = tempDiv.querySelector('.fretboard').innerHTML;
+                DOM_CACHE.fretNumbers.innerHTML = tempDiv.querySelector('.fret-numbers').innerHTML; DOM_CACHE.fretboard.innerHTML = tempDiv.querySelector('.fretboard').innerHTML;
             }
             applyHighlights();
         }
 
         function updateFretboard() {
-            const rootIndex = parseInt(document.getElementById('key-select').value); const rootName = notes[rootIndex]; const t = getSafeI18n();
+            const rootIndex = parseInt(DOM_CACHE.keySelect.value); const rootName = notes[rootIndex]; const t = getSafeI18n();
             let intervals = []; let displayTitle = "";
-            const tuningVal = document.getElementById('tuning-select') ? document.getElementById('tuning-select').value : 'standard';
+            const tuningVal = DOM_CACHE.tuningSelect ? DOM_CACHE.tuningSelect.value : 'standard';
             let instrumentLabel = currentInstrument === 'keyboard' ? 'Keyboard' : (currentInstrument === 'guitar' ? 'Guitar' : 'Bass');
             if (currentInstrument !== 'keyboard' && tuningVal !== 'standard') instrumentLabel += ` [${tuningPresets[currentInstrument][tuningVal][currentLang] || 'Standard'}]`;
 
-            const chordVal = document.getElementById('chord-select').value;
-            const scaleVal = document.getElementById('major-select').value || document.getElementById('minor-select').value;
+            const chordVal = DOM_CACHE.chordSelect.value;
+            const majorVal = DOM_CACHE.majorSelect.value;
+            const minorVal = DOM_CACHE.minorSelect.value;
+            const scaleVal = majorVal || minorVal;
 
             if (currentMode === 'scale') {
                 if (scaleVal) { intervals = allScales[scaleVal]; displayTitle = `${instrumentLabel} ${rootName} ${scaleVal}`; } 
@@ -1012,55 +885,41 @@
                 if (chordVal) { intervals = allChords[chordVal]; displayTitle = `${instrumentLabel} ${rootName} ${chordVal.split(' (')[0]} Chord`; } 
                 else displayTitle = `${instrumentLabel} ${rootName} ${t.txtCustom}`;
             }
-
-            const captureTitleEl = document.getElementById('capture-title');
-            const fretboardTitleEl = document.getElementById('fretboard-title');
             
-            // 🔥 메인 지판의 제목은 언제나 하얀 박스 안에 존재하게 함
-            fretboardTitleEl.textContent = displayTitle;
+            DOM_CACHE.fretboardTitle.textContent = displayTitle;
 
-            // 🔥 코드 다이어그램 모드일 때만 외부 타이틀(배경투명) 사용
             if (currentMode === 'chord' && showChordDiagram) { 
-                if (chordProgression.length > 0) captureTitleEl.textContent = `${instrumentLabel} ${t.titleChordProgression}`; 
-                else captureTitleEl.textContent = displayTitle;
-                captureTitleEl.style.display = 'block';
-                captureTitleEl.classList.add('no-capture'); 
+                if (chordProgression.length > 0) DOM_CACHE.captureTitle.textContent = `${instrumentLabel} ${t.titleChordProgression}`; 
+                else DOM_CACHE.captureTitle.textContent = displayTitle;
+                DOM_CACHE.captureTitle.style.display = 'block';
+                DOM_CACHE.captureTitle.classList.add('no-capture'); 
             } else { 
-                captureTitleEl.style.display = 'none'; 
+                DOM_CACHE.captureTitle.style.display = 'none'; 
             }
 
-            const diagramBtn = document.getElementById('toggle-diagram-btn'), addChordBtn = document.getElementById('add-chord-btn'), addCustomBtn = document.getElementById('add-custom-btn'), addScaleBtn = document.getElementById('add-scale-btn'), saveJsonBtn = document.getElementById('save-json-btn'), clearProgBtn = document.getElementById('clear-progression-btn');
-            const diagramView = document.getElementById('chord-diagram-view'), fretboardView = document.getElementById('fretboard-view'), scaleProgView = document.getElementById('scale-progression-view');
-
             if (currentMode === 'scale') {
-                diagramBtn.style.display = 'none'; diagramView.style.display = 'none'; addChordBtn.style.display = 'none'; addCustomBtn.style.display = 'none';
-                addScaleBtn.style.display = scaleVal ? 'inline-block' : 'none'; fretboardView.style.display = 'block';
-                if (scaleProgression.length > 0) {
-                    saveJsonBtn.style.display = 'inline-block'; clearProgBtn.style.display = 'inline-block'; scaleProgView.style.display = 'flex';
-                    let html = ''; scaleProgression.forEach((c, idx) => html += generateScaleBoardHTML(c, idx)); scaleProgView.innerHTML = html;
-                } else { saveJsonBtn.style.display = 'none'; clearProgBtn.style.display = 'none'; scaleProgView.style.display = 'none'; }
-            } else {
-                // Chord mode UI control
-                const isGuitar = currentInstrument === 'guitar' && tuningVal === 'standard';
-                
-                setButtonVisibility({
-                    'add-scale-btn': false,
-                    'toggle-diagram-btn': isGuitar,
-                    'add-chord-btn': isGuitar && showChordDiagram,
-                    'add-custom-btn': isGuitar && showChordDiagram,
-                    'save-json-btn': isGuitar && showChordDiagram && chordProgression.length > 0,
-                    'clear-progression-btn': isGuitar && showChordDiagram && chordProgression.length > 0
-                });
+                setButtonVisibility({ toggleDiagramBtn: false, addChordBtn: false, addCustomBtn: false, addScaleBtn: !!scaleVal });
+                DOM_CACHE.diagramView.style.display = 'none'; DOM_CACHE.fretboardView.style.display = 'block';
 
-                document.getElementById('scale-progression-view').style.display = 'none';
-                
-                if (isGuitar && showChordDiagram) {
-                    // 💡 필요한 변수들을 함수로 넘겨줍니다
-                    renderChordDiagrams(chordProgression, rootIndex, chordVal);
-                } else {
-                    diagramView.style.display = 'none';
-                    fretboardView.style.display = 'block';
+                if (scaleProgression.length > 0) {
+                    setButtonVisibility({ saveJsonBtn: true, clearProgBtn: true });
+                    DOM_CACHE.scaleProgView.style.display = 'flex';
+                    let html = ''; scaleProgression.forEach((c, idx) => html += generateScaleBoardHTML(c, idx)); DOM_CACHE.scaleProgView.innerHTML = html;
+                } else { 
+                    setButtonVisibility({ saveJsonBtn: false, clearProgBtn: false });
+                    DOM_CACHE.scaleProgView.style.display = 'none'; 
                 }
+            } else {
+                const isGuitar = currentInstrument === 'guitar' && tuningVal === 'standard';
+                setButtonVisibility({
+                    addScaleBtn: false, toggleDiagramBtn: isGuitar, addChordBtn: isGuitar && showChordDiagram,
+                    addCustomBtn: isGuitar && showChordDiagram, saveJsonBtn: isGuitar && showChordDiagram && chordProgression.length > 0,
+                    clearProgBtn: isGuitar && showChordDiagram && chordProgression.length > 0
+                });
+                DOM_CACHE.scaleProgView.style.display = 'none';
+                
+                if (isGuitar && showChordDiagram) { renderChordDiagrams(chordProgression, rootIndex, chordVal); } 
+                else { DOM_CACHE.diagramView.style.display = 'none'; DOM_CACHE.fretboardView.style.display = 'block'; }
             }
 
             if (currentInstrument !== 'keyboard') {
@@ -1071,96 +930,25 @@
                     const lowestStrIdx = tunings[currentInstrument].length - 1;
                     const tuningOffsets = tuningPresets[currentInstrument][tuningVal].offset;
                     let f1 = (anchorNote - ((tunings[currentInstrument][lowestStrIdx] + tuningOffsets[lowestStrIdx] + 120) % 12) + 12) % 12;
-                    const formSelectVal = document.getElementById('form-select').value;
+                    const formSelectVal = DOM_CACHE.formSelect.value;
                     let offsets = BASS_FORM_SPECIAL_OFFSETS[formSelectVal] || [...formOffsets[formSelectVal]];
                     offsets.map(o => f1 + o).forEach(f => FRET_OCTAVE_SHIFTS.forEach(s => { if (f+s >= 0 && f+s <= TOTAL_FRETS) anchorFrets.add(f+s); }));
                 }
-                document.querySelectorAll('#fretboard-view .fret').forEach(fretEl => {
-                    fretEl.classList.remove('anchor-highlight');
-                    if (fretEl.dataset.fretIndex && anchorFrets.has(parseInt(fretEl.dataset.fretIndex))) fretEl.classList.add('anchor-highlight');
-                });
+                updateAnchorFrets(anchorFrets);
             }
 
-            // 🔥 activeNotes 업데이트 최적화 (Map 사용)
             const activeNotes = new Set(intervals.map(interval => (rootIndex + interval) % 12));
-            const noteElements = document.querySelectorAll('#fretboard-view .note');
-            
-            noteElements.forEach(noteEl => {
-                const noteIdx = parseInt(noteEl.dataset.noteIndex);
-                const isActive = activeNotes.has(noteIdx);
-                
-                noteEl.classList.toggle('active', isActive);
-                noteEl.classList.toggle('root', isActive && noteIdx === rootIndex);
-            });
+            updateNoteHighlights(Array.from(activeNotes), rootIndex);
         }
 
-        // 🔥 상수 정의 (하드코딩 제거)
-        const FRET_OCTAVE_SHIFTS = [-24, -12, 0, 12, 24];
-        const BASS_FORM_SPECIAL_OFFSETS = { '3': [4, 5, 6, 7] };
-        
-        // 🔥 코드 심볼 추출 헬퍼 (반복 코드 제거)
-        function extractChordSymbol(chordName) {
-            const match = chordName.match(/\(([^)]+)\)/);
-            let symbol = match ? match[1] : '';
-            return symbol === 'M' ? '' : symbol;
-        }
-
-        // 🔥 버튼 표시/숨김 헬퍼 (display 제어 단순화)
-        function setButtonVisibility(buttons) {
-            Object.entries(buttons).forEach(([btn, visible]) => {
-                const el = document.getElementById(btn);
-                if (el) el.style.display = visible ? 'inline-block' : 'none';
-            });
-        }
-
-        window.applyView = function(rootIndex, name, type) {
-            document.getElementById('key-select').value = rootIndex;
-            if (type === 'scale') { 
-                switchMode('scale'); 
-                if (majorScales.hasOwnProperty(name)) { document.getElementById('major-select').value = name; document.getElementById('minor-select').value = ""; } 
-                else { document.getElementById('minor-select').value = name; document.getElementById('major-select').value = ""; } 
-            } else if (type === 'chord') { switchMode('chord'); document.getElementById('chord-select').value = name; }
-            updateFretboard(); window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
-        function analyzeCustomNotes() {
-            const resultDiv = document.getElementById('scale-analysis-result'); const customElements = document.querySelectorAll('.note.custom'); const selectedNotesSet = new Set(); const t = getSafeI18n();
-            customElements.forEach(el => selectedNotesSet.add(parseInt(el.dataset.noteIndex))); const selectedArr = Array.from(selectedNotesSet).sort((a, b) => a - b);
-            if (selectedArr.length === 0) { resultDiv.innerHTML = t.analyzerDefault; return; }
-            
-            let exactChords = [], exactScales = [], partialScales = [];
-            const arraysEqual = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
-
-            for (let root = 0; root < 12; root++) {
-                let rootName = notes[root];
-                for (let chordName in allChords) {
-                    if (arraysEqual(allChords[chordName].map(i => (root + i) % 12).sort((a, b) => a - b), selectedArr)) exactChords.push(`<span class="clickable-scale" onclick="applyView(${root}, '${chordName}', 'chord')"><strong>${rootName}${extractChordSymbol(chordName)}</strong> (${chordName})</span>`);
-                }
-                for (let scaleName in allScales) {
-                    let scaleNotes = allScales[scaleName].map(i => (root + i) % 12).sort((a, b) => a - b);
-                    if (arraysEqual(scaleNotes, selectedArr)) exactScales.push(`<span class="clickable-scale" onclick="applyView(${root}, '${scaleName}', 'scale')"><strong>${rootName}</strong> ${scaleName}</span>`);
-                    else if (selectedArr.length >= 3 && selectedArr.every(val => scaleNotes.includes(val))) partialScales.push(`<span class="clickable-scale" onclick="applyView(${root}, '${scaleName}', 'scale')">${rootName} ${scaleName}</span>`);
-                }
-            }
-
-            let html = `${t.txtCurrentNotes}<strong>[ ${selectedArr.map(n => notes[n]).join(', ')} ]</strong><br><br>${t.txtExactChords}<br>${exactChords.length > 0 ? exactChords.join('<br>') + '<br><br>' : t.txtNone + '<br><br>'}${t.txtExactScales}<br>${exactScales.length > 0 ? exactScales.join('<br>') + '<br><br>' : t.txtNone + '<br><br>'}`;
-            if (partialScales.length > 0) html += `${t.txtPartialScales}<br>${partialScales.slice(0, 15).join('')}${partialScales.length > 15 ? t.txtEtc : ''}`;
-            resultDiv.innerHTML = html;
-        }
-
-        // 🔥 코드 다이어그램 렌더링 함수 (반복 코드 통합)
-        // 🔥 매개변수로 필요한 값들을 받도록 수정
+        // 🚀 코드 다이어그램 렌더링 (DOM_CACHE 활용)
         function renderChordDiagrams(progression, rootIndex, chordVal) {
-            // 💡 함수 내부에서 DOM 요소를 직접 찾습니다
-            const diagramView = document.getElementById('chord-diagram-view');
-            const fretboardView = document.getElementById('fretboard-view');
-            
-            diagramView.style.display = 'flex';
-            diagramView.style.flexWrap = 'wrap';
-            diagramView.style.gap = '25px';
-            diagramView.style.justifyContent = 'center';
-            diagramView.style.alignItems = 'flex-start';
-            fretboardView.style.display = 'none';
+            DOM_CACHE.diagramView.style.display = 'flex';
+            DOM_CACHE.diagramView.style.flexWrap = 'wrap';
+            DOM_CACHE.diagramView.style.gap = '25px';
+            DOM_CACHE.diagramView.style.justifyContent = 'center';
+            DOM_CACHE.diagramView.style.alignItems = 'flex-start';
+            DOM_CACHE.fretboardView.style.display = 'none';
             
             let html = '';
             progression.forEach((c, idx) => {
@@ -1185,42 +973,71 @@
                     html += `<div class="no-capture" style="position:relative; opacity:0.8; border: 2px dashed #9c27b0; border-radius: 12px; padding: 5px; margin-bottom: 10px; box-sizing:border-box;"><div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:#9c27b0; color:white; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:bold; white-space:nowrap;">${currentLang === 'ko' ? '미리보기 (Preview)' : 'Preview'}</div>${generateChordDiagramSVG(voicing, `${notes[rootIndex]}${shortSymbol}`, false, -1)}</div>`;
                 } else html += `<p class="no-capture" style="color:#666; align-self:center; width:100%; text-align:center; padding: 20px;">해당 코드의 다이어그램을 찾을 수 없습니다.</p>`;
             }
-            diagramView.innerHTML = html;
+            DOM_CACHE.diagramView.innerHTML = html;
+        }
+
+        window.applyView = function(rootIndex, name, type) {
+            DOM_CACHE.keySelect.value = rootIndex;
+            if (type === 'scale') { 
+                switchMode('scale'); 
+                if (majorScales.hasOwnProperty(name)) { DOM_CACHE.majorSelect.value = name; DOM_CACHE.minorSelect.value = ""; } 
+                else { DOM_CACHE.minorSelect.value = name; DOM_CACHE.majorSelect.value = ""; } 
+            } else if (type === 'chord') { switchMode('chord'); DOM_CACHE.chordSelect.value = name; }
+            updateFretboard(); window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        function analyzeCustomNotes() {
+            const customElements = Array.from(DOM_CACHE.allNoteElements).filter(el => el.classList.contains('custom'));
+            const selectedNotesSet = new Set(); const t = getSafeI18n();
+            customElements.forEach(el => selectedNotesSet.add(parseInt(el.dataset.noteIndex))); const selectedArr = Array.from(selectedNotesSet).sort((a, b) => a - b);
+            if (selectedArr.length === 0) { DOM_CACHE.analyzerResult.innerHTML = t.analyzerDefault; return; }
             
-            // 💡 여기에 있던 개별 아이템 이벤트 리스너 등록 반복문은 삭제!
-            // setupDragAndDropEvents()가 이벤트 위임으로 자동 처리합니다
+            let exactChords = [], exactScales = [], partialScales = [];
+            const arraysEqual = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
+
+            for (let root = 0; root < 12; root++) {
+                let rootName = notes[root];
+                for (let chordName in allChords) {
+                    if (arraysEqual(allChords[chordName].map(i => (root + i) % 12).sort((a, b) => a - b), selectedArr)) exactChords.push(`<span class="clickable-scale" onclick="applyView(${root}, '${chordName}', 'chord')"><strong>${rootName}${extractChordSymbol(chordName)}</strong> (${chordName})</span>`);
+                }
+                for (let scaleName in allScales) {
+                    let scaleNotes = allScales[scaleName].map(i => (root + i) % 12).sort((a, b) => a - b);
+                    if (arraysEqual(scaleNotes, selectedArr)) exactScales.push(`<span class="clickable-scale" onclick="applyView(${root}, '${scaleName}', 'scale')"><strong>${rootName}</strong> ${scaleName}</span>`);
+                    else if (selectedArr.length >= 3 && selectedArr.every(val => scaleNotes.includes(val))) partialScales.push(`<span class="clickable-scale" onclick="applyView(${root}, '${scaleName}', 'scale')">${rootName} ${scaleName}</span>`);
+                }
+            }
+
+            let html = `${t.txtCurrentNotes}<strong>[ ${selectedArr.map(n => notes[n]).join(', ')} ]</strong><br><br>${t.txtExactChords}<br>${exactChords.length > 0 ? exactChords.join('<br>') + '<br><br>' : t.txtNone + '<br><br>'}${t.txtExactScales}<br>${exactScales.length > 0 ? exactScales.join('<br>') + '<br><br>' : t.txtNone + '<br><br>'}`;
+            if (partialScales.length > 0) html += `${t.txtPartialScales}<br>${partialScales.slice(0, 15).join('')}${partialScales.length > 15 ? t.txtEtc : ''}`;
+            DOM_CACHE.analyzerResult.innerHTML = html;
         }
 
         function captureFretboard() {
-            const captureArea = document.getElementById('capture-area'); 
-            const btn = document.getElementById('capture-btn'); 
-            
-            // 🔥 다운로드 파일 이름은 화면에 표시된 올바른 타이틀에서 가져옴
             let titleText = "";
-            if (document.getElementById('capture-title').style.display !== 'none') {
-                titleText = document.getElementById('capture-title').textContent;
+            if (DOM_CACHE.captureTitle.style.display !== 'none') {
+                titleText = DOM_CACHE.captureTitle.textContent;
             } else {
-                titleText = document.getElementById('fretboard-title').textContent;
+                titleText = DOM_CACHE.fretboardTitle.textContent;
             }
             
-            const hideElements = document.querySelectorAll('.no-capture'); 
+            const hideElements = DOM_CACHE.captureArea.querySelectorAll('.no-capture'); 
             const originalDisplays = []; 
             hideElements.forEach((el, i) => { originalDisplays[i] = el.style.display; el.style.display = 'none'; });
             
-            const originalBg = captureArea.style.backgroundColor; 
-            captureArea.style.backgroundColor = 'transparent';
-            const originalText = btn.innerHTML; 
-            btn.innerHTML = currentLang === 'ko' ? '저장 중...' : 'Saving...'; 
-            btn.disabled = true;
+            const originalBg = DOM_CACHE.captureArea.style.backgroundColor; 
+            DOM_CACHE.captureArea.style.backgroundColor = 'transparent';
+            const originalText = DOM_CACHE.captureBtn.innerHTML; 
+            DOM_CACHE.captureBtn.innerHTML = currentLang === 'ko' ? '저장 중...' : 'Saving...'; 
+            DOM_CACHE.captureBtn.disabled = true;
 
-            html2canvas(captureArea, { backgroundColor: null, scale: 2 }).then(canvas => {
+            html2canvas(DOM_CACHE.captureArea, { backgroundColor: null, scale: 2 }).then(canvas => {
                 const link = document.createElement('a'); 
                 link.download = titleText.replace(/ /g, '_').replace(/[()]/g, '') + '_capture.png'; 
                 link.href = canvas.toDataURL("image/png"); 
                 link.click();
-                captureArea.style.backgroundColor = originalBg; hideElements.forEach((el, i) => el.style.display = originalDisplays[i]); btn.innerHTML = originalText; btn.disabled = false;
+                DOM_CACHE.captureArea.style.backgroundColor = originalBg; hideElements.forEach((el, i) => el.style.display = originalDisplays[i]); DOM_CACHE.captureBtn.innerHTML = originalText; DOM_CACHE.captureBtn.disabled = false;
             }).catch(err => {
-                console.error('캡처 실패:', err); captureArea.style.backgroundColor = originalBg; hideElements.forEach((el, i) => el.style.display = originalDisplays[i]); btn.innerHTML = originalText; btn.disabled = false;
+                console.error('캡처 실패:', err); DOM_CACHE.captureArea.style.backgroundColor = originalBg; hideElements.forEach((el, i) => el.style.display = originalDisplays[i]); DOM_CACHE.captureBtn.innerHTML = originalText; DOM_CACHE.captureBtn.disabled = false;
             });
         }
         
