@@ -1045,17 +1045,18 @@
                 
                 setButtonVisibility({
                     'add-scale-btn': false,
-                    'diagram-btn': isGuitar,
+                    'toggle-diagram-btn': isGuitar,
                     'add-chord-btn': isGuitar && showChordDiagram,
                     'add-custom-btn': isGuitar && showChordDiagram,
                     'save-json-btn': isGuitar && showChordDiagram && chordProgression.length > 0,
-                    'clear-prog-btn': isGuitar && showChordDiagram && chordProgression.length > 0
+                    'clear-progression-btn': isGuitar && showChordDiagram && chordProgression.length > 0
                 });
 
-                document.getElementById('scale-prog-view').style.display = 'none';
+                document.getElementById('scale-progression-view').style.display = 'none';
                 
                 if (isGuitar && showChordDiagram) {
-                    renderChordDiagrams(chordProgression);
+                    // 💡 필요한 변수들을 함수로 넘겨줍니다
+                    renderChordDiagrams(chordProgression, rootIndex, chordVal);
                 } else {
                     diagramView.style.display = 'none';
                     fretboardView.style.display = 'block';
@@ -1148,7 +1149,12 @@
         }
 
         // 🔥 코드 다이어그램 렌더링 함수 (반복 코드 통합)
-        function renderChordDiagrams(progression) {
+        // 🔥 매개변수로 필요한 값들을 받도록 수정
+        function renderChordDiagrams(progression, rootIndex, chordVal) {
+            // 💡 함수 내부에서 DOM 요소를 직접 찾습니다
+            const diagramView = document.getElementById('chord-diagram-view');
+            const fretboardView = document.getElementById('fretboard-view');
+            
             diagramView.style.display = 'flex';
             diagramView.style.flexWrap = 'wrap';
             diagramView.style.gap = '25px';
@@ -1180,6 +1186,9 @@
                 } else html += `<p class="no-capture" style="color:#666; align-self:center; width:100%; text-align:center; padding: 20px;">해당 코드의 다이어그램을 찾을 수 없습니다.</p>`;
             }
             diagramView.innerHTML = html;
+            
+            // 💡 여기에 있던 개별 아이템 이벤트 리스너 등록 반복문은 삭제!
+            // setupDragAndDropEvents()가 이벤트 위임으로 자동 처리합니다
         }
 
         function captureFretboard() {
