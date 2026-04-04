@@ -95,6 +95,11 @@
         .custom-click-zone { fill: transparent; }
         .custom-click-zone:hover { fill: rgba(255, 255, 255, 0.15); }
 
+        /* 🔥 SVG 내부의 화살표 버튼 CSS */
+        .custom-fret-svg-btn { cursor: pointer; }
+        .custom-fret-svg-btn rect { transition: fill 0.2s; }
+        .custom-fret-svg-btn:hover rect { fill: rgba(255, 255, 255, 0.5) !important; }
+
         @media (max-width: 768px) {
             .controls-row { flex-direction: column; align-items: stretch; gap: 8px; }
             .controls-row > span { display: flex; flex-direction: column; gap: 8px; }
@@ -215,9 +220,6 @@
     </div>
 
     <script>
-        // =========================================================================
-        // [1] CONFIG: 매직 넘버 및 구조적 설정 통합
-        // =========================================================================
         const CONFIG = {
             KEYBOARD_WHITE_NOTES: [0, 2, 4, 5, 7, 9, 11],
             KEYBOARD_BLACK_MAP: {0: 1, 2: 3, 4: null, 5: 6, 7: 8, 9: 10, 11: null},
@@ -263,9 +265,6 @@
             }
         };
 
-        // =========================================================================
-        // [2] MUSIC_DATA: 이론 및 악기 관련 데이터베이스 분리
-        // =========================================================================
         const MUSIC_DATA = {
             notes: ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
             tunings: { 'guitar': [4, 11, 7, 2, 9, 4], 'bass': [7, 2, 9, 4] },
@@ -316,14 +315,14 @@
         };
         MUSIC_DATA.allScales = { ...MUSIC_DATA.majorScales, ...MUSIC_DATA.minorScales };
 
+        let currentLang = 'en'; 
+        const browserLang = navigator.language || navigator.userLanguage;
+        if (browserLang && browserLang.toLowerCase().includes('ko')) currentLang = 'ko';
 
-        // =========================================================================
-        // [3] AppState: 전역 상태 관리 객체화 (완전 캡슐화)
-        // =========================================================================
         const AppState = {
             instrument: 'guitar', 
             mode: CONFIG.MODES.SCALE,
-            currentLang: navigator.language?.toLowerCase().includes('ko') ? 'ko' : 'en',
+            currentLang: currentLang,
             
             highlightedNotes: new Set(), 
             showFormHighlight: false,
@@ -343,10 +342,6 @@
 
         function getSafeI18n() { return i18n[AppState.currentLang] || i18n['en']; }
 
-
-        // =========================================================================
-        // [4] DOM_CACHE: HTML 요소 캐싱 (성능 최적화)
-        // =========================================================================
         const DOM_CACHE = {
             fretboardView: null, diagramView: null, scaleProgView: null,
             captureArea: null, captureTitle: null, fretboardTitle: null,
@@ -412,9 +407,6 @@
             }
         };
 
-        // =========================================================================
-        // [5] 렌더링 헬퍼 함수
-        // =========================================================================
         function generateKeyboardHTML(activeNotes = [], rootIdx = -1) {
             let html = `<div class="keyboard-container" style="margin: 0 auto;">`;
             for(let oct = 0; oct < 3; oct++) {
@@ -502,10 +494,6 @@
             });
         }
 
-
-        // =========================================================================
-        // [6] EventManager: 모든 이벤트 중앙집중화 관리
-        // =========================================================================
         const EventManager = {
             init() {
                 this.bindUIEvents();
@@ -567,7 +555,6 @@
                     reader.onload = function(e) {
                         try {
                             const parsed = JSON.parse(e.target.result);
-                            // 🔥 엄격한 JSON 데이터 검증 도입
                             if (isValidProgressionData(parsed)) {
                                 if (parsed.length > 0 && parsed[0].scaleName) { 
                                     AppState.scaleProgression = parsed; 
@@ -661,16 +648,11 @@
             }
         };
 
-        // 데이터 검증 유틸리티
         function isValidProgressionData(data) {
             if (!Array.isArray(data)) return false;
             return data.every(item => item.type === 'linebreak' || item.scaleName || item.chordName || (item.voicing && Array.isArray(item.voicing)));
         }
 
-
-        // =========================================================================
-        // [7] 초기화 및 코어 기능
-        // =========================================================================
         function init() {
             DOM_CACHE.init();
             
@@ -684,7 +666,6 @@
             updateFretboard(); 
             applyLanguage(); 
             
-            // 모든 이벤트 바인딩은 EventManager로 통일!
             EventManager.init();
         }
 
@@ -743,6 +724,18 @@
                         svg += `<rect class="custom-click-zone" x="${x-10}" y="${startY + (relFret - 1) * gapY}" width="20" height="${gapY}" style="cursor:pointer;" onclick="toggleCustomDiagramNote(${progIdx}, ${strIdx}, ${relFret})" />`;
                     }
                 }
+                
+                // 🔥 화살표 버튼을 SVG 내부 요소(<g>, <rect>, <text>)로 삽입하여 다이어그램 크기와 1:1로 축소/확대되도록 완벽 대응!
+                svg += `
+                <g class="no-capture custom-fret-svg-btn" onclick="shiftCustomFret(${progIdx}, -1)">
+                    <rect x="8" y="115" width="26" height="26" rx="4" fill="rgba(255,255,255,0.25)" />
+                    <text x="21" y="133" fill="white" font-size="14" font-family="sans-serif" text-anchor="middle">▲</text>
+                </g>
+                <g class="no-capture custom-fret-svg-btn" onclick="shiftCustomFret(${progIdx}, 1)">
+                    <rect x="8" y="145" width="26" height="26" rx="4" fill="rgba(255,255,255,0.25)" />
+                    <text x="21" y="163" fill="white" font-size="14" font-family="sans-serif" text-anchor="middle">▼</text>
+                </g>
+                `;
             }
             return svg + `</svg>`;
         }
@@ -963,7 +956,7 @@
                     return;
                 }
 
-                let svgContent = '', customControls = '';
+                let svgContent = '';
                 if (c.type === 'preset') {
                     const voicing = getChordVoicing(c.rootIdx, c.chordName);
                     if (voicing) {
@@ -971,12 +964,12 @@
                         svgContent = generateChordDiagramSVG(voicing, `${MUSIC_DATA.notes[c.rootIdx]}${shortSymbol}`, false, idx);
                     }
                 } else if (c.type === 'custom') {
+                    // 🔥 HTML customControls 삭제 완료. SVG 안에 화살표가 그려집니다.
                     svgContent = generateChordDiagramSVG(c.voicing, c.title, true, idx, c.startFret);
-                    customControls = `<div class="no-capture" style="position:absolute; top: 120px; left: -25px; display:flex; flex-direction:column; gap:5px;"><button onclick="shiftCustomFret(${idx}, -1)" style="border:none; background:#555; color:white; cursor:pointer; border-radius:4px; padding:4px 6px;">▲</button><button onclick="shiftCustomFret(${idx}, 1)" style="border:none; background:#555; color:white; cursor:pointer; border-radius:4px; padding:4px 6px;">▼</button></div>`;
                 }
                 
                 if (svgContent) {
-                    html += `<div class="chord-item" draggable="true" data-index="${idx}" style="position:relative; margin-bottom: 10px; cursor: grab;">${svgContent}${customControls}<button class="no-capture" onclick="removeChord(${idx})" style="position:absolute; top:-10px; right:-10px; background:#f44336; color:white; border:none; border-radius:50%; width:28px; height:28px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display:flex; justify-content:center; align-items:center;">X</button></div>`;
+                    html += `<div class="chord-item" draggable="true" data-index="${idx}" style="position:relative; margin-bottom: 10px; cursor: grab;">${svgContent}<button class="no-capture" onclick="removeChord(${idx})" style="position:absolute; top:-10px; right:-10px; background:#f44336; color:white; border:none; border-radius:50%; width:28px; height:28px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display:flex; justify-content:center; align-items:center;">X</button></div>`;
                 }
             });
             
