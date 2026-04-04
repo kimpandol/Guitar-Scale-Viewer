@@ -86,15 +86,9 @@
         .youtube-link { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #333; font-weight: bold; font-size: 16px; padding: 10px 20px; border: 1px solid #ddd; border-radius: 30px; background-color: #fff; transition: all 0.2s ease; }
         .youtube-link:hover { background-color: #ff0000; color: #fff; border-color: #ff0000; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-        /* 🔥 수정된 다중 악보 및 커스텀 아이템 CSS (역할별 분리) */
-        /* 1. 코드표(다이어그램) 디자인 */
         .chord-item { transition: opacity 0.2s; flex: 1 1 120px; max-width: 220px; }
         .chord-item svg { width: 100%; height: auto; }
-        
-        /* 2. 스케일 지판 디자인 (쪼그라듦 방지) */
         .scale-item { transition: opacity 0.2s; width: 100%; }
-        
-        /* 3. 줄바꿈 전용 투명 블록 디자인 (강제 100% 너비 확보) */
         .linebreak-item { flex-basis: 100% !important; max-width: 100% !important; height: 35px; display:flex; align-items:center; justify-content:center; cursor:grab; position:relative; margin: 5px 0; }
 
         .chord-item.over, .scale-item.over { border: 2px dashed #4CAF50 !important; border-radius: 12px; opacity: 0.7; }
@@ -121,90 +115,90 @@
 </head>
 <body>
 
-    <div class="controls-container">
-        <div class="controls-row">
-            <button id="lang-btn" class="btn lang-btn">🌐 English</button>
-            <button id="guitar-btn" class="btn instrument-btn active">🎸 기타 (6줄)</button>
-            <button id="bass-btn" class="btn instrument-btn">🎸 베이스 (4줄)</button>
-            <button id="keyboard-btn" class="btn instrument-btn">🎹 키보드 (피아노)</button>
+    <div class="controls-container" role="region" aria-label="메인 컨트롤 패널">
+        <div class="controls-row" role="group" aria-label="악기 및 모드 선택">
+            <button id="lang-btn" class="btn lang-btn" aria-label="언어 변경">🌐 English</button>
+            <button id="guitar-btn" class="btn instrument-btn active" aria-label="기타 선택">🎸 기타 (6줄)</button>
+            <button id="bass-btn" class="btn instrument-btn" aria-label="베이스 선택">🎸 베이스 (4줄)</button>
+            <button id="keyboard-btn" class="btn instrument-btn" aria-label="키보드 선택">🎹 키보드 (피아노)</button>
             
             <span id="tuning-controls" style="display:inline-flex; align-items:center; gap:8px;">
-                <label id="lbl-tuning">튜닝: </label>
-                <select id="tuning-select" style="min-width: 120px;"></select>
+                <label id="lbl-tuning" for="tuning-select">튜닝: </label>
+                <select id="tuning-select" style="min-width: 120px;" aria-label="튜닝 옵션 선택"></select>
             </span>
             
-            <button id="scale-mode-btn" class="btn mode-btn active">🎶 스케일 모드</button>
-            <button id="chord-mode-btn" class="btn mode-btn">🎹 코드 모드</button>
-            <button id="capture-btn" class="btn capture-btn">📸 지판/악보 저장</button>
+            <button id="scale-mode-btn" class="btn mode-btn active" aria-label="스케일 모드 선택">🎶 스케일 모드</button>
+            <button id="chord-mode-btn" class="btn mode-btn" aria-label="코드 모드 선택">🎹 코드 모드</button>
+            <button id="capture-btn" class="btn capture-btn" aria-label="화면 캡처하여 저장">📸 지판/악보 저장</button>
         </div>
 
         <div class="divider"></div>
 
-        <div class="controls-row">
-            <label id="lbl-key">조(Key/Root): </label>
-            <select id="key-select"></select>
+        <div class="controls-row" role="group" aria-label="상세 옵션 선택">
+            <label id="lbl-key" for="key-select">조(Key/Root): </label>
+            <select id="key-select" aria-label="기준음 선택"></select>
             
             <span id="scale-controls" style="display:inline-flex; flex-wrap:wrap; align-items:center; gap:8px;">
-                <label id="lbl-major">메이저 계열: </label>
-                <select id="major-select"><option value="">-- 선택 --</option></select>
-                <label id="lbl-minor">마이너 계열: </label>
-                <select id="minor-select"><option value="">-- 선택 --</option></select>
-                <button id="add-scale-btn" class="btn" style="background-color:#4CAF50; color:white; display:none;">➕ 스케일 추가</button>
+                <label id="lbl-major" for="major-select">메이저 계열: </label>
+                <select id="major-select" aria-label="메이저 스케일 선택"><option value="">-- 선택 --</option></select>
+                <label id="lbl-minor" for="minor-select">마이너 계열: </label>
+                <select id="minor-select" aria-label="마이너 스케일 선택"><option value="">-- 선택 --</option></select>
+                <button id="add-scale-btn" class="btn" style="background-color:#4CAF50; color:white; display:none;" aria-label="스케일 악보에 추가">➕ 스케일 추가</button>
             </span>
 
             <span id="chord-controls" style="display:none; flex-wrap:wrap; align-items:center; gap:8px;">
-                <label id="lbl-chord">코드 종류: </label>
-                <select id="chord-select"><option value="">-- 선택 --</option></select>
-                <button id="add-chord-btn" class="btn" style="background-color:#4CAF50; color:white; display:none;">➕ 악보에 추가</button>
-                <button id="add-custom-btn" class="btn" style="background-color:#2196F3; color:white; display:none;">➕ 빈 지판 추가</button>
-                <button id="add-linebreak-btn" class="btn" style="background-color:#9E9E9E; color:white; display:none;">⏎ 줄바꿈</button>
-                <button id="toggle-diagram-btn" class="btn" style="background-color:#9c27b0; color:white; display:none;">📋 코드표로 보기</button>
+                <label id="lbl-chord" for="chord-select">코드 종류: </label>
+                <select id="chord-select" aria-label="코드 종류 선택"><option value="">-- 선택 --</option></select>
+                <button id="add-chord-btn" class="btn" style="background-color:#4CAF50; color:white; display:none;" aria-label="코드 악보에 추가">➕ 악보에 추가</button>
+                <button id="add-custom-btn" class="btn" style="background-color:#2196F3; color:white; display:none;" aria-label="빈 다이어그램 추가">➕ 빈 지판 추가</button>
+                <button id="add-linebreak-btn" class="btn" style="background-color:#9E9E9E; color:white; display:none;" aria-label="악보 줄바꿈 추가">⏎ 줄바꿈</button>
+                <button id="toggle-diagram-btn" class="btn" style="background-color:#9c27b0; color:white; display:none;" aria-label="코드표/지판 보기 전환">📋 코드표로 보기</button>
             </span>
             
             <span id="shared-controls" style="display:inline-flex; flex-wrap:wrap; align-items:center; gap:8px; margin-left:auto;">
-                <button id="save-json-btn" class="btn" style="background-color:#FF9800; color:white; display:none;">💾 악보 저장</button>
-                <button id="load-json-btn" class="btn" style="background-color:#00BCD4; color:white; display:inline-block;">📂 불러오기</button>
-                <input type="file" id="load-json-input" accept=".json" style="display:none;">
-                <button id="clear-progression-btn" class="btn" style="background-color:#f44336; color:white; display:none;">🗑️ 비우기</button>
+                <button id="save-json-btn" class="btn" style="background-color:#FF9800; color:white; display:none;" aria-label="현재 악보 JSON으로 저장">💾 악보 저장</button>
+                <button id="load-json-btn" class="btn" style="background-color:#00BCD4; color:white; display:inline-block;" aria-label="저장된 JSON 악보 불러오기">📂 불러오기</button>
+                <input type="file" id="load-json-input" accept=".json" style="display:none;" aria-hidden="true">
+                <button id="clear-progression-btn" class="btn" style="background-color:#f44336; color:white; display:none;" aria-label="추가된 모든 악보 지우기">🗑️ 비우기</button>
             </span>
         </div>
     </div>
 
-    <div class="fretboard-scroll-wrapper">
+    <div class="fretboard-scroll-wrapper" role="region" aria-label="악보 및 지판 표시 영역">
         <div id="capture-area">
-            <h2 id="capture-title" class="no-capture" style="display:none;"></h2>
+            <h2 id="capture-title" class="no-capture" style="display:none;" aria-live="polite"></h2>
             
             <div id="fretboard-view">
-                <h2 id="fretboard-title"></h2>
-                <div class="fret-numbers" id="fret-numbers"></div>
-                <div id="fretboard" class="fretboard instrument-guitar"></div>
+                <h2 id="fretboard-title" aria-live="polite"></h2>
+                <div class="fret-numbers" id="fret-numbers" aria-hidden="true"></div>
+                <div id="fretboard" class="fretboard instrument-guitar" aria-label="인터랙티브 지판"></div>
             </div>
             
-            <div id="scale-progression-view" style="display:none; flex-direction:column; gap:25px; margin-top:30px;"></div>
-            <div id="chord-diagram-view" style="display:none; padding: 20px 0;"></div>
+            <div id="scale-progression-view" style="display:none; flex-direction:column; gap:25px; margin-top:30px;" aria-label="스케일 모음 악보"></div>
+            <div id="chord-diagram-view" style="display:none; padding: 20px 0;" aria-label="코드 다이어그램 모음"></div>
         </div>
     </div>
 
-    <div class="analyzer">
+    <div class="analyzer" role="region" aria-label="화성 분석 영역">
         <h3>
             <span id="lbl-analyzer-title">🔍 화성 분석기 (코드 & 스케일)</span>
-            <button id="clear-custom-btn" class="btn">초록/보라색 초기화</button>
+            <button id="clear-custom-btn" class="btn" aria-label="분석용으로 찍은 음표 모두 지우기">초록/보라색 초기화</button>
         </h3>
-        <div id="scale-analysis-result" class="analyzer-content"></div>
+        <div id="scale-analysis-result" class="analyzer-content" aria-live="polite"></div>
     </div>
 
-    <div class="controls-container" style="margin-top: 20px;">
+    <div class="controls-container" style="margin-top: 20px;" role="region" aria-label="부가 기능 패널">
         <div class="controls-row">
             <label id="lbl-find-note" style="min-width: 160px;">특정 음 찾기 (보라색): </label>
-            <div id="note-buttons-container" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+            <div id="note-buttons-container" style="display:flex; gap:8px; flex-wrap:wrap;" role="group" aria-label="강조할 특정 음 선택"></div>
         </div>
 
         <div class="divider" id="form-toggle-divider"></div>
 
         <div class="controls-row" id="form-toggle-row">
             <label id="lbl-form-toggle">🎸 폼(포지션) 영역 표시: </label>
-            <button id="toggle-form-btn" class="btn" style="background-color: #e0e0e0; color: #333;">OFF</button>
-            <select id="form-select" style="display:none;">
+            <button id="toggle-form-btn" class="btn" style="background-color: #e0e0e0; color: #333;" aria-label="기타/베이스 포지션 폼 강조 켜기/끄기">OFF</button>
+            <select id="form-select" style="display:none;" aria-label="강조할 포지션 폼 선택">
                 <option value="1">1번 폼 (Root-6)</option>
                 <option value="2">2번 폼</option>
                 <option value="3">3번 폼</option>
@@ -215,19 +209,26 @@
     </div>
 
     <div class="youtube-footer">
-        <a href="https://www.youtube.com/@kimpandol123" target="_blank" rel="noopener noreferrer" class="youtube-link">
+        <a href="https://www.youtube.com/@kimpandol123" target="_blank" rel="noopener noreferrer" class="youtube-link" aria-label="개발자 유튜브 채널로 이동">
             🎬 kimpandol YouTube Channel
         </a>
     </div>
 
     <script>
-        const KEYBOARD_WHITE_NOTES = [0, 2, 4, 5, 7, 9, 11];
-        const KEYBOARD_BLACK_MAP = {0: 1, 2: 3, 4: null, 5: 6, 7: 8, 9: 10, 11: null};
-        const INLAY_FRETS = [3, 5, 7, 9, 15, 17, 19, 21];
-        const TOTAL_FRETS = 21;
-        const OCTAVE_FRET = 12;
-        const FRET_OCTAVE_SHIFTS = [-24, -12, 0, 12, 24];
-        const BASS_FORM_SPECIAL_OFFSETS = { '3': [4, 5, 6, 7] };
+        // =========================================================================
+        // [1] CONFIG: 매직 넘버 및 구조적 설정 통합
+        // =========================================================================
+        const CONFIG = {
+            KEYBOARD_WHITE_NOTES: [0, 2, 4, 5, 7, 9, 11],
+            KEYBOARD_BLACK_MAP: {0: 1, 2: 3, 4: null, 5: 6, 7: 8, 9: 10, 11: null},
+            INLAY_FRETS: [3, 5, 7, 9, 15, 17, 19, 21],
+            TOTAL_FRETS: 21,
+            OCTAVE_FRET: 12,
+            FRET_OCTAVE_SHIFTS: [-24, -12, 0, 12, 24],
+            BASS_FORM_SPECIAL_OFFSETS: { '3': [4, 5, 6, 7] },
+            FORM_OFFSETS: { '1': [0, 1, 2, 3], '2': [2, 3, 4, 5], '3': [4, 5, 6, 7, 8], '4': [7, 8, 9, 10], '5': [-3, -2, -1, 0] },
+            MODES: { SCALE: 'scale', CHORD: 'chord' }
+        };
 
         const i18n = {
             ko: {
@@ -262,12 +263,90 @@
             }
         };
 
-        let currentLang = 'en'; 
-        const browserLang = navigator.language || navigator.userLanguage;
-        if (browserLang && browserLang.toLowerCase().includes('ko')) currentLang = 'ko';
+        // =========================================================================
+        // [2] MUSIC_DATA: 이론 및 악기 관련 데이터베이스 분리
+        // =========================================================================
+        const MUSIC_DATA = {
+            notes: ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
+            tunings: { 'guitar': [4, 11, 7, 2, 9, 4], 'bass': [7, 2, 9, 4] },
+            tuningPresets: {
+                'guitar': {
+                    'standard': { offset: [0, 0, 0, 0, 0, 0], ko: "스탠다드", en: "Standard" },
+                    'halfDown': { offset: [-1, -1, -1, -1, -1, -1], ko: "하프 다운 (Eb)", en: "Half Step Down" },
+                    'wholeDown': { offset: [-2, -2, -2, -2, -2, -2], ko: "홀 다운 (D)", en: "Whole Step Down" },
+                    'dropD': { offset: [0, 0, 0, 0, 0, -2], ko: "드롭 D", en: "Drop D" },
+                    'dropC': { offset: [-2, -2, -2, -2, -2, -4], ko: "드롭 C", en: "Drop C" },
+                    'upHalf': { offset: [1, 1, 1, 1, 1, 1], ko: "하프 업 (F)", en: "Half Step Up" }
+                },
+                'bass': {
+                    'standard': { offset: [0, 0, 0, 0], ko: "스탠다드", en: "Standard" },
+                    'halfDown': { offset: [-1, -1, -1, -1], ko: "하프 다운 (Eb)", en: "Half Step Down" },
+                    'wholeDown': { offset: [-2, -2, -2, -2], ko: "홀 다운 (D)", en: "Whole Step Down" },
+                    'dropD': { offset: [0, 0, 0, -2], ko: "드롭 D", en: "Drop D" }
+                }
+            },
+            majorScales: {
+                "Major (Ionian)": [0, 2, 4, 5, 7, 9, 11], "Lydian": [0, 2, 4, 6, 7, 9, 11], "Mixolydian": [0, 2, 4, 5, 7, 9, 10],
+                "Major Pentatonic": [0, 2, 4, 7, 9], "Bebop Major": [0, 2, 4, 5, 7, 8, 9, 11], "Phrygian Dominant": [0, 1, 4, 5, 7, 8, 10], "Lydian Dominant": [0, 2, 4, 6, 7, 9, 10] 
+            },
+            minorScales: {
+                "Minor (Aeolian)": [0, 2, 3, 5, 7, 8, 10], "Dorian": [0, 2, 3, 5, 7, 9, 10], "Phrygian": [0, 1, 3, 5, 7, 8, 10], "Locrian": [0, 1, 3, 5, 6, 8, 10],
+                "Minor Pentatonic": [0, 3, 5, 7, 10], "Blues": [0, 3, 5, 6, 7, 10], "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11], "Melodic Minor": [0, 2, 3, 5, 7, 9, 11], 
+                "Diminished (W-H)": [0, 2, 3, 5, 6, 8, 9, 11], "Bebop Minor": [0, 2, 3, 4, 5, 7, 9, 10], "Altered": [0, 1, 3, 4, 6, 8, 10]
+            },
+            allChords: {
+                "Major (M)": [0, 4, 7], "Minor (m)": [0, 3, 7], "Dominant 7 (7)": [0, 4, 7, 10], "Major 7 (maj7)": [0, 4, 7, 11], "Minor 7 (m7)": [0, 3, 7, 10],
+                "Sus 4 (sus4)": [0, 5, 7], "Sus 2 (sus2)": [0, 2, 7], "Diminished (dim)": [0, 3, 6], "Augmented (aug)": [0, 4, 8], "Half Diminished (m7b5)": [0, 3, 6, 10],
+                "Diminished 7 (dim7)": [0, 3, 6, 9], "Minor Major 7 (mM7)": [0, 3, 7, 11]
+            },
+            openChords: {
+                "0_Major (M)": ['x', 3, 2, 0, 1, 0], "2_Major (M)": ['x', 'x', 0, 2, 3, 2], "4_Major (M)": [0, 2, 2, 1, 0, 0], "7_Major (M)": [3, 2, 0, 0, 0, 3], "9_Major (M)": ['x', 0, 2, 2, 2, 0], 
+                "2_Minor (m)": ['x', 'x', 0, 2, 3, 1], "4_Minor (m)": [0, 2, 2, 0, 0, 0], "9_Minor (m)": ['x', 0, 2, 2, 1, 0], "0_Dominant 7 (7)": ['x', 3, 2, 3, 1, 0], "2_Dominant 7 (7)": ['x', 'x', 0, 2, 1, 2], 
+                "4_Dominant 7 (7)": [0, 2, 0, 1, 0, 0], "7_Dominant 7 (7)": [3, 2, 0, 0, 0, 1], "9_Dominant 7 (7)": ['x', 0, 2, 0, 2, 0], "11_Dominant 7 (7)": ['x', 2, 1, 2, 0, 2], 
+                "0_Major 7 (maj7)": ['x', 3, 2, 0, 0, 0], "2_Major 7 (maj7)": ['x', 'x', 0, 2, 2, 2], "5_Major 7 (maj7)": ['x', 'x', 3, 2, 1, 0], "7_Major 7 (maj7)": [3, 'x', 0, 0, 0, 2], "9_Major 7 (maj7)": ['x', 0, 2, 1, 2, 0], 
+                "2_Minor 7 (m7)": ['x', 'x', 0, 2, 1, 1], "4_Minor 7 (m7)": [0, 2, 0, 0, 0, 0], "9_Minor 7 (m7)": ['x', 0, 2, 0, 1, 0], "2_Sus 4 (sus4)": ['x', 'x', 0, 2, 3, 3], "4_Sus 4 (sus4)": [0, 2, 2, 2, 0, 0], 
+                "9_Sus 4 (sus4)": ['x', 0, 2, 2, 3, 0], "2_Sus 2 (sus2)": ['x', 'x', 0, 2, 3, 0], "9_Sus 2 (sus2)": ['x', 0, 2, 2, 0, 0] 
+            },
+            chordShapes: {
+                "Major (M)": { E: [0, 2, 2, 1, 0, 0], A: ['x', 0, 2, 2, 2, 0] }, "Minor (m)": { E: [0, 2, 2, 0, 0, 0], A: ['x', 0, 2, 2, 1, 0] }, "Dominant 7 (7)": { E: [0, 2, 0, 1, 0, 0], A: ['x', 0, 2, 0, 2, 0] },
+                "Major 7 (maj7)": { E: [0, 'x', 1, 1, 0, 'x'], A: ['x', 0, 2, 1, 2, 0] }, "Minor 7 (m7)": { E: [0, 'x', 0, 0, 0, 'x'], A: ['x', 0, 2, 0, 1, 0] }, "Sus 4 (sus4)": { E: [0, 2, 2, 2, 0, 0], A: ['x', 0, 2, 2, 3, 0] },
+                "Sus 2 (sus2)": { E: [0, 2, 4, 4, 0, 0], A: ['x', 0, 2, 2, 0, 0] }, "Diminished (dim)": { E: [0, 'x', 2, 0, -1, 'x'], A: ['x', 0, 1, 2, 1, 'x'] }, "Augmented (aug)": { E: [0, 'x', 2, 1, 1, 'x'], A: ['x', 0, 3, 2, 2, 'x'] },
+                "Half Diminished (m7b5)": { E: [0, 'x', 0, 0, -1, 'x'], A: ['x', 0, 1, 0, 1, 'x'] }, "Diminished 7 (dim7)": { E: [0, 'x', -1, 0, -1, 'x'], A: ['x', 0, 1, 2, 1, 2] }, "Minor Major 7 (mM7)": { E: [0, 'x', 1, 0, 0, 'x'], A: ['x', 0, 2, 1, 1, 0] }
+            }
+        };
+        MUSIC_DATA.allScales = { ...MUSIC_DATA.majorScales, ...MUSIC_DATA.minorScales };
 
-        function getSafeI18n() { return i18n[currentLang] || i18n['en']; }
 
+        // =========================================================================
+        // [3] AppState: 전역 상태 관리 객체화 (완전 캡슐화)
+        // =========================================================================
+        const AppState = {
+            instrument: 'guitar', 
+            mode: CONFIG.MODES.SCALE,
+            currentLang: navigator.language?.toLowerCase().includes('ko') ? 'ko' : 'en',
+            
+            highlightedNotes: new Set(), 
+            showFormHighlight: false,
+            showChordDiagram: false, 
+            chordProgression: [], 
+            scaleProgression: [],
+            
+            clearCustomData() {
+                Array.from(DOM_CACHE.allNoteElements).filter(el => el.classList.contains('custom')).forEach(el => el.classList.remove('custom')); 
+                this.highlightedNotes.clear();
+                DOM_CACHE.findNoteBtns.forEach(btn => btn.classList.remove('active')); 
+                Array.from(DOM_CACHE.allNoteElements).filter(el => el.classList.contains('highlight')).forEach(el => el.classList.remove('highlight'));
+                DOM_CACHE.majorSelect.value = ""; DOM_CACHE.minorSelect.value = ""; DOM_CACHE.chordSelect.value = "";
+                if (this.mode === CONFIG.MODES.SCALE) DOM_CACHE.minorSelect.value = "Blues";
+            }
+        };
+
+        function getSafeI18n() { return i18n[AppState.currentLang] || i18n['en']; }
+
+
+        // =========================================================================
+        // [4] DOM_CACHE: HTML 요소 캐싱 (성능 최적화)
+        // =========================================================================
         const DOM_CACHE = {
             fretboardView: null, diagramView: null, scaleProgView: null,
             captureArea: null, captureTitle: null, fretboardTitle: null,
@@ -333,106 +412,46 @@
             }
         };
 
-        const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-        const tunings = { 'guitar': [4, 11, 7, 2, 9, 4], 'bass': [7, 2, 9, 4] };
-        
-        const tuningPresets = {
-            'guitar': {
-                'standard': { offset: [0, 0, 0, 0, 0, 0], ko: "스탠다드", en: "Standard" },
-                'halfDown': { offset: [-1, -1, -1, -1, -1, -1], ko: "하프 다운 (Eb)", en: "Half Step Down" },
-                'wholeDown': { offset: [-2, -2, -2, -2, -2, -2], ko: "홀 다운 (D)", en: "Whole Step Down" },
-                'dropD': { offset: [0, 0, 0, 0, 0, -2], ko: "드롭 D", en: "Drop D" },
-                'dropC': { offset: [-2, -2, -2, -2, -2, -4], ko: "드롭 C", en: "Drop C" },
-                'upHalf': { offset: [1, 1, 1, 1, 1, 1], ko: "하프 업 (F)", en: "Half Step Up" }
-            },
-            'bass': {
-                'standard': { offset: [0, 0, 0, 0], ko: "스탠다드", en: "Standard" },
-                'halfDown': { offset: [-1, -1, -1, -1], ko: "하프 다운 (Eb)", en: "Half Step Down" },
-                'wholeDown': { offset: [-2, -2, -2, -2], ko: "홀 다운 (D)", en: "Whole Step Down" },
-                'dropD': { offset: [0, 0, 0, -2], ko: "드롭 D", en: "Drop D" }
-            }
-        };
-
-        const formOffsets = { '1': [0, 1, 2, 3], '2': [2, 3, 4, 5], '3': [4, 5, 6, 7, 8], '4': [7, 8, 9, 10], '5': [-3, -2, -1, 0] };
-
-        const majorScales = {
-            "Major (Ionian)": [0, 2, 4, 5, 7, 9, 11], "Lydian": [0, 2, 4, 6, 7, 9, 11], "Mixolydian": [0, 2, 4, 5, 7, 9, 10],
-            "Major Pentatonic": [0, 2, 4, 7, 9], "Bebop Major": [0, 2, 4, 5, 7, 8, 9, 11], "Phrygian Dominant": [0, 1, 4, 5, 7, 8, 10], "Lydian Dominant": [0, 2, 4, 6, 7, 9, 10] 
-        };
-        const minorScales = {
-            "Minor (Aeolian)": [0, 2, 3, 5, 7, 8, 10], "Dorian": [0, 2, 3, 5, 7, 9, 10], "Phrygian": [0, 1, 3, 5, 7, 8, 10], "Locrian": [0, 1, 3, 5, 6, 8, 10],
-            "Minor Pentatonic": [0, 3, 5, 7, 10], "Blues": [0, 3, 5, 6, 7, 10], "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11], "Melodic Minor": [0, 2, 3, 5, 7, 9, 11], 
-            "Diminished (W-H)": [0, 2, 3, 5, 6, 8, 9, 11], "Bebop Minor": [0, 2, 3, 4, 5, 7, 9, 10], "Altered": [0, 1, 3, 4, 6, 8, 10]
-        };
-        const allScales = { ...majorScales, ...minorScales };
-
-        const allChords = {
-            "Major (M)": [0, 4, 7], "Minor (m)": [0, 3, 7], "Dominant 7 (7)": [0, 4, 7, 10], "Major 7 (maj7)": [0, 4, 7, 11], "Minor 7 (m7)": [0, 3, 7, 10],
-            "Sus 4 (sus4)": [0, 5, 7], "Sus 2 (sus2)": [0, 2, 7], "Diminished (dim)": [0, 3, 6], "Augmented (aug)": [0, 4, 8], "Half Diminished (m7b5)": [0, 3, 6, 10],
-            "Diminished 7 (dim7)": [0, 3, 6, 9], "Minor Major 7 (mM7)": [0, 3, 7, 11]
-        };
-
-        const openChords = {
-            "0_Major (M)": ['x', 3, 2, 0, 1, 0], "2_Major (M)": ['x', 'x', 0, 2, 3, 2], "4_Major (M)": [0, 2, 2, 1, 0, 0], "7_Major (M)": [3, 2, 0, 0, 0, 3], "9_Major (M)": ['x', 0, 2, 2, 2, 0], 
-            "2_Minor (m)": ['x', 'x', 0, 2, 3, 1], "4_Minor (m)": [0, 2, 2, 0, 0, 0], "9_Minor (m)": ['x', 0, 2, 2, 1, 0], "0_Dominant 7 (7)": ['x', 3, 2, 3, 1, 0], "2_Dominant 7 (7)": ['x', 'x', 0, 2, 1, 2], 
-            "4_Dominant 7 (7)": [0, 2, 0, 1, 0, 0], "7_Dominant 7 (7)": [3, 2, 0, 0, 0, 1], "9_Dominant 7 (7)": ['x', 0, 2, 0, 2, 0], "11_Dominant 7 (7)": ['x', 2, 1, 2, 0, 2], 
-            "0_Major 7 (maj7)": ['x', 3, 2, 0, 0, 0], "2_Major 7 (maj7)": ['x', 'x', 0, 2, 2, 2], "5_Major 7 (maj7)": ['x', 'x', 3, 2, 1, 0], "7_Major 7 (maj7)": [3, 'x', 0, 0, 0, 2], "9_Major 7 (maj7)": ['x', 0, 2, 1, 2, 0], 
-            "2_Minor 7 (m7)": ['x', 'x', 0, 2, 1, 1], "4_Minor 7 (m7)": [0, 2, 0, 0, 0, 0], "9_Minor 7 (m7)": ['x', 0, 2, 0, 1, 0], "2_Sus 4 (sus4)": ['x', 'x', 0, 2, 3, 3], "4_Sus 4 (sus4)": [0, 2, 2, 2, 0, 0], 
-            "9_Sus 4 (sus4)": ['x', 0, 2, 2, 3, 0], "2_Sus 2 (sus2)": ['x', 'x', 0, 2, 3, 0], "9_Sus 2 (sus2)": ['x', 0, 2, 2, 0, 0] 
-        };
-
-        const chordShapes = {
-            "Major (M)": { E: [0, 2, 2, 1, 0, 0], A: ['x', 0, 2, 2, 2, 0] }, "Minor (m)": { E: [0, 2, 2, 0, 0, 0], A: ['x', 0, 2, 2, 1, 0] }, "Dominant 7 (7)": { E: [0, 2, 0, 1, 0, 0], A: ['x', 0, 2, 0, 2, 0] },
-            "Major 7 (maj7)": { E: [0, 'x', 1, 1, 0, 'x'], A: ['x', 0, 2, 1, 2, 0] }, "Minor 7 (m7)": { E: [0, 'x', 0, 0, 0, 'x'], A: ['x', 0, 2, 0, 1, 0] }, "Sus 4 (sus4)": { E: [0, 2, 2, 2, 0, 0], A: ['x', 0, 2, 2, 3, 0] },
-            "Sus 2 (sus2)": { E: [0, 2, 4, 4, 0, 0], A: ['x', 0, 2, 2, 0, 0] }, "Diminished (dim)": { E: [0, 'x', 2, 0, -1, 'x'], A: ['x', 0, 1, 2, 1, 'x'] }, "Augmented (aug)": { E: [0, 'x', 2, 1, 1, 'x'], A: ['x', 0, 3, 2, 2, 'x'] },
-            "Half Diminished (m7b5)": { E: [0, 'x', 0, 0, -1, 'x'], A: ['x', 0, 1, 0, 1, 'x'] }, "Diminished 7 (dim7)": { E: [0, 'x', -1, 0, -1, 'x'], A: ['x', 0, 1, 2, 1, 2] }, "Minor Major 7 (mM7)": { E: [0, 'x', 1, 0, 0, 'x'], A: ['x', 0, 2, 1, 1, 0] }
-        };
-
-        let currentInstrument = 'guitar'; 
-        let currentMode = 'scale'; 
-        let highlightedNotes = new Set(); 
-        let showFormHighlight = false;
-        let showChordDiagram = false; 
-        let chordProgression = []; 
-        let scaleProgression = []; 
-
+        // =========================================================================
+        // [5] 렌더링 헬퍼 함수
+        // =========================================================================
         function generateKeyboardHTML(activeNotes = [], rootIdx = -1) {
             let html = `<div class="keyboard-container" style="margin: 0 auto;">`;
             for(let oct = 0; oct < 3; oct++) {
-                KEYBOARD_WHITE_NOTES.forEach(whiteIdx => {
+                CONFIG.KEYBOARD_WHITE_NOTES.forEach(whiteIdx => {
                     let wActive = activeNotes.includes(whiteIdx) ? 'active' : '';
                     let wRoot = (activeNotes.length > 0 && whiteIdx === rootIdx) ? 'root' : '';
-                    html += `<div class="piano-key-wrapper"><div class="white-key"><div class="note ${wActive} ${wRoot}" data-note-index="${whiteIdx}">${notes[whiteIdx]}</div></div>`;
-                    const blackIdx = KEYBOARD_BLACK_MAP[whiteIdx];
+                    html += `<div class="piano-key-wrapper"><div class="white-key"><div class="note ${wActive} ${wRoot}" data-note-index="${whiteIdx}">${MUSIC_DATA.notes[whiteIdx]}</div></div>`;
+                    const blackIdx = CONFIG.KEYBOARD_BLACK_MAP[whiteIdx];
                     if (blackIdx !== null) {
                         let bActive = activeNotes.includes(blackIdx) ? 'active' : '';
                         let bRoot = (activeNotes.length > 0 && blackIdx === rootIdx) ? 'root' : '';
-                        html += `<div class="black-key"><div class="note ${bActive} ${bRoot}" data-note-index="${blackIdx}">${notes[blackIdx]}</div></div>`;
+                        html += `<div class="black-key"><div class="note ${bActive} ${bRoot}" data-note-index="${blackIdx}">${MUSIC_DATA.notes[blackIdx]}</div></div>`;
                     }
                     html += `</div>`;
                 });
             }
-            html += `<div class="piano-key-wrapper"><div class="white-key"><div class="note ${activeNotes.includes(0) ? 'active' : ''} ${activeNotes.length > 0 && 0 === rootIdx ? 'root' : ''}" data-note-index="0">${notes[0]}</div></div></div></div>`;
+            html += `<div class="piano-key-wrapper"><div class="white-key"><div class="note ${activeNotes.includes(0) ? 'active' : ''} ${activeNotes.length > 0 && 0 === rootIdx ? 'root' : ''}" data-note-index="0">${MUSIC_DATA.notes[0]}</div></div></div></div>`;
             return html;
         }
 
         function generateFretboardHTML(instrument, tuningVal, activeNotes = [], rootIdx = -1, anchorFrets = new Set()) {
             let html = `<div class="fret-numbers" style="display:flex; width:max-content; min-width:100%;">`;
-            for (let i = 0; i <= TOTAL_FRETS; i++) {
-                let cls = 'fret-number' + (i === OCTAVE_FRET ? ' highlight-12' : (INLAY_FRETS.includes(i) ? ' inlay-mark' : ''));
+            for (let i = 0; i <= CONFIG.TOTAL_FRETS; i++) {
+                let cls = 'fret-number' + (i === CONFIG.OCTAVE_FRET ? ' highlight-12' : (CONFIG.INLAY_FRETS.includes(i) ? ' inlay-mark' : ''));
                 html += `<div class="${cls}"><span>${i}</span></div>`;
             }
             html += `</div><div class="fretboard instrument-${instrument}" style="width:max-content; min-width:100%;">`;
-            const currentTuning = tunings[instrument];
-            const tuningOffsets = tuningPresets[instrument][tuningVal].offset;
+            const currentTuning = MUSIC_DATA.tunings[instrument];
+            const tuningOffsets = MUSIC_DATA.tuningPresets[instrument][tuningVal].offset;
             currentTuning.forEach((openNoteIndex, stringIndex) => {
                 html += `<div class="string">`;
-                for (let fret = 0; fret <= TOTAL_FRETS; fret++) {
+                for (let fret = 0; fret <= CONFIG.TOTAL_FRETS; fret++) {
                     const currentNoteIndex = (openNoteIndex + tuningOffsets[stringIndex] + fret + 120) % 12;
                     let nActive = activeNotes.includes(currentNoteIndex) ? 'active' : '';
                     let nRoot = (activeNotes.length > 0 && currentNoteIndex === rootIdx) ? 'root' : '';
                     let anchorCls = anchorFrets.has(fret) ? 'anchor-highlight' : '';
-                    html += `<div class="fret ${anchorCls}" data-fret-index="${fret}"><div class="note ${nActive} ${nRoot}" data-note-index="${currentNoteIndex}">${notes[currentNoteIndex]}</div></div>`;
+                    html += `<div class="fret ${anchorCls}" data-fret-index="${fret}"><div class="note ${nActive} ${nRoot}" data-note-index="${currentNoteIndex}">${MUSIC_DATA.notes[currentNoteIndex]}</div></div>`;
                 }
                 html += `</div>`;
             });
@@ -440,18 +459,18 @@
             return html;
         }
 
-        window.removeChord = function(idx) { chordProgression.splice(idx, 1); updateFretboard(); };
-        window.removeScale = function(idx) { scaleProgression.splice(idx, 1); updateFretboard(); };
+        window.removeChord = function(idx) { AppState.chordProgression.splice(idx, 1); updateFretboard(); };
+        window.removeScale = function(idx) { AppState.scaleProgression.splice(idx, 1); updateFretboard(); };
         window.shiftCustomFret = function(idx, dir) {
-            const item = chordProgression[idx]; if (!item || item.type !== 'custom') return;
-            let newFret = item.startFret + dir; if (newFret >= 1 && newFret <= TOTAL_FRETS) { item.startFret = newFret; updateFretboard(); }
+            const item = AppState.chordProgression[idx]; if (!item || item.type !== 'custom') return;
+            let newFret = item.startFret + dir; if (newFret >= 1 && newFret <= CONFIG.TOTAL_FRETS) { item.startFret = newFret; updateFretboard(); }
         };
         window.editCustomTitle = function(idx) {
-            const item = chordProgression[idx]; if (!item || item.type !== 'custom') return;
+            const item = AppState.chordProgression[idx]; if (!item || item.type !== 'custom') return;
             let newTitle = prompt(getSafeI18n().promptCustomTitle, item.title); if (newTitle !== null) { item.title = newTitle; updateFretboard(); }
         };
         window.toggleCustomDiagramNote = function(progIdx, strIdx, relFret) {
-            const item = chordProgression[progIdx]; if (!item || item.type !== 'custom') return;
+            const item = AppState.chordProgression[progIdx]; if (!item || item.type !== 'custom') return;
             let currentVal = item.voicing[strIdx];
             if (relFret === 0) { item.voicing[strIdx] = (currentVal === 'x' ? 0 : 'x'); } 
             else { let actualFret = item.startFret + relFret - 1; item.voicing[strIdx] = (currentVal === actualFret ? 'x' : actualFret); }
@@ -483,172 +502,190 @@
             });
         }
 
+
+        // =========================================================================
+        // [6] EventManager: 모든 이벤트 중앙집중화 관리
+        // =========================================================================
+        const EventManager = {
+            init() {
+                this.bindUIEvents();
+                this.bindFretboardEvents();
+                this.bindDragAndDropEvents();
+            },
+
+            bindUIEvents() {
+                DOM_CACHE.langBtn.addEventListener('click', toggleLanguage);
+                DOM_CACHE.keySelect.addEventListener('change', updateFretboard);
+                DOM_CACHE.majorSelect.addEventListener('change', function() { DOM_CACHE.minorSelect.value = ""; updateFretboard(); });
+                DOM_CACHE.minorSelect.addEventListener('change', function() { DOM_CACHE.majorSelect.value = ""; updateFretboard(); });
+                DOM_CACHE.chordSelect.addEventListener('change', updateFretboard);
+                DOM_CACHE.tuningSelect.addEventListener('change', function() { 
+                    renderFretboard(); DOM_CACHE.updateDynamicElements(); updateFretboard(); analyzeCustomNotes(); 
+                });
+                DOM_CACHE.formToggleBtn.addEventListener('click', function() {
+                    AppState.showFormHighlight = !AppState.showFormHighlight;
+                    this.textContent = AppState.showFormHighlight ? getSafeI18n().btnOn : getSafeI18n().btnOff;
+                    this.style.backgroundColor = AppState.showFormHighlight ? '#4CAF50' : '#e0e0e0';
+                    this.style.color = AppState.showFormHighlight ? '#fff' : '#333';
+                    DOM_CACHE.formSelect.style.display = AppState.showFormHighlight ? 'inline-block' : 'none'; 
+                    updateFretboard();
+                });
+                DOM_CACHE.toggleDiagramBtn.addEventListener('click', function() {
+                    AppState.showChordDiagram = !AppState.showChordDiagram; 
+                    this.textContent = AppState.showChordDiagram ? getSafeI18n().btnFretboard : getSafeI18n().btnDiagram; 
+                    updateFretboard();
+                });
+                DOM_CACHE.addScaleBtn.addEventListener('click', function() {
+                    const rootIdx = parseInt(DOM_CACHE.keySelect.value);
+                    const scaleVal = DOM_CACHE.majorSelect.value || DOM_CACHE.minorSelect.value;
+                    const tuningVal = DOM_CACHE.tuningSelect ? DOM_CACHE.tuningSelect.value : 'standard';
+                    if (scaleVal) { AppState.scaleProgression.push({ instrument: AppState.instrument, tuningVal: tuningVal, rootIdx: rootIdx, scaleName: scaleVal }); updateFretboard(); }
+                });
+                DOM_CACHE.addChordBtn.addEventListener('click', function() {
+                    const rootIdx = parseInt(DOM_CACHE.keySelect.value);
+                    const chordVal = DOM_CACHE.chordSelect.value;
+                    if (chordVal) { AppState.chordProgression.push({ type: 'preset', rootIdx: rootIdx, chordName: chordVal }); updateFretboard(); }
+                });
+                DOM_CACHE.addCustomBtn.addEventListener('click', function() {
+                    AppState.chordProgression.push({ type: 'custom', title: 'Custom', startFret: 1, voicing: ['x', 'x', 'x', 'x', 'x', 'x'] }); updateFretboard();
+                });
+                DOM_CACHE.addLinebreakBtn.addEventListener('click', function() {
+                    AppState.chordProgression.push({ type: 'linebreak' }); updateFretboard();
+                });
+                DOM_CACHE.saveJsonBtn.addEventListener('click', function() {
+                    let dataToSave = AppState.mode === CONFIG.MODES.CHORD ? AppState.chordProgression : AppState.scaleProgression;
+                    if (dataToSave.length === 0) { alert(getSafeI18n().msgNoData); return; }
+                    const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: "application/json" });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a'); link.href = url; link.download = AppState.mode === CONFIG.MODES.CHORD ? "chord_progression.json" : "scale_progression.json";
+                    link.click(); URL.revokeObjectURL(url);
+                });
+                DOM_CACHE.loadJsonBtn.addEventListener('click', function() { DOM_CACHE.loadJsonInput.click(); });
+                DOM_CACHE.loadJsonInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0]; if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const parsed = JSON.parse(e.target.result);
+                            // 🔥 엄격한 JSON 데이터 검증 도입
+                            if (isValidProgressionData(parsed)) {
+                                if (parsed.length > 0 && parsed[0].scaleName) { 
+                                    AppState.scaleProgression = parsed; 
+                                    if(AppState.mode !== CONFIG.MODES.SCALE) switchMode(CONFIG.MODES.SCALE);
+                                    else updateFretboard();
+                                } else { 
+                                    AppState.chordProgression = parsed; 
+                                    if(AppState.mode !== CONFIG.MODES.CHORD) switchMode(CONFIG.MODES.CHORD);
+                                    else updateFretboard();
+                                }
+                            } else throw new Error("Invalid Format");
+                        } catch (err) { alert(getSafeI18n().msgLoadFail); }
+                    };
+                    reader.readAsText(file); this.value = ''; 
+                });
+                DOM_CACHE.clearProgBtn.addEventListener('click', function() {
+                    AppState.mode === CONFIG.MODES.SCALE ? AppState.scaleProgression = [] : AppState.chordProgression = []; updateFretboard();
+                });
+                DOM_CACHE.formSelect.addEventListener('change', updateFretboard);
+                DOM_CACHE.clearCustomBtn.addEventListener('click', function() {
+                    AppState.clearCustomData(); analyzeCustomNotes();
+                });
+                DOM_CACHE.guitarBtn.addEventListener('click', () => switchInstrument('guitar'));
+                DOM_CACHE.bassBtn.addEventListener('click', () => switchInstrument('bass'));
+                DOM_CACHE.keyboardBtn.addEventListener('click', () => switchInstrument('keyboard'));
+                DOM_CACHE.scaleModeBtn.addEventListener('click', () => switchMode(CONFIG.MODES.SCALE));
+                DOM_CACHE.chordModeBtn.addEventListener('click', () => switchMode(CONFIG.MODES.CHORD));
+                DOM_CACHE.captureBtn.addEventListener('click', captureFretboard);
+            },
+
+            bindFretboardEvents() {
+                DOM_CACHE.fretboardView.addEventListener('click', function(e) {
+                    let noteEl = null;
+                    if (e.target.classList.contains('note')) noteEl = e.target;
+                    else if (e.target.classList.contains('fret') || e.target.classList.contains('white-key') || e.target.classList.contains('black-key')) noteEl = e.target.querySelector('.note');
+                    if (noteEl) { noteEl.classList.toggle('custom'); analyzeCustomNotes(); }
+                });
+            },
+
+            bindDragAndDropEvents() {
+                const handleDragStart = (e) => { 
+                    const item = e.target.closest('.chord-item, .scale-item'); 
+                    if (item) { 
+                        e.dataTransfer.effectAllowed = 'move'; 
+                        e.dataTransfer.setData('text/plain', item.dataset.index); 
+                        setTimeout(() => item.style.opacity = '0.4', 0); 
+                    } 
+                };
+                const handleDragEnd = (e) => { 
+                    const item = e.target.closest('.chord-item, .scale-item'); 
+                    if (item) item.style.opacity = '1'; 
+                };
+                const handleDragOver = (e) => { 
+                    if (e.target.closest('.chord-item, .scale-item') || e.target === DOM_CACHE.diagramView || e.target === DOM_CACHE.scaleProgView) { 
+                        e.preventDefault(); 
+                        e.dataTransfer.dropEffect = 'move'; 
+                    } 
+                };
+                const handleDrop = (e, type) => {
+                    e.preventDefault();
+                    const draggedIdx = parseInt(e.dataTransfer.getData('text/plain'));
+                    if (isNaN(draggedIdx)) return;
+
+                    const arr = type === 'chord' ? AppState.chordProgression : AppState.scaleProgression;
+                    const item = e.target.closest('.chord-item, .scale-item'); 
+                    
+                    if (item) {
+                        const targetIdx = parseInt(item.dataset.index);
+                        if (draggedIdx !== targetIdx) { 
+                            const draggedElement = arr.splice(draggedIdx, 1)[0]; 
+                            arr.splice(targetIdx, 0, draggedElement); 
+                            updateFretboard(); 
+                        }
+                    } else {
+                        const container = type === 'chord' ? DOM_CACHE.diagramView : DOM_CACHE.scaleProgView;
+                        if (e.target === container || container.contains(e.target)) {
+                            const draggedElement = arr.splice(draggedIdx, 1)[0];
+                            arr.push(draggedElement);
+                            updateFretboard();
+                        }
+                    }
+                };
+                const attachEvents = (view, type) => {
+                    view.addEventListener('dragstart', handleDragStart); 
+                    view.addEventListener('dragend', handleDragEnd); 
+                    view.addEventListener('dragover', handleDragOver); 
+                    view.addEventListener('drop', (e) => handleDrop(e, type));
+                };
+                attachEvents(DOM_CACHE.diagramView, 'chord'); 
+                attachEvents(DOM_CACHE.scaleProgView, 'scale');
+            }
+        };
+
+        // 데이터 검증 유틸리티
+        function isValidProgressionData(data) {
+            if (!Array.isArray(data)) return false;
+            return data.every(item => item.type === 'linebreak' || item.scaleName || item.chordName || (item.voicing && Array.isArray(item.voicing)));
+        }
+
+
+        // =========================================================================
+        // [7] 초기화 및 코어 기능
+        // =========================================================================
         function init() {
             DOM_CACHE.init();
             
             setupSelects(); 
             updateTuningOptions(); 
             setupNoteButtons(); 
-            setupMainFretboardEvents(); 
-            setupDragAndDropEvents();
             
             renderFretboard(); 
             DOM_CACHE.updateDynamicElements(); 
             
             updateFretboard(); 
             applyLanguage(); 
-
-            DOM_CACHE.langBtn.addEventListener('click', toggleLanguage);
-            DOM_CACHE.keySelect.addEventListener('change', updateFretboard);
-            DOM_CACHE.majorSelect.addEventListener('change', function() { DOM_CACHE.minorSelect.value = ""; updateFretboard(); });
-            DOM_CACHE.minorSelect.addEventListener('change', function() { DOM_CACHE.majorSelect.value = ""; updateFretboard(); });
-            DOM_CACHE.chordSelect.addEventListener('change', updateFretboard);
-            DOM_CACHE.tuningSelect.addEventListener('change', function() { 
-                renderFretboard(); 
-                DOM_CACHE.updateDynamicElements(); 
-                updateFretboard(); 
-                analyzeCustomNotes(); 
-            });
-            DOM_CACHE.formToggleBtn.addEventListener('click', function() {
-                showFormHighlight = !showFormHighlight;
-                this.textContent = showFormHighlight ? getSafeI18n().btnOn : getSafeI18n().btnOff;
-                this.style.backgroundColor = showFormHighlight ? '#4CAF50' : '#e0e0e0';
-                this.style.color = showFormHighlight ? '#fff' : '#333';
-                DOM_CACHE.formSelect.style.display = showFormHighlight ? 'inline-block' : 'none'; 
-                updateFretboard();
-            });
-            DOM_CACHE.toggleDiagramBtn.addEventListener('click', function() {
-                showChordDiagram = !showChordDiagram; 
-                this.textContent = showChordDiagram ? getSafeI18n().btnFretboard : getSafeI18n().btnDiagram; 
-                updateFretboard();
-            });
-            DOM_CACHE.addScaleBtn.addEventListener('click', function() {
-                const rootIdx = parseInt(DOM_CACHE.keySelect.value);
-                const scaleVal = DOM_CACHE.majorSelect.value || DOM_CACHE.minorSelect.value;
-                const tuningVal = DOM_CACHE.tuningSelect ? DOM_CACHE.tuningSelect.value : 'standard';
-                if (scaleVal) { scaleProgression.push({ instrument: currentInstrument, tuningVal: tuningVal, rootIdx: rootIdx, scaleName: scaleVal }); updateFretboard(); }
-            });
-            DOM_CACHE.addChordBtn.addEventListener('click', function() {
-                const rootIdx = parseInt(DOM_CACHE.keySelect.value);
-                const chordVal = DOM_CACHE.chordSelect.value;
-                if (chordVal) { chordProgression.push({ type: 'preset', rootIdx: rootIdx, chordName: chordVal }); updateFretboard(); }
-            });
-            DOM_CACHE.addCustomBtn.addEventListener('click', function() {
-                chordProgression.push({ type: 'custom', title: 'Custom', startFret: 1, voicing: ['x', 'x', 'x', 'x', 'x', 'x'] }); updateFretboard();
-            });
-            // 🔥 줄바꿈 버튼 클릭 이벤트
-            DOM_CACHE.addLinebreakBtn.addEventListener('click', function() {
-                chordProgression.push({ type: 'linebreak' }); updateFretboard();
-            });
-            DOM_CACHE.saveJsonBtn.addEventListener('click', function() {
-                let dataToSave = currentMode === 'chord' ? chordProgression : scaleProgression;
-                if (dataToSave.length === 0) { alert(getSafeI18n().msgNoData); return; }
-                const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a'); link.href = url; link.download = currentMode === 'chord' ? "chord_progression.json" : "scale_progression.json";
-                link.click(); URL.revokeObjectURL(url);
-            });
-            DOM_CACHE.loadJsonBtn.addEventListener('click', function() { DOM_CACHE.loadJsonInput.click(); });
-            DOM_CACHE.loadJsonInput.addEventListener('change', function(e) {
-                const file = e.target.files[0]; if (!file) return;
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const parsed = JSON.parse(e.target.result);
-                        if (Array.isArray(parsed)) {
-                            // 🔥 파일을 불러온 뒤 화면을 무조건 갱신하도록 강제 처리
-                            if (parsed.length > 0 && parsed[0].scaleName) { 
-                                scaleProgression = parsed; 
-                                if(currentMode !== 'scale') switchMode('scale');
-                                else updateFretboard();
-                            } else { 
-                                chordProgression = parsed; 
-                                if(currentMode !== 'chord') switchMode('chord');
-                                else updateFretboard();
-                            }
-                        } else throw new Error("Invalid Format");
-                    } catch (err) { alert(getSafeI18n().msgLoadFail); }
-                };
-                reader.readAsText(file); this.value = ''; 
-            });
-            DOM_CACHE.clearProgBtn.addEventListener('click', function() {
-                currentMode === 'scale' ? scaleProgression = [] : chordProgression = []; updateFretboard();
-            });
-            DOM_CACHE.formSelect.addEventListener('change', updateFretboard);
-            DOM_CACHE.clearCustomBtn.addEventListener('click', function() {
-                Array.from(DOM_CACHE.allNoteElements).filter(el => el.classList.contains('custom')).forEach(el => el.classList.remove('custom')); 
-                highlightedNotes.clear(); 
-                DOM_CACHE.findNoteBtns.forEach(btn => btn.classList.remove('active')); 
-                applyHighlights(); analyzeCustomNotes();
-            });
-            DOM_CACHE.guitarBtn.addEventListener('click', () => switchInstrument('guitar'));
-            DOM_CACHE.bassBtn.addEventListener('click', () => switchInstrument('bass'));
-            DOM_CACHE.keyboardBtn.addEventListener('click', () => switchInstrument('keyboard'));
-            DOM_CACHE.scaleModeBtn.addEventListener('click', () => switchMode('scale'));
-            DOM_CACHE.chordModeBtn.addEventListener('click', () => switchMode('chord'));
-            DOM_CACHE.captureBtn.addEventListener('click', captureFretboard);
-        }
-
-        function setupMainFretboardEvents() {
-            DOM_CACHE.fretboardView.addEventListener('click', function(e) {
-                let noteEl = null;
-                if (e.target.classList.contains('note')) noteEl = e.target;
-                else if (e.target.classList.contains('fret') || e.target.classList.contains('white-key') || e.target.classList.contains('black-key')) noteEl = e.target.querySelector('.note');
-                if (noteEl) { noteEl.classList.toggle('custom'); analyzeCustomNotes(); }
-            });
-        }
-        
-        function setupDragAndDropEvents() {
-            const handleDragStart = (e) => { 
-                const item = e.target.closest('.chord-item, .scale-item'); 
-                if (item) { 
-                    e.dataTransfer.effectAllowed = 'move'; 
-                    e.dataTransfer.setData('text/plain', item.dataset.index); 
-                    setTimeout(() => item.style.opacity = '0.4', 0); 
-                } 
-            };
-            const handleDragEnd = (e) => { 
-                const item = e.target.closest('.chord-item, .scale-item'); 
-                if (item) item.style.opacity = '1'; 
-            };
-            const handleDragOver = (e) => { 
-                if (e.target.closest('.chord-item, .scale-item') || e.target === DOM_CACHE.diagramView || e.target === DOM_CACHE.scaleProgView) { 
-                    e.preventDefault(); 
-                    e.dataTransfer.dropEffect = 'move'; 
-                } 
-            };
-            const handleDrop = (e, type) => {
-                e.preventDefault();
-                const draggedIdx = parseInt(e.dataTransfer.getData('text/plain'));
-                if (isNaN(draggedIdx)) return;
-
-                const arr = type === 'chord' ? chordProgression : scaleProgression;
-                const item = e.target.closest('.chord-item, .scale-item'); 
-                
-                if (item) {
-                    const targetIdx = parseInt(item.dataset.index);
-                    if (draggedIdx !== targetIdx) { 
-                        const draggedElement = arr.splice(draggedIdx, 1)[0]; 
-                        arr.splice(targetIdx, 0, draggedElement); 
-                        updateFretboard(); 
-                    }
-                } else {
-                    const container = type === 'chord' ? DOM_CACHE.diagramView : DOM_CACHE.scaleProgView;
-                    if (e.target === container || container.contains(e.target)) {
-                        const draggedElement = arr.splice(draggedIdx, 1)[0];
-                        arr.push(draggedElement);
-                        updateFretboard();
-                    }
-                }
-            };
-            const bindEvents = (view, type) => {
-                view.addEventListener('dragstart', handleDragStart); 
-                view.addEventListener('dragend', handleDragEnd); 
-                view.addEventListener('dragover', handleDragOver); 
-                view.addEventListener('drop', (e) => handleDrop(e, type));
-            };
-            bindEvents(DOM_CACHE.diagramView, 'chord'); 
-            bindEvents(DOM_CACHE.scaleProgView, 'scale');
+            
+            // 모든 이벤트 바인딩은 EventManager로 통일!
+            EventManager.init();
         }
 
         function extractChordSymbol(chordName) {
@@ -658,12 +695,12 @@
         }
 
         function getChordVoicing(rootIdx, chordName) {
-            const key = `${rootIdx}_${chordName}`; if (openChords[key]) return openChords[key]; 
-            const shape = chordShapes[chordName]; if (!shape) return null;
+            const key = `${rootIdx}_${chordName}`; if (MUSIC_DATA.openChords[key]) return MUSIC_DATA.openChords[key]; 
+            const shape = MUSIC_DATA.chordShapes[chordName]; if (!shape) return null;
             let f6 = (rootIdx - 4 + 12) % 12, f5 = (rootIdx - 9 + 12) % 12; 
             const applyOffset = (baseShape, offset) => baseShape.map(f => f === 'x' ? 'x' : f + offset);
             let voicingE = applyOffset(shape.E, f6), voicingA = applyOffset(shape.A, f5);
-            const isValid = v => v.every(f => f === 'x' || (f >= 0 && f <= TOTAL_FRETS));
+            const isValid = v => v.every(f => f === 'x' || (f >= 0 && f <= CONFIG.TOTAL_FRETS));
             let validE = isValid(voicingE), validA = isValid(voicingA);
             if (validE && validA) return f6 <= f5 ? voicingE : voicingA; else if (validE) return voicingE; else if (validA) return voicingA;
             return null;
@@ -686,7 +723,7 @@
             }
             if (startFret > 1) svg += `<text x="22" y="${startY + gapY/2}" fill="white" font-size="14" font-weight="bold" font-family="sans-serif" text-anchor="middle" dominant-baseline="central">${startFret}fr</text>`;
             const tuningVal = DOM_CACHE.tuningSelect ? DOM_CACHE.tuningSelect.value : 'standard';
-            const tuningOffsets = tuningPresets['guitar'][tuningVal].offset;
+            const tuningOffsets = MUSIC_DATA.tuningPresets['guitar'][tuningVal].offset;
             const stringOpenNotes = [4, 11, 7, 2, 9, 4].map((open, i) => (open + tuningOffsets[i] + 120) % 12);
             voicing.forEach((fret, strIdx) => {
                 let x = startX + strIdx * gapX;
@@ -695,7 +732,7 @@
                 } else if (fret >= startFret && fret <= startFret + 4) {
                     let y = startY + (fret - startFret + 0.5) * gapY;
                     svg += `<circle cx="${x}" cy="${y}" r="12" fill="white" stroke="#ff9800" stroke-width="2" pointer-events="none"/>`;
-                    svg += `<text x="${x}" y="${y}" fill="#333" font-size="11" font-weight="bold" font-family="sans-serif" text-anchor="middle" dominant-baseline="central" pointer-events="none">${notes[(stringOpenNotes[strIdx] + fret) % 12]}</text>`;
+                    svg += `<text x="${x}" y="${y}" fill="#333" font-size="11" font-weight="bold" font-family="sans-serif" text-anchor="middle" dominant-baseline="central" pointer-events="none">${MUSIC_DATA.notes[(stringOpenNotes[strIdx] + fret) % 12]}</text>`;
                 }
             });
             if (isCustom) {
@@ -711,27 +748,27 @@
         }
 
         function generateScaleBoardHTML(item, idx) {
-            let intervals = allScales[item.scaleName] || [];
+            let intervals = MUSIC_DATA.allScales[item.scaleName] || [];
             const activeNotes = intervals.map(interval => (item.rootIdx + interval) % 12);
             let html = `<div class="scale-item" draggable="true" data-index="${idx}" style="position:relative; padding:15px; background:#fff; border:1px solid #ddd; border-radius:8px; cursor:grab; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing:border-box;">`;
             html += `<button class="no-capture" onclick="removeScale(${idx})" style="position:absolute; top:10px; right:10px; background:#f44336; color:white; border:none; border-radius:50%; width:28px; height:28px; font-size:14px; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; z-index:10;">X</button>`;
             
             let t_instrument = item.instrument === 'keyboard' ? 'Keyboard' : item.instrument === 'guitar' ? 'Guitar' : 'Bass';
-            if (item.instrument !== 'keyboard' && item.tuningVal !== 'standard') t_instrument += ` [${tuningPresets[item.instrument][item.tuningVal][currentLang] || 'Standard'}]`;
-            html += `<h3 style="text-align:center; margin-top:0; margin-bottom:15px; color:#333;">${t_instrument} ${notes[item.rootIdx]} ${item.scaleName}</h3>`;
+            if (item.instrument !== 'keyboard' && item.tuningVal !== 'standard') t_instrument += ` [${MUSIC_DATA.tuningPresets[item.instrument][item.tuningVal][AppState.currentLang] || 'Standard'}]`;
+            html += `<h3 style="text-align:center; margin-top:0; margin-bottom:15px; color:#333;">${t_instrument} ${MUSIC_DATA.notes[item.rootIdx]} ${item.scaleName}</h3>`;
             html += `<div style="overflow-x:auto; width:100%; padding-bottom:10px;">`;
             
             if (item.instrument === 'keyboard') {
                 html += generateKeyboardHTML(activeNotes, item.rootIdx);
             } else {
                 let anchorFrets = new Set();
-                if (showFormHighlight && !item.scaleName.includes("Phrygian")) {
-                    const tuningOffsets = tuningPresets[item.instrument][item.tuningVal].offset;
-                    const lowestStrIdx = tunings[item.instrument].length - 1;
-                    let f1 = ((item.rootIdx - 3 + 12) % 12 - ((tunings[item.instrument][lowestStrIdx] + tuningOffsets[lowestStrIdx] + 120) % 12) + 12) % 12;
-                    let offsets = [...formOffsets[DOM_CACHE.formSelect.value]];
+                if (AppState.showFormHighlight && !item.scaleName.includes("Phrygian")) {
+                    const tuningOffsets = MUSIC_DATA.tuningPresets[item.instrument][item.tuningVal].offset;
+                    const lowestStrIdx = MUSIC_DATA.tunings[item.instrument].length - 1;
+                    let f1 = ((item.rootIdx - 3 + 12) % 12 - ((MUSIC_DATA.tunings[item.instrument][lowestStrIdx] + tuningOffsets[lowestStrIdx] + 120) % 12) + 12) % 12;
+                    let offsets = [...CONFIG.FORM_OFFSETS[DOM_CACHE.formSelect.value]];
                     if (item.instrument === 'bass' && DOM_CACHE.formSelect.value === '3') offsets = [4, 5, 6, 7]; 
-                    offsets.map(o => f1 + o).forEach(f => FRET_OCTAVE_SHIFTS.forEach(s => { if (f+s >= 0 && f+s <= TOTAL_FRETS) anchorFrets.add(f+s); }));
+                    offsets.map(o => f1 + o).forEach(f => CONFIG.FRET_OCTAVE_SHIFTS.forEach(s => { if (f+s >= 0 && f+s <= CONFIG.TOTAL_FRETS) anchorFrets.add(f+s); }));
                 }
                 html += generateFretboardHTML(item.instrument, item.tuningVal, activeNotes, item.rootIdx, anchorFrets);
             }
@@ -739,15 +776,16 @@
         }
 
         function updateTuningOptions() {
-            if (currentInstrument === 'keyboard') return; 
+            if (AppState.instrument === 'keyboard') return; 
             const currentVal = DOM_CACHE.tuningSelect.value; 
             DOM_CACHE.tuningSelect.innerHTML = ''; 
-            const presets = tuningPresets[currentInstrument]; const safeLang = currentLang === 'ko' ? 'ko' : 'en';
+            const presets = MUSIC_DATA.tuningPresets[AppState.instrument]; 
+            const safeLang = AppState.currentLang === 'ko' ? 'ko' : 'en';
             for (let key in presets) DOM_CACHE.tuningSelect.appendChild(new Option(presets[key][safeLang], key));
             DOM_CACHE.tuningSelect.value = presets[currentVal] ? currentVal : 'standard';
         }
 
-        function toggleLanguage() { currentLang = currentLang === 'ko' ? 'en' : 'ko'; applyLanguage(); }
+        function toggleLanguage() { AppState.currentLang = AppState.currentLang === 'ko' ? 'en' : 'ko'; applyLanguage(); }
 
         function applyLanguage() {
             const t = getSafeI18n();
@@ -758,8 +796,8 @@
             document.getElementById('lbl-key').textContent = t.lblKey; document.getElementById('lbl-major').textContent = t.lblMajor;
             document.getElementById('lbl-minor').textContent = t.lblMinor; document.getElementById('lbl-chord').textContent = t.lblChord;
             document.getElementById('lbl-find-note').textContent = t.lblFindNote; document.getElementById('lbl-form-toggle').textContent = t.lblFormToggle;
-            DOM_CACHE.formToggleBtn.textContent = showFormHighlight ? t.btnOn : t.btnOff;
-            DOM_CACHE.toggleDiagramBtn.textContent = showChordDiagram ? t.btnFretboard : t.btnDiagram;
+            DOM_CACHE.formToggleBtn.textContent = AppState.showFormHighlight ? t.btnOn : t.btnOff;
+            DOM_CACHE.toggleDiagramBtn.textContent = AppState.showChordDiagram ? t.btnFretboard : t.btnDiagram;
             DOM_CACHE.addScaleBtn.textContent = t.btnAddScale; DOM_CACHE.addChordBtn.textContent = t.btnAddChord;
             DOM_CACHE.addCustomBtn.textContent = t.btnAddCustom; DOM_CACHE.addLinebreakBtn.textContent = t.btnAddLinebreak; 
             DOM_CACHE.saveJsonBtn.textContent = t.btnSaveJson;
@@ -774,20 +812,20 @@
         function setupNoteButtons() {
             DOM_CACHE.noteButtonsContainer.innerHTML = '';
             DOM_CACHE.findNoteBtns = []; 
-            notes.forEach((note, index) => {
+            MUSIC_DATA.notes.forEach((note, index) => {
                 const btn = document.createElement('button'); btn.className = 'btn find-note-btn'; btn.textContent = note;
-                btn.addEventListener('click', function() { highlightedNotes.has(index) ? (highlightedNotes.delete(index), this.classList.remove('active')) : (highlightedNotes.add(index), this.classList.add('active')); applyHighlights(); });
+                btn.addEventListener('click', function() { AppState.highlightedNotes.has(index) ? (AppState.highlightedNotes.delete(index), this.classList.remove('active')) : (AppState.highlightedNotes.add(index), this.classList.add('active')); applyHighlights(); });
                 DOM_CACHE.noteButtonsContainer.appendChild(btn);
                 DOM_CACHE.findNoteBtns.push(btn);
             });
         }
         
         function applyHighlights() {
-            DOM_CACHE.allNoteElements.forEach(noteEl => { highlightedNotes.has(parseInt(noteEl.dataset.noteIndex)) ? noteEl.classList.add('highlight') : noteEl.classList.remove('highlight'); });
+            DOM_CACHE.allNoteElements.forEach(noteEl => { AppState.highlightedNotes.has(parseInt(noteEl.dataset.noteIndex)) ? noteEl.classList.add('highlight') : noteEl.classList.remove('highlight'); });
         }
 
         function switchInstrument(instrument) {
-            if (currentInstrument === instrument) return; currentInstrument = instrument;
+            if (AppState.instrument === instrument) return; AppState.instrument = instrument;
             DOM_CACHE.guitarBtn.classList.toggle('active', instrument === 'guitar'); DOM_CACHE.bassBtn.classList.toggle('active', instrument === 'bass'); DOM_CACHE.keyboardBtn.classList.toggle('active', instrument === 'keyboard');
             if (instrument === 'keyboard') { DOM_CACHE.tuningControls.style.display = 'none'; DOM_CACHE.formToggleRow.style.display = 'none'; DOM_CACHE.formToggleDivider.style.display = 'none'; } 
             else { DOM_CACHE.tuningControls.style.display = 'inline-flex'; DOM_CACHE.formToggleRow.style.display = 'flex'; DOM_CACHE.formToggleDivider.style.display = 'block'; }
@@ -797,65 +835,62 @@
         }
 
         function switchMode(mode) {
-            if (currentMode === mode) return; currentMode = mode;
-            DOM_CACHE.scaleModeBtn.classList.toggle('active', mode === 'scale'); DOM_CACHE.chordModeBtn.classList.toggle('active', mode === 'chord');
-            DOM_CACHE.scaleControls.style.display = mode === 'scale' ? 'inline-flex' : 'none'; DOM_CACHE.chordControls.style.display = mode === 'chord' ? 'inline-flex' : 'none';
-            if (mode !== 'chord') { showChordDiagram = false; DOM_CACHE.toggleDiagramBtn.textContent = getSafeI18n().btnDiagram; }
+            if (AppState.mode === mode) return; AppState.mode = mode;
+            DOM_CACHE.scaleModeBtn.classList.toggle('active', mode === CONFIG.MODES.SCALE); DOM_CACHE.chordModeBtn.classList.toggle('active', mode === CONFIG.MODES.CHORD);
+            DOM_CACHE.scaleControls.style.display = mode === CONFIG.MODES.SCALE ? 'inline-flex' : 'none'; DOM_CACHE.chordControls.style.display = mode === CONFIG.MODES.CHORD ? 'inline-flex' : 'none';
+            if (mode !== CONFIG.MODES.CHORD) { AppState.showChordDiagram = false; DOM_CACHE.toggleDiagramBtn.textContent = getSafeI18n().btnDiagram; }
             resetSelections(); updateFretboard();
         }
 
         function resetSelections() {
-            Array.from(DOM_CACHE.allNoteElements).filter(el => el.classList.contains('custom')).forEach(el => el.classList.remove('custom')); 
-            highlightedNotes.clear();
-            DOM_CACHE.findNoteBtns.forEach(btn => btn.classList.remove('active')); 
-            Array.from(DOM_CACHE.allNoteElements).filter(el => el.classList.contains('highlight')).forEach(el => el.classList.remove('highlight'));
+            AppState.clearCustomData();
             DOM_CACHE.majorSelect.value = ""; DOM_CACHE.minorSelect.value = ""; DOM_CACHE.chordSelect.value = "";
-            if (currentMode === 'scale') DOM_CACHE.minorSelect.value = "Blues";
+            if (AppState.mode === CONFIG.MODES.SCALE) DOM_CACHE.minorSelect.value = "Blues";
         }
 
         function setupSelects() {
-            notes.forEach((note, index) => DOM_CACHE.keySelect.appendChild(new Option(note, index)));
-            for (let scale in majorScales) DOM_CACHE.majorSelect.appendChild(new Option(scale, scale));
-            for (let scale in minorScales) { const option = new Option(scale, scale); if (scale === "Blues") option.selected = true; DOM_CACHE.minorSelect.appendChild(option); }
-            for (let chord in allChords) DOM_CACHE.chordSelect.appendChild(new Option(chord, chord));
+            MUSIC_DATA.notes.forEach((note, index) => DOM_CACHE.keySelect.appendChild(new Option(note, index)));
+            for (let scale in MUSIC_DATA.majorScales) DOM_CACHE.majorSelect.appendChild(new Option(scale, scale));
+            for (let scale in MUSIC_DATA.minorScales) { const option = new Option(scale, scale); if (scale === "Blues") option.selected = true; DOM_CACHE.minorSelect.appendChild(option); }
+            for (let chord in MUSIC_DATA.allChords) DOM_CACHE.chordSelect.appendChild(new Option(chord, chord));
         }
 
         function renderFretboard() {
-            if (currentInstrument === 'keyboard') {
+            if (AppState.instrument === 'keyboard') {
                 DOM_CACHE.fretNumbers.style.display = 'none'; DOM_CACHE.fretboard.className = 'keyboard-container'; DOM_CACHE.fretboard.innerHTML = generateKeyboardHTML(); 
             } else {
-                DOM_CACHE.fretNumbers.style.display = 'flex'; DOM_CACHE.fretboard.className = `fretboard instrument-${currentInstrument}`;
+                DOM_CACHE.fretNumbers.style.display = 'flex'; DOM_CACHE.fretboard.className = `fretboard instrument-${AppState.instrument}`;
                 const tuningVal = DOM_CACHE.tuningSelect.value || 'standard';
-                const tempDiv = document.createElement('div'); tempDiv.innerHTML = generateFretboardHTML(currentInstrument, tuningVal);
+                const tempDiv = document.createElement('div'); tempDiv.innerHTML = generateFretboardHTML(AppState.instrument, tuningVal);
                 DOM_CACHE.fretNumbers.innerHTML = tempDiv.querySelector('.fret-numbers').innerHTML; DOM_CACHE.fretboard.innerHTML = tempDiv.querySelector('.fretboard').innerHTML;
             }
             applyHighlights();
         }
 
         function updateFretboard() {
-            const rootIndex = parseInt(DOM_CACHE.keySelect.value); const rootName = notes[rootIndex]; const t = getSafeI18n();
+            const rootIndex = parseInt(DOM_CACHE.keySelect.value); const rootName = MUSIC_DATA.notes[rootIndex]; const t = getSafeI18n();
             let intervals = []; let displayTitle = "";
             const tuningVal = DOM_CACHE.tuningSelect ? DOM_CACHE.tuningSelect.value : 'standard';
-            let instrumentLabel = currentInstrument === 'keyboard' ? 'Keyboard' : (currentInstrument === 'guitar' ? 'Guitar' : 'Bass');
-            if (currentInstrument !== 'keyboard' && tuningVal !== 'standard') instrumentLabel += ` [${tuningPresets[currentInstrument][tuningVal][currentLang] || 'Standard'}]`;
+            let instrumentLabel = AppState.instrument === 'keyboard' ? 'Keyboard' : (AppState.instrument === 'guitar' ? 'Guitar' : 'Bass');
+            if (AppState.instrument !== 'keyboard' && tuningVal !== 'standard') instrumentLabel += ` [${MUSIC_DATA.tuningPresets[AppState.instrument][tuningVal][AppState.currentLang] || 'Standard'}]`;
 
             const chordVal = DOM_CACHE.chordSelect.value;
             const majorVal = DOM_CACHE.majorSelect.value;
             const minorVal = DOM_CACHE.minorSelect.value;
             const scaleVal = majorVal || minorVal;
 
-            if (currentMode === 'scale') {
-                if (scaleVal) { intervals = allScales[scaleVal]; displayTitle = `${instrumentLabel} ${rootName} ${scaleVal}`; } 
+            if (AppState.mode === CONFIG.MODES.SCALE) {
+                if (scaleVal) { intervals = MUSIC_DATA.allScales[scaleVal]; displayTitle = `${instrumentLabel} ${rootName} ${scaleVal}`; } 
                 else displayTitle = `${instrumentLabel} ${rootName} ${t.txtCustom}`;
             } else {
-                if (chordVal) { intervals = allChords[chordVal]; displayTitle = `${instrumentLabel} ${rootName} ${chordVal.split(' (')[0]} Chord`; } 
+                if (chordVal) { intervals = MUSIC_DATA.allChords[chordVal]; displayTitle = `${instrumentLabel} ${rootName} ${chordVal.split(' (')[0]} Chord`; } 
                 else displayTitle = `${instrumentLabel} ${rootName} ${t.txtCustom}`;
             }
             
             DOM_CACHE.fretboardTitle.textContent = displayTitle;
 
-            if (currentMode === 'chord' && showChordDiagram) { 
-                if (chordProgression.length > 0) DOM_CACHE.captureTitle.textContent = `${instrumentLabel} ${t.titleChordProgression}`; 
+            if (AppState.mode === CONFIG.MODES.CHORD && AppState.showChordDiagram) { 
+                if (AppState.chordProgression.length > 0) DOM_CACHE.captureTitle.textContent = `${instrumentLabel} ${t.titleChordProgression}`; 
                 else DOM_CACHE.captureTitle.textContent = displayTitle;
                 DOM_CACHE.captureTitle.style.display = 'block';
                 DOM_CACHE.captureTitle.classList.add('no-capture'); 
@@ -863,43 +898,43 @@
                 DOM_CACHE.captureTitle.style.display = 'none'; 
             }
 
-            if (currentMode === 'scale') {
+            if (AppState.mode === CONFIG.MODES.SCALE) {
                 setButtonVisibility({ toggleDiagramBtn: false, addChordBtn: false, addCustomBtn: false, addLinebreakBtn: false, addScaleBtn: !!scaleVal });
                 DOM_CACHE.diagramView.style.display = 'none'; DOM_CACHE.fretboardView.style.display = 'block';
 
-                if (scaleProgression.length > 0) {
+                if (AppState.scaleProgression.length > 0) {
                     setButtonVisibility({ saveJsonBtn: true, clearProgBtn: true });
                     DOM_CACHE.scaleProgView.style.display = 'flex';
-                    let html = ''; scaleProgression.forEach((c, idx) => html += generateScaleBoardHTML(c, idx)); DOM_CACHE.scaleProgView.innerHTML = html;
+                    let html = ''; AppState.scaleProgression.forEach((c, idx) => html += generateScaleBoardHTML(c, idx)); DOM_CACHE.scaleProgView.innerHTML = html;
                 } else { 
                     setButtonVisibility({ saveJsonBtn: false, clearProgBtn: false });
                     DOM_CACHE.scaleProgView.style.display = 'none'; 
                 }
             } else {
-                const isGuitar = currentInstrument === 'guitar' && tuningVal === 'standard';
+                const isGuitar = AppState.instrument === 'guitar' && tuningVal === 'standard';
                 setButtonVisibility({
-                    addScaleBtn: false, toggleDiagramBtn: isGuitar, addChordBtn: isGuitar && showChordDiagram,
-                    addCustomBtn: isGuitar && showChordDiagram, addLinebreakBtn: isGuitar && showChordDiagram,
-                    saveJsonBtn: isGuitar && showChordDiagram && chordProgression.length > 0,
-                    clearProgBtn: isGuitar && showChordDiagram && chordProgression.length > 0
+                    addScaleBtn: false, toggleDiagramBtn: isGuitar, addChordBtn: isGuitar && AppState.showChordDiagram,
+                    addCustomBtn: isGuitar && AppState.showChordDiagram, addLinebreakBtn: isGuitar && AppState.showChordDiagram,
+                    saveJsonBtn: isGuitar && AppState.showChordDiagram && AppState.chordProgression.length > 0,
+                    clearProgBtn: isGuitar && AppState.showChordDiagram && AppState.chordProgression.length > 0
                 });
                 DOM_CACHE.scaleProgView.style.display = 'none';
                 
-                if (isGuitar && showChordDiagram) { renderChordDiagrams(chordProgression, rootIndex, chordVal); } 
+                if (isGuitar && AppState.showChordDiagram) { renderChordDiagrams(AppState.chordProgression, rootIndex, chordVal); } 
                 else { DOM_CACHE.diagramView.style.display = 'none'; DOM_CACHE.fretboardView.style.display = 'block'; }
             }
 
-            if (currentInstrument !== 'keyboard') {
+            if (AppState.instrument !== 'keyboard') {
                 let anchorFrets = new Set(); 
-                if (showFormHighlight && intervals.length > 0) {
-                    let useRelativeMinor = currentMode === 'scale' ? (!scaleVal.includes("Phrygian")) : (chordVal && (chordVal.includes("Major") || chordVal.includes("Dominant") || chordVal === "Sus 2 (sus2)" || chordVal === "Sus 4 (sus4)"));
+                if (AppState.showFormHighlight && intervals.length > 0) {
+                    let useRelativeMinor = AppState.mode === CONFIG.MODES.SCALE ? (!scaleVal.includes("Phrygian")) : (chordVal && (chordVal.includes("Major") || chordVal.includes("Dominant") || chordVal === "Sus 2 (sus2)" || chordVal === "Sus 4 (sus4)"));
                     const anchorNote = useRelativeMinor ? (rootIndex - 3 + 12) % 12 : rootIndex;
-                    const lowestStrIdx = tunings[currentInstrument].length - 1;
-                    const tuningOffsets = tuningPresets[currentInstrument][tuningVal].offset;
-                    let f1 = (anchorNote - ((tunings[currentInstrument][lowestStrIdx] + tuningOffsets[lowestStrIdx] + 120) % 12) + 12) % 12;
+                    const lowestStrIdx = MUSIC_DATA.tunings[AppState.instrument].length - 1;
+                    const tuningOffsets = MUSIC_DATA.tuningPresets[AppState.instrument][tuningVal].offset;
+                    let f1 = (anchorNote - ((MUSIC_DATA.tunings[AppState.instrument][lowestStrIdx] + tuningOffsets[lowestStrIdx] + 120) % 12) + 12) % 12;
                     const formSelectVal = DOM_CACHE.formSelect.value;
-                    let offsets = BASS_FORM_SPECIAL_OFFSETS[formSelectVal] || [...formOffsets[formSelectVal]];
-                    offsets.map(o => f1 + o).forEach(f => FRET_OCTAVE_SHIFTS.forEach(s => { if (f+s >= 0 && f+s <= TOTAL_FRETS) anchorFrets.add(f+s); }));
+                    let offsets = CONFIG.BASS_FORM_SPECIAL_OFFSETS[formSelectVal] || [...CONFIG.FORM_OFFSETS[formSelectVal]];
+                    offsets.map(o => f1 + o).forEach(f => CONFIG.FRET_OCTAVE_SHIFTS.forEach(s => { if (f+s >= 0 && f+s <= CONFIG.TOTAL_FRETS) anchorFrets.add(f+s); }));
                 }
                 updateAnchorFrets(anchorFrets);
             }
@@ -908,7 +943,6 @@
             updateNoteHighlights(Array.from(activeNotes), rootIndex);
         }
 
-        // 🔥 새롭게 렌더링되도록 수정 (줄바꿈 기능 포함)
         function renderChordDiagrams(progression, rootIndex, chordVal) {
             DOM_CACHE.diagramView.style.display = 'flex';
             DOM_CACHE.diagramView.style.flexWrap = 'wrap';
@@ -934,7 +968,7 @@
                     const voicing = getChordVoicing(c.rootIdx, c.chordName);
                     if (voicing) {
                         const shortSymbol = extractChordSymbol(c.chordName);
-                        svgContent = generateChordDiagramSVG(voicing, `${notes[c.rootIdx]}${shortSymbol}`, false, idx);
+                        svgContent = generateChordDiagramSVG(voicing, `${MUSIC_DATA.notes[c.rootIdx]}${shortSymbol}`, false, idx);
                     }
                 } else if (c.type === 'custom') {
                     svgContent = generateChordDiagramSVG(c.voicing, c.title, true, idx, c.startFret);
@@ -950,7 +984,7 @@
                 const voicing = getChordVoicing(rootIndex, chordVal);
                 if (voicing) {
                     const shortSymbol = extractChordSymbol(chordVal);
-                    html += `<div class="no-capture chord-item" style="position:relative; opacity:0.8; border: 2px dashed #9c27b0; border-radius: 12px; padding: 5px; margin-bottom: 10px; box-sizing:border-box;"><div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:#9c27b0; color:white; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:bold; white-space:nowrap;">${currentLang === 'ko' ? '미리보기 (Preview)' : 'Preview'}</div>${generateChordDiagramSVG(voicing, `${notes[rootIndex]}${shortSymbol}`, false, -1)}</div>`;
+                    html += `<div class="no-capture chord-item" style="position:relative; opacity:0.8; border: 2px dashed #9c27b0; border-radius: 12px; padding: 5px; margin-bottom: 10px; box-sizing:border-box;"><div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:#9c27b0; color:white; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:bold; white-space:nowrap;">${AppState.currentLang === 'ko' ? '미리보기 (Preview)' : 'Preview'}</div>${generateChordDiagramSVG(voicing, `${MUSIC_DATA.notes[rootIndex]}${shortSymbol}`, false, -1)}</div>`;
                 } else html += `<p class="no-capture" style="color:#666; align-self:center; width:100%; text-align:center; padding: 20px;">해당 코드의 다이어그램을 찾을 수 없습니다.</p>`;
             }
             DOM_CACHE.diagramView.innerHTML = html;
@@ -959,10 +993,10 @@
         window.applyView = function(rootIndex, name, type) {
             DOM_CACHE.keySelect.value = rootIndex;
             if (type === 'scale') { 
-                switchMode('scale'); 
-                if (majorScales.hasOwnProperty(name)) { DOM_CACHE.majorSelect.value = name; DOM_CACHE.minorSelect.value = ""; } 
+                switchMode(CONFIG.MODES.SCALE); 
+                if (MUSIC_DATA.majorScales.hasOwnProperty(name)) { DOM_CACHE.majorSelect.value = name; DOM_CACHE.minorSelect.value = ""; } 
                 else { DOM_CACHE.minorSelect.value = name; DOM_CACHE.majorSelect.value = ""; } 
-            } else if (type === 'chord') { switchMode('chord'); DOM_CACHE.chordSelect.value = name; }
+            } else if (type === 'chord') { switchMode(CONFIG.MODES.CHORD); DOM_CACHE.chordSelect.value = name; }
             updateFretboard(); window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
@@ -976,18 +1010,18 @@
             const arraysEqual = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
 
             for (let root = 0; root < 12; root++) {
-                let rootName = notes[root];
-                for (let chordName in allChords) {
-                    if (arraysEqual(allChords[chordName].map(i => (root + i) % 12).sort((a, b) => a - b), selectedArr)) exactChords.push(`<span class="clickable-scale" onclick="applyView(${root}, '${chordName}', 'chord')"><strong>${rootName}${extractChordSymbol(chordName)}</strong> (${chordName})</span>`);
+                let rootName = MUSIC_DATA.notes[root];
+                for (let chordName in MUSIC_DATA.allChords) {
+                    if (arraysEqual(MUSIC_DATA.allChords[chordName].map(i => (root + i) % 12).sort((a, b) => a - b), selectedArr)) exactChords.push(`<span class="clickable-scale" onclick="applyView(${root}, '${chordName}', 'chord')"><strong>${rootName}${extractChordSymbol(chordName)}</strong> (${chordName})</span>`);
                 }
-                for (let scaleName in allScales) {
-                    let scaleNotes = allScales[scaleName].map(i => (root + i) % 12).sort((a, b) => a - b);
+                for (let scaleName in MUSIC_DATA.allScales) {
+                    let scaleNotes = MUSIC_DATA.allScales[scaleName].map(i => (root + i) % 12).sort((a, b) => a - b);
                     if (arraysEqual(scaleNotes, selectedArr)) exactScales.push(`<span class="clickable-scale" onclick="applyView(${root}, '${scaleName}', 'scale')"><strong>${rootName}</strong> ${scaleName}</span>`);
                     else if (selectedArr.length >= 3 && selectedArr.every(val => scaleNotes.includes(val))) partialScales.push(`<span class="clickable-scale" onclick="applyView(${root}, '${scaleName}', 'scale')">${rootName} ${scaleName}</span>`);
                 }
             }
 
-            let html = `${t.txtCurrentNotes}<strong>[ ${selectedArr.map(n => notes[n]).join(', ')} ]</strong><br><br>${t.txtExactChords}<br>${exactChords.length > 0 ? exactChords.join('<br>') + '<br><br>' : t.txtNone + '<br><br>'}${t.txtExactScales}<br>${exactScales.length > 0 ? exactScales.join('<br>') + '<br><br>' : t.txtNone + '<br><br>'}`;
+            let html = `${t.txtCurrentNotes}<strong>[ ${selectedArr.map(n => MUSIC_DATA.notes[n]).join(', ')} ]</strong><br><br>${t.txtExactChords}<br>${exactChords.length > 0 ? exactChords.join('<br>') + '<br><br>' : t.txtNone + '<br><br>'}${t.txtExactScales}<br>${exactScales.length > 0 ? exactScales.join('<br>') + '<br><br>' : t.txtNone + '<br><br>'}`;
             if (partialScales.length > 0) html += `${t.txtPartialScales}<br>${partialScales.slice(0, 15).join('')}${partialScales.length > 15 ? t.txtEtc : ''}`;
             DOM_CACHE.analyzerResult.innerHTML = html;
         }
@@ -1007,7 +1041,7 @@
             const originalBg = DOM_CACHE.captureArea.style.backgroundColor; 
             DOM_CACHE.captureArea.style.backgroundColor = 'transparent';
             const originalText = DOM_CACHE.captureBtn.innerHTML; 
-            DOM_CACHE.captureBtn.innerHTML = currentLang === 'ko' ? '저장 중...' : 'Saving...'; 
+            DOM_CACHE.captureBtn.innerHTML = AppState.currentLang === 'ko' ? '저장 중...' : 'Saving...'; 
             DOM_CACHE.captureBtn.disabled = true;
 
             html2canvas(DOM_CACHE.captureArea, { backgroundColor: null, scale: 2 }).then(canvas => {
