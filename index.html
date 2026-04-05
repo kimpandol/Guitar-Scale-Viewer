@@ -13,21 +13,33 @@
     <title>기타 & 베이스 & 키보드 스케일/코드 뷰어</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
+        /* =========================================================
+           1. 공통 및 PC(데스크탑) 기본 스타일 (원본 레이아웃 100% 유지)
+           ========================================================= */
         body { font-family: sans-serif; background-color: #f4f4f4; padding: 15px; margin: 0; }
         .controls-container { background-color: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px; }
-        .controls-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px; }
+        .controls-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px; width: 100%; }
         .controls-row:last-child { margin-bottom: 0; }
         .divider { width: 100%; height: 1px; background-color: #eee; margin: 10px 0 15px 0; }
-        select { padding: 8px 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; background-color: #fff; }
+        select { padding: 8px 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; background-color: #fff; box-sizing: border-box; }
         
+        .instrument-group, .mode-group { display: inline-flex; gap: 10px; }
+        
+        /* PC에서 캡처버튼을 우측으로 쫙 밀어냄 */
+        #capture-btn { margin-left: auto; }
+
+        /* PC용 인라인 플렉스 정렬 복구 */
+        #tuning-controls, #key-controls { display: inline-flex; align-items: center; gap: 8px; }
+        #scale-controls, #chord-controls { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+        #shared-controls { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-left: auto; }
+
+        /* 캡처 및 지판 영역 */
         .fretboard-scroll-wrapper { width: 100%; margin-bottom: 20px; border-radius: 8px; }
-        
-        #capture-area { background-color: #f4f4f4; padding: 20px 15px 15px 15px; width: 100%; box-sizing: border-box; }
+        #capture-area { width: 100%; box-sizing: border-box; display: flex; flex-direction: column; background-color: #f4f4f4; padding: 20px 15px 15px 15px; }
         #capture-title, #fretboard-title { text-align: center; color: #333; margin-top: 0; margin-bottom: 15px; font-size: 24px; font-weight: bold; }
+        #fretboard-view { background-color: #fff; padding: 20px 15px; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; width: 100%; margin-bottom: 20px; }
         
-        #fretboard-view { background-color: #fff; padding: 20px 15px; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; width: 100%; }
-        
-        /* 악기 반응형 디자인 */
+        /* 악기 디자인 */
         .fretboard { display: flex; flex-direction: column; background-color: #3e3e3e; padding: 10px 0; border-radius: 5px; user-select: none; width: 100%; }
         .string { display: flex; height: clamp(30px, 5vw, 40px); position: relative; align-items: center; }
         .string::before { content: ''; position: absolute; left: 0; right: 0; height: 2px; background-color: #b0b0b0; z-index: 1; }
@@ -56,7 +68,7 @@
         .black-key { width: 66%; height: 120px; background-color: #222; position: absolute; top: 0; right: -33%; z-index: 2; border-radius: 0 0 4px 4px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 15px; cursor: pointer; }
         .black-key:hover { background-color: #444; }
 
-        .note { width: 80%; max-width: 24px; aspect-ratio: 1; border-radius: 50%; background-color: #ff9800; color: white; display: none; justify-content: center; align-items: center; font-size: clamp(6px, 1.5vw, 11px); font-weight: bold; z-index: 3; box-shadow: 0 2px 4px rgba(0,0,0,0.3); pointer-events: none; }
+        .note { width: 80%; max-width: 24px; aspect-ratio: 1; border-radius: 50%; background-color: #ff9800; color: white; display: none; justify-content: center; align-items: center; font-size: clamp(7px, 1.8vw, 11px); font-weight: bold; z-index: 3; box-shadow: 0 2px 4px rgba(0,0,0,0.3); pointer-events: none; }
         .note.active { display: flex; }
         .note.root { background-color: #f44336; }
         .note.custom { display: flex !important; background-color: #4CAF50 !important; color: white; border: 2px solid #fff; }
@@ -66,7 +78,7 @@
         .analyzer h3 { margin-top: 0; color: #333; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
         .analyzer-content { font-size: 15px; color: #555; word-break: keep-all; }
         
-        .btn { background-color: #e0e0e0; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; color: #333; touch-action: manipulation; }
+        .btn { background-color: #e0e0e0; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; color: #333; touch-action: manipulation; box-sizing: border-box; }
         .btn:hover { background-color: #ccc; }
         .lang-btn { background-color: #333; color: white; }
         .lang-btn:hover { background-color: #111; }
@@ -76,7 +88,7 @@
         .mode-btn.active { background-color: #ff9800; box-shadow: 0 0 8px rgba(255,152,0,0.5); }
         .find-note-btn { padding: 6px 12px; font-size: 14px; background-color: #e0e0e0; text-align: center; }
         .find-note-btn.active { background-color: #9c27b0; color: white; box-shadow: 0 0 6px rgba(156, 39, 176, 0.6); }
-        .capture-btn { background-color: #1a73e8; color: white; margin-left: auto; }
+        .capture-btn { background-color: #1a73e8; color: white; }
         .capture-btn:hover { background-color: #1152a3; }
         
         .clickable-scale { cursor: pointer; color: #1a73e8; text-decoration: underline; display: inline-block; margin-right: 15px; margin-bottom: 5px; }
@@ -88,100 +100,211 @@
 
         .chord-item { transition: opacity 0.2s; flex: 1 1 120px; max-width: 220px; }
         .chord-item svg { width: 100%; height: auto; }
-        .scale-item { transition: opacity 0.2s; width: 100%; }
+        .scale-item { position: relative; padding: 15px; background: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: grab; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; width: 100%; transition: opacity 0.2s; }
+        .scale-item-title { text-align: center; margin-top: 0; margin-bottom: 15px; color: #333; font-size: 20px; }
+        .scale-item-close { position: absolute; top: 10px; right: 10px; background: #f44336; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; z-index: 10; }
+        
         .linebreak-item { flex-basis: 100% !important; max-width: 100% !important; height: 35px; display:flex; align-items:center; justify-content:center; cursor:grab; position:relative; margin: 5px 0; }
-
         .chord-item.over, .scale-item.over { border: 2px dashed #4CAF50 !important; border-radius: 12px; opacity: 0.7; }
         .custom-click-zone { fill: transparent; }
         .custom-click-zone:hover { fill: rgba(255, 255, 255, 0.15); }
-
-        /* 🔥 SVG 내부의 화살표 버튼 CSS */
         .custom-fret-svg-btn { cursor: pointer; }
         .custom-fret-svg-btn rect { transition: fill 0.2s; }
         .custom-fret-svg-btn:hover rect { fill: rgba(255, 255, 255, 0.5) !important; }
 
+        /* =========================================================
+           2. 모바일 최적화 레이아웃 (768px 이하 전용 마법의 CSS)
+           ========================================================= */
         @media (max-width: 768px) {
-            .controls-row { flex-direction: column; align-items: stretch; gap: 8px; }
-            .controls-row > span { display: flex; flex-direction: column; gap: 8px; }
-            .capture-btn { margin-left: 0; }
-            .btn { width: 100%; padding: 12px; font-size: 16px; }
-            select { width: 100%; padding: 12px; }
+            .hide-on-mobile { display: none !important; }
+            .show-on-mobile { display: inline !important; }
+            
+            /* 🚀 앱 전체를 Grid로 변환하여 완전 자유로운 순서 배치 */
+            #app-wrapper { 
+                display: grid; 
+                grid-template-columns: 1fr 1fr; 
+                gap: 10px; 
+                align-items: start; 
+            }
+            
+            /* PC의 하얀 껍데기를 해제하여 자식 요소들을 모바일 Grid에 풀어줌 */
+            #main-controls, #pc-row-1, #pc-row-2 { display: contents; }
+            #main-divider { display: none; }
+            
+            /* [모바일 전용 하얀색 카드 스타일 일괄 적용] */
+            #m-grp-inst, #tuning-controls, #key-controls, #scale-controls, #chord-controls, #m-grp-mode, #shared-controls {
+                background-color: #fff;
+                padding: 12px;
+                border-radius: 8px;
+                border: 1px solid #ddd;
+                box-sizing: border-box;
+                width: 100%;
+                margin: 0;
+            }
+
+            /* 🔥 [1열] EN (왼쪽 끝)과 저장 (오른쪽 끝) */
+            #lang-btn { order: 1; grid-column: 1; width: 100%; padding: 12px 0; text-align: center; margin: 0; }
+            #capture-btn { order: 2; grid-column: 2; width: 100%; padding: 12px 0; text-align: center; margin: 0 !important; }
+            
+            /* 🔥 [2열] 악기 버튼 (기타, 베이스, 피아노 3열 꽉차게) */
+            #m-grp-inst { order: 3; grid-column: 1 / 3; display: flex; gap: 5px; }
+            #m-grp-inst .btn { flex: 1; margin: 0; padding: 12px 0; font-size: 13px; }
+
+            /* 🔥 [3열] 튜닝 */
+            #tuning-controls { order: 4; grid-column: 1 / 3; display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
+            #tuning-controls label { font-size: 14px; font-weight: bold; margin: 0; white-space: nowrap; }
+            #tuning-select { width: 100%; height: 40px; margin: 0; }
+
+            /* 🔥 [4열 상단] 조 (Key) - 박스를 메이저/마이너와 시각적으로 결합 */
+            #key-controls { 
+                grid-column: 1 / 3; display: flex; flex-direction: column; align-items: stretch; gap: 4px; 
+                padding-bottom: 0; border-bottom: none; border-radius: 8px 8px 0 0; 
+            }
+            #key-controls label { font-size: 14px; font-weight: bold; margin: 0; white-space: nowrap; }
+            #key-select { width: 100%; height: 40px; margin: 0; }
+
+            /* 🔥 [4열 하단] 메이저/마이너 (스케일 모드 시 표시) - 박스 결합 */
+            #scale-controls { 
+                grid-column: 1 / 3; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: -10px; 
+                border-top: none; border-radius: 0 0 8px 8px; 
+            }
+            #scale-controls > span { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
+            #scale-controls label { font-size: 13px; font-weight: bold; margin: 0; }
+            #major-select, #minor-select { width: 100%; height: 40px; margin: 0; }
+            #add-scale-btn { grid-column: 1 / 3; width: 100%; margin: 0; padding: 12px 0; margin-top: 5px; }
+
+            /* 🔥 [4열 하단 대체] 코드 종류 (코드 모드 시 표시) - 박스 결합 */
+            #chord-controls { 
+                order: 6; grid-column: 1 / 3; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; 
+                border-top: none; border-radius: 0 0 8px 8px; 
+            }
+            #chord-controls > span { grid-column: 1 / 4; display: flex; flex-direction: column; align-items: stretch; gap: 4px; margin-bottom: 5px; }
+            #chord-controls label { font-size: 13px; font-weight: bold; margin: 0; }
+            #chord-select { width: 100%; height: 40px; margin: 0; }
+            #add-chord-btn, #add-custom-btn, #add-linebreak-btn { margin: 0; padding: 10px 2px; font-size: 12px; }
+            #toggle-diagram-btn { grid-column: 1 / 4; width: 100%; margin: 0; padding: 12px 0; }
+
+            /* 🔥 [5열] 🎸 메인 지판 (조-메이저-마이너 바로 아래로 직행!) */
+            #panel-fretboard { grid-column: 1 / 3; margin: 5px 0; }
+
+            /* 🔥 [6열] 스케일/코드 모드 버튼 (지판 아래에 배치!) */
+            #m-grp-mode { order: 8; grid-column: 1 / 3; display: flex; gap: 5px; margin-left: 0 !important; }
+            #m-grp-mode .btn { flex: 1; margin: 0; padding: 12px 0; font-size: 14px; }
+
+            /* 🔥 [7열] 세이브 / 로드 / 지우기 (가장 하단) */
+            #shared-controls { order: 9; grid-column: 1 / 3; display: flex; flex-direction: row; gap: 8px; margin-left: 0 !important; }
+            #shared-controls .btn { flex: 1; margin: 0; padding: 12px 0; font-size: 13px; }
+
+            /* 캡처 영역 내 요소 순서 정렬 */
+            #capture-title { order: 1; }
+            #fretboard-view { order: 2; margin-bottom: 10px; } 
+            #scale-progression-view { order: 3; }
+            #chord-diagram-view { order: 4; }
+
+            /* 분석기 및 기타 요소 */
             #note-buttons-container { display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 5px; }
             .find-note-btn { width: 100%; padding: 10px 0; }
             .analyzer h3 { flex-direction: column; align-items: stretch; }
             #clear-custom-btn { width: 100%; margin-top: 10px; }
             
             #capture-title, #fretboard-title { font-size: 20px; margin-bottom: 14px; }
+            .scale-item-title { font-size: 18px; }
             .piano-key-wrapper { min-width: 0; }
             .white-key { height: 150px; padding-bottom: 10px; }
             .black-key { height: 90px; padding-bottom: 10px; }
+
+            /* 12프렛 하이라이트 글자 겹침 방지 */
+            .fret-number.highlight-12 span { padding: 1px 3px; font-size: 0.85em; border-radius: 2px; box-shadow: none; letter-spacing: -0.5px; }
+        }
+        
+        @media (max-width: 479px) {
+            .fret-number.highlight-12 span { padding: 0px 2px; font-size: 0.75em; letter-spacing: -1px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="controls-container" role="region" aria-label="메인 컨트롤 패널">
-        <div class="controls-row" role="group" aria-label="악기 및 모드 선택">
-            <button id="lang-btn" class="btn lang-btn" aria-label="언어 변경">🌐 English</button>
-            <button id="guitar-btn" class="btn instrument-btn active" aria-label="기타 선택">🎸 기타 (6줄)</button>
-            <button id="bass-btn" class="btn instrument-btn" aria-label="베이스 선택">🎸 베이스 (4줄)</button>
-            <button id="keyboard-btn" class="btn instrument-btn" aria-label="키보드 선택">🎹 키보드 (피아노)</button>
+    <div id="app-wrapper">
+        
+        <div class="controls-container no-capture" id="main-controls" role="region" aria-label="메인 컨트롤 패널">
             
-            <span id="tuning-controls" style="display:inline-flex; align-items:center; gap:8px;">
-                <label id="lbl-tuning" for="tuning-select">튜닝: </label>
-                <select id="tuning-select" style="min-width: 120px;" aria-label="튜닝 옵션 선택"></select>
-            </span>
-            
-            <button id="scale-mode-btn" class="btn mode-btn active" aria-label="스케일 모드 선택">🎶 스케일 모드</button>
-            <button id="chord-mode-btn" class="btn mode-btn" aria-label="코드 모드 선택">🎹 코드 모드</button>
-            <button id="capture-btn" class="btn capture-btn" aria-label="화면 캡처하여 저장">📸 지판/악보 저장</button>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="controls-row" role="group" aria-label="상세 옵션 선택">
-            <label id="lbl-key" for="key-select">조(Key/Root): </label>
-            <select id="key-select" aria-label="기준음 선택"></select>
-            
-            <span id="scale-controls" style="display:inline-flex; flex-wrap:wrap; align-items:center; gap:8px;">
-                <label id="lbl-major" for="major-select">메이저 계열: </label>
-                <select id="major-select" aria-label="메이저 스케일 선택"><option value="">-- 선택 --</option></select>
-                <label id="lbl-minor" for="minor-select">마이너 계열: </label>
-                <select id="minor-select" aria-label="마이너 스케일 선택"><option value="">-- 선택 --</option></select>
-                <button id="add-scale-btn" class="btn" style="background-color:#4CAF50; color:white; display:none;" aria-label="스케일 악보에 추가">➕ 스케일 추가</button>
-            </span>
-
-            <span id="chord-controls" style="display:none; flex-wrap:wrap; align-items:center; gap:8px;">
-                <label id="lbl-chord" for="chord-select">코드 종류: </label>
-                <select id="chord-select" aria-label="코드 종류 선택"><option value="">-- 선택 --</option></select>
-                <button id="add-chord-btn" class="btn" style="background-color:#4CAF50; color:white; display:none;" aria-label="코드 악보에 추가">➕ 악보에 추가</button>
-                <button id="add-custom-btn" class="btn" style="background-color:#2196F3; color:white; display:none;" aria-label="빈 다이어그램 추가">➕ 빈 지판 추가</button>
-                <button id="add-linebreak-btn" class="btn" style="background-color:#9E9E9E; color:white; display:none;" aria-label="악보 줄바꿈 추가">⏎ 줄바꿈</button>
-                <button id="toggle-diagram-btn" class="btn" style="background-color:#9c27b0; color:white; display:none;" aria-label="코드표/지판 보기 전환">📋 코드표로 보기</button>
-            </span>
-            
-            <span id="shared-controls" style="display:inline-flex; flex-wrap:wrap; align-items:center; gap:8px; margin-left:auto;">
-                <button id="save-json-btn" class="btn" style="background-color:#FF9800; color:white; display:none;" aria-label="현재 악보 JSON으로 저장">💾 악보 저장</button>
-                <button id="load-json-btn" class="btn" style="background-color:#00BCD4; color:white; display:inline-block;" aria-label="저장된 JSON 악보 불러오기">📂 불러오기</button>
-                <input type="file" id="load-json-input" accept=".json" style="display:none;" aria-hidden="true">
-                <button id="clear-progression-btn" class="btn" style="background-color:#f44336; color:white; display:none;" aria-label="추가된 모든 악보 지우기">🗑️ 비우기</button>
-            </span>
-        </div>
-    </div>
-
-    <div class="fretboard-scroll-wrapper" role="region" aria-label="악보 및 지판 표시 영역">
-        <div id="capture-area">
-            <h2 id="capture-title" class="no-capture" style="display:none;" aria-live="polite"></h2>
-            
-            <div id="fretboard-view">
-                <h2 id="fretboard-title" aria-live="polite"></h2>
-                <div class="fret-numbers" id="fret-numbers" aria-hidden="true"></div>
-                <div id="fretboard" class="fretboard instrument-guitar" aria-label="인터랙티브 지판"></div>
+            <div class="controls-row" id="pc-row-1">
+                <button id="lang-btn" class="btn lang-btn" aria-label="언어 변경">🌐<span class="hide-on-mobile"> English</span><span class="show-on-mobile" style="display:none;"> EN</span></button>
+                
+                <span class="instrument-group" id="m-grp-inst">
+                    <button id="guitar-btn" class="btn instrument-btn active" aria-label="기타 선택">🎸 기타<span class="hide-on-mobile"> (6줄)</span></button>
+                    <button id="bass-btn" class="btn instrument-btn" aria-label="베이스 선택">🎸 베이스<span class="hide-on-mobile"> (4줄)</span></button>
+                    <button id="keyboard-btn" class="btn instrument-btn" aria-label="키보드 선택">🎹<span class="hide-on-mobile"> 키보드 (피아노)</span><span class="show-on-mobile" style="display:none;"> 피아노</span></button>
+                </span>
+                
+                <span id="tuning-controls">
+                    <label id="lbl-tuning" for="tuning-select">튜닝: </label>
+                    <select id="tuning-select" aria-label="튜닝 옵션 선택"></select>
+                </span>
+                
+                <span class="mode-group" id="m-grp-mode">
+                    <button id="scale-mode-btn" class="btn mode-btn active" aria-label="스케일 모드 선택">🎶 스케일<span class="hide-on-mobile"> 모드</span></button>
+                    <button id="chord-mode-btn" class="btn mode-btn" aria-label="코드 모드 선택">🎹 코드<span class="hide-on-mobile"> 모드</span></button>
+                </span>
+                
+                <button id="capture-btn" class="btn capture-btn" aria-label="화면 캡처하여 저장">📸<span class="hide-on-mobile"> 지판/악보 저장</span><span class="show-on-mobile" style="display:none;"> 저장</span></button>
             </div>
-            
-            <div id="scale-progression-view" style="display:none; flex-direction:column; gap:25px; margin-top:30px;" aria-label="스케일 모음 악보"></div>
-            <div id="chord-diagram-view" style="display:none; padding: 20px 0;" aria-label="코드 다이어그램 모음"></div>
+
+            <div class="divider" id="main-divider"></div>
+
+            <div class="controls-row" id="pc-row-2">
+                <span id="key-controls">
+                    <label id="lbl-key" for="key-select">조(Key/Root): </label>
+                    <select id="key-select" aria-label="기준음 선택"></select>
+                </span>
+                
+                <span id="scale-controls">
+                    <span style="display:inline-flex; align-items:center; gap:8px;">
+                        <label id="lbl-major" for="major-select">메이저 계열: </label>
+                        <select id="major-select" aria-label="메이저 스케일 선택"><option value="">-- 선택 --</option></select>
+                    </span>
+                    <span style="display:inline-flex; align-items:center; gap:8px;">
+                        <label id="lbl-minor" for="minor-select">마이너 계열: </label>
+                        <select id="minor-select" aria-label="마이너 스케일 선택"><option value="">-- 선택 --</option></select>
+                    </span>
+                    <button id="add-scale-btn" class="btn" style="background-color:#4CAF50; color:white; display:none;" aria-label="스케일 악보에 추가">➕ 지판 추가</button>
+                </span>
+
+                <span id="chord-controls" style="display:none;">
+                    <span style="display:inline-flex; align-items:center; gap:8px;">
+                        <label id="lbl-chord" for="chord-select">코드 종류: </label>
+                        <select id="chord-select" aria-label="코드 종류 선택"><option value="">-- 선택 --</option></select>
+                    </span>
+                    <button id="add-chord-btn" class="btn" style="background-color:#4CAF50; color:white; display:none;" aria-label="코드 악보에 추가">➕ 악보에 추가</button>
+                    <button id="add-custom-btn" class="btn" style="background-color:#2196F3; color:white; display:none;" aria-label="빈 다이어그램 추가">➕ 빈 지판 추가</button>
+                    <button id="add-linebreak-btn" class="btn" style="background-color:#9E9E9E; color:white; display:none;" aria-label="악보 줄바꿈 추가">⏎ 줄바꿈</button>
+                    <button id="toggle-diagram-btn" class="btn" style="background-color:#9c27b0; color:white; display:none;" aria-label="코드표/지판 보기 전환">📋 코드표로 보기</button>
+                </span>
+                
+                <span id="shared-controls">
+                    <button id="save-json-btn" class="btn" style="background-color:#FF9800; color:white; display:none;" aria-label="현재 악보 JSON으로 저장">💾 악보 저장</button>
+                    <button id="load-json-btn" class="btn" style="background-color:#00BCD4; color:white; display:inline-block;" aria-label="저장된 JSON 악보 불러오기">📂 불러오기</button>
+                    <input type="file" id="load-json-input" accept=".json" style="display:none;" aria-hidden="true">
+                    <button id="clear-progression-btn" class="btn" style="background-color:#f44336; color:white; display:none;" aria-label="추가된 모든 악보 지우기">🗑️ 비우기</button>
+                </span>
+            </div>
         </div>
+
+        <div class="fretboard-scroll-wrapper" id="panel-fretboard" role="region" aria-label="악보 및 지판 표시 영역">
+            <div id="capture-area">
+                <h2 id="capture-title" class="no-capture" style="display:none;" aria-live="polite"></h2>
+                
+                <div id="fretboard-view">
+                    <h2 id="fretboard-title" aria-live="polite"></h2>
+                    <div class="fret-numbers" id="fret-numbers" aria-hidden="true"></div>
+                    <div id="fretboard" class="fretboard instrument-guitar" aria-label="인터랙티브 지판"></div>
+                </div>
+                
+                <div id="scale-progression-view" style="display:none; flex-direction:column; gap:25px; margin-top:30px;" aria-label="스케일 모음 악보"></div>
+                <div id="chord-diagram-view" style="display:none; padding: 20px 0;" aria-label="코드 다이어그램 모음"></div>
+            </div>
+        </div>
+
     </div>
 
     <div class="analyzer" role="region" aria-label="화성 분석 영역">
@@ -224,7 +347,6 @@
             KEYBOARD_WHITE_NOTES: [0, 2, 4, 5, 7, 9, 11],
             KEYBOARD_BLACK_MAP: {0: 1, 2: 3, 4: null, 5: 6, 7: 8, 9: 10, 11: null},
             INLAY_FRETS: [3, 5, 7, 9, 15, 17, 19, 21],
-            TOTAL_FRETS: 21,
             OCTAVE_FRET: 12,
             FRET_OCTAVE_SHIFTS: [-24, -12, 0, 12, 24],
             BASS_FORM_SPECIAL_OFFSETS: { '3': [4, 5, 6, 7] },
@@ -232,14 +354,29 @@
             MODES: { SCALE: 'scale', CHORD: 'chord' }
         };
 
+        const getTotalFrets = () => window.innerWidth <= 768 ? 18 : 21;
+
         const i18n = {
             ko: {
-                langBtn: "🌐 English", guitarBtn: "🎸 기타 (6줄)", bassBtn: "🎸 베이스 (4줄)", keyboardBtn: "🎹 키보드 (피아노)", lblTuning: "튜닝: ",
-                scaleModeBtn: "🎶 스케일 모드", chordModeBtn: "🎹 코드 모드", captureBtn: "📸 캡처/저장", lblKey: "조(Key/Root): ",
+                langBtn: '🌐<span class="hide-on-mobile"> English</span><span class="show-on-mobile" style="display:none;"> EN</span>', 
+                guitarBtn: '🎸 기타<span class="hide-on-mobile"> (6줄)</span>', 
+                bassBtn: '🎸 베이스<span class="hide-on-mobile"> (4줄)</span>', 
+                keyboardBtn: '🎹<span class="hide-on-mobile"> 키보드 (피아노)</span><span class="show-on-mobile" style="display:none;"> 피아노</span>', 
+                lblTuning: "튜닝: ",
+                scaleModeBtn: '🎶 스케일<span class="hide-on-mobile"> 모드</span>', 
+                chordModeBtn: '🎹 코드<span class="hide-on-mobile"> 모드</span>', 
+                captureBtn: '📸<span class="hide-on-mobile"> 지판/악보 저장</span><span class="show-on-mobile" style="display:none;"> 저장</span>', 
+                lblKey: "조(Key/Root): ",
                 lblMajor: "메이저 계열: ", lblMinor: "마이너 계열: ", lblChord: "코드 종류: ", lblFindNote: "특정 음 찾기 (보라색): ",
-                lblFormToggle: "🎸 폼(포지션) 영역 표시: ", btnOff: "OFF", btnOn: "ON", btnDiagram: "📋 코드표로 보기", btnFretboard: "🎸 지판으로 보기",
-                btnAddScale: "➕ 스케일 추가", btnAddChord: "➕ 악보에 추가", btnAddCustom: "➕ 빈 지판 추가", btnAddLinebreak: "⏎ 줄바꿈", btnSaveJson: "💾 악보 저장",
-                btnLoadJson: "📂 불러오기", btnClear: "🗑️ 비우기", titleChordProgression: "코드 진행 악보", titleScaleProgression: "스케일 모음 악보",
+                lblFormToggle: "🎸 폼(포지션) 영역 표시: ", btnOff: "OFF", btnOn: "ON", 
+                btnDiagram: '📋<span class="hide-on-mobile"> 코드표로 보기</span><span class="show-on-mobile" style="display:none;"> 표 보기</span>', 
+                btnFretboard: '🎸<span class="hide-on-mobile"> 지판으로 보기</span><span class="show-on-mobile" style="display:none;"> 지판 보기</span>',
+                btnAddScale: "➕ 지판 추가", btnAddChord: '➕<span class="hide-on-mobile"> 악보에 추가</span><span class="show-on-mobile" style="display:none;"> 코드</span>', 
+                btnAddCustom: '➕<span class="hide-on-mobile"> 빈 지판 추가</span><span class="show-on-mobile" style="display:none;"> 빈 지판</span>', 
+                btnAddLinebreak: "⏎ 줄바꿈", 
+                btnSaveJson: '💾<span class="hide-on-mobile"> 악보 저장</span><span class="show-on-mobile" style="display:none;"> 저장</span>',
+                btnLoadJson: '📂<span class="hide-on-mobile"> 불러오기</span><span class="show-on-mobile" style="display:none;"> 열기</span>', 
+                btnClear: "🗑️ 비우기", titleChordProgression: "코드 진행 악보", titleScaleProgression: "스케일 모음 악보",
                 form1: "1번 폼 (Root-6)", form2: "2번 폼", form3: "3번 폼", form4: "4번 폼", form5: "5번 폼 (Root-5)", selectDefault: "-- 선택 --",
                 analyzerTitle: "🔍 화성 분석기", clearBtn: "초록/보라색 초기화", 
                 analyzerDefault: "지판/건반을 클릭해서 초록색 음을 추가하면, 어떤 <strong>코드</strong>와 <strong>스케일</strong>인지 여기에 분석해 줄게!",
@@ -249,12 +386,25 @@
                 txtLineBreak: "줄바꿈"
             },
             en: {
-                langBtn: "🌐 한국어", guitarBtn: "🎸 Guitar (6-string)", bassBtn: "🎸 Bass (4-string)", keyboardBtn: "🎹 Keyboard", lblTuning: "Tuning: ",
-                scaleModeBtn: "🎶 Scale Mode", chordModeBtn: "🎹 Chord Mode", captureBtn: "📸 Save Image", lblKey: "Key/Root: ",
+                langBtn: '🌐<span class="hide-on-mobile"> 한국어</span><span class="show-on-mobile" style="display:none;"> KO</span>', 
+                guitarBtn: '🎸 Guitar<span class="hide-on-mobile"> (6-string)</span>', 
+                bassBtn: '🎸 Bass<span class="hide-on-mobile"> (4-string)</span>', 
+                keyboardBtn: '🎹 Keyboard', 
+                lblTuning: "Tuning: ",
+                scaleModeBtn: '🎶 Scale<span class="hide-on-mobile"> Mode</span>', 
+                chordModeBtn: '🎹 Chord<span class="hide-on-mobile"> Mode</span>', 
+                captureBtn: '📸<span class="hide-on-mobile"> Save Image</span><span class="show-on-mobile" style="display:none;"> Save</span>', 
+                lblKey: "Key/Root: ",
                 lblMajor: "Major Scales: ", lblMinor: "Minor Scales: ", lblChord: "Chord Type: ", lblFindNote: "Find Notes (Purple): ",
-                lblFormToggle: "🎸 Position Highlight: ", btnOff: "OFF", btnOn: "ON", btnDiagram: "📋 View Diagram", btnFretboard: "🎸 View Fretboard",
-                btnAddScale: "➕ Add Scale", btnAddChord: "➕ Add to Sheet", btnAddCustom: "➕ Blank Diagram", btnAddLinebreak: "⏎ Line Break", btnSaveJson: "💾 Save JSON",
-                btnLoadJson: "📂 Load JSON", btnClear: "🗑️ Clear All", titleChordProgression: "Chord Progression", titleScaleProgression: "Scale Collection",
+                lblFormToggle: "🎸 Position Highlight: ", btnOff: "OFF", btnOn: "ON", 
+                btnDiagram: '📋<span class="hide-on-mobile"> View Diagram</span><span class="show-on-mobile" style="display:none;"> Diagram</span>', 
+                btnFretboard: '🎸<span class="hide-on-mobile"> View Fretboard</span><span class="show-on-mobile" style="display:none;"> Fretboard</span>',
+                btnAddScale: "➕ Add Fretboard", btnAddChord: '➕<span class="hide-on-mobile"> Add to Sheet</span><span class="show-on-mobile" style="display:none;"> Add</span>', 
+                btnAddCustom: '➕<span class="hide-on-mobile"> Blank Diagram</span><span class="show-on-mobile" style="display:none;"> Blank</span>', 
+                btnAddLinebreak: "⏎ Break", 
+                btnSaveJson: '💾<span class="hide-on-mobile"> Save JSON</span><span class="show-on-mobile" style="display:none;"> Save</span>',
+                btnLoadJson: '📂<span class="hide-on-mobile"> Load JSON</span><span class="show-on-mobile" style="display:none;"> Load</span>', 
+                btnClear: "🗑️ Clear All", titleChordProgression: "Chord Progression", titleScaleProgression: "Scale Collection",
                 form1: "Form 1 (Root-6)", form2: "Form 2", form3: "Form 3", form4: "Form 4", form5: "Form 5 (Root-5)", selectDefault: "-- Select --",
                 analyzerTitle: "🔍 Harmony Analyzer", clearBtn: "Clear Highlights", 
                 analyzerDefault: "Click the fretboard/keys to add green notes, and I'll analyze the <strong>Chord</strong> and <strong>Scale</strong> for you!",
@@ -323,13 +473,13 @@
             instrument: 'guitar', 
             mode: CONFIG.MODES.SCALE,
             currentLang: currentLang,
-            
             highlightedNotes: new Set(), 
             showFormHighlight: false,
             showChordDiagram: false, 
             chordProgression: [], 
             scaleProgression: [],
-            
+            lastFretCount: getTotalFrets(),
+
             clearCustomData() {
                 Array.from(DOM_CACHE.allNoteElements).filter(el => el.classList.contains('custom')).forEach(el => el.classList.remove('custom')); 
                 this.highlightedNotes.clear();
@@ -428,17 +578,18 @@
         }
 
         function generateFretboardHTML(instrument, tuningVal, activeNotes = [], rootIdx = -1, anchorFrets = new Set()) {
-            let html = `<div class="fret-numbers" style="display:flex; width:max-content; min-width:100%;">`;
-            for (let i = 0; i <= CONFIG.TOTAL_FRETS; i++) {
+            const FRET_COUNT = getTotalFrets();
+            let html = `<div class="fret-numbers" style="display:flex; width:100%;">`;
+            for (let i = 0; i <= FRET_COUNT; i++) {
                 let cls = 'fret-number' + (i === CONFIG.OCTAVE_FRET ? ' highlight-12' : (CONFIG.INLAY_FRETS.includes(i) ? ' inlay-mark' : ''));
                 html += `<div class="${cls}"><span>${i}</span></div>`;
             }
-            html += `</div><div class="fretboard instrument-${instrument}" style="width:max-content; min-width:100%;">`;
+            html += `</div><div class="fretboard instrument-${instrument}" style="width:100%;">`;
             const currentTuning = MUSIC_DATA.tunings[instrument];
             const tuningOffsets = MUSIC_DATA.tuningPresets[instrument][tuningVal].offset;
             currentTuning.forEach((openNoteIndex, stringIndex) => {
                 html += `<div class="string">`;
-                for (let fret = 0; fret <= CONFIG.TOTAL_FRETS; fret++) {
+                for (let fret = 0; fret <= FRET_COUNT; fret++) {
                     const currentNoteIndex = (openNoteIndex + tuningOffsets[stringIndex] + fret + 120) % 12;
                     let nActive = activeNotes.includes(currentNoteIndex) ? 'active' : '';
                     let nRoot = (activeNotes.length > 0 && currentNoteIndex === rootIdx) ? 'root' : '';
@@ -455,7 +606,7 @@
         window.removeScale = function(idx) { AppState.scaleProgression.splice(idx, 1); updateFretboard(); };
         window.shiftCustomFret = function(idx, dir) {
             const item = AppState.chordProgression[idx]; if (!item || item.type !== 'custom') return;
-            let newFret = item.startFret + dir; if (newFret >= 1 && newFret <= CONFIG.TOTAL_FRETS) { item.startFret = newFret; updateFretboard(); }
+            let newFret = item.startFret + dir; if (newFret >= 1 && newFret <= getTotalFrets()) { item.startFret = newFret; updateFretboard(); }
         };
         window.editCustomTitle = function(idx) {
             const item = AppState.chordProgression[idx]; if (!item || item.type !== 'custom') return;
@@ -489,7 +640,8 @@
         function setButtonVisibility(buttons) {
             Object.entries(buttons).forEach(([cacheKey, visible]) => {
                 if (DOM_CACHE[cacheKey]) {
-                    DOM_CACHE[cacheKey].style.display = visible ? 'inline-block' : 'none';
+                    // 원래 inline-block이던 버튼들의 레이아웃 유지를 위해
+                    DOM_CACHE[cacheKey].style.display = visible ? '' : 'none';
                 }
             });
         }
@@ -499,6 +651,16 @@
                 this.bindUIEvents();
                 this.bindFretboardEvents();
                 this.bindDragAndDropEvents();
+                
+                window.addEventListener('resize', () => {
+                    const currentFretCount = getTotalFrets();
+                    if (AppState.lastFretCount !== currentFretCount) {
+                        AppState.lastFretCount = currentFretCount;
+                        renderFretboard();
+                        DOM_CACHE.updateDynamicElements();
+                        updateFretboard();
+                    }
+                });
             },
 
             bindUIEvents() {
@@ -515,12 +677,12 @@
                     this.textContent = AppState.showFormHighlight ? getSafeI18n().btnOn : getSafeI18n().btnOff;
                     this.style.backgroundColor = AppState.showFormHighlight ? '#4CAF50' : '#e0e0e0';
                     this.style.color = AppState.showFormHighlight ? '#fff' : '#333';
-                    DOM_CACHE.formSelect.style.display = AppState.showFormHighlight ? 'inline-block' : 'none'; 
+                    DOM_CACHE.formSelect.style.display = AppState.showFormHighlight ? '' : 'none'; 
                     updateFretboard();
                 });
                 DOM_CACHE.toggleDiagramBtn.addEventListener('click', function() {
                     AppState.showChordDiagram = !AppState.showChordDiagram; 
-                    this.textContent = AppState.showChordDiagram ? getSafeI18n().btnFretboard : getSafeI18n().btnDiagram; 
+                    this.innerHTML = AppState.showChordDiagram ? getSafeI18n().btnFretboard : getSafeI18n().btnDiagram; 
                     updateFretboard();
                 });
                 DOM_CACHE.addScaleBtn.addEventListener('click', function() {
@@ -655,17 +817,13 @@
 
         function init() {
             DOM_CACHE.init();
-            
             setupSelects(); 
             updateTuningOptions(); 
             setupNoteButtons(); 
-            
             renderFretboard(); 
             DOM_CACHE.updateDynamicElements(); 
-            
             updateFretboard(); 
             applyLanguage(); 
-            
             EventManager.init();
         }
 
@@ -724,8 +882,6 @@
                         svg += `<rect class="custom-click-zone" x="${x-10}" y="${startY + (relFret - 1) * gapY}" width="20" height="${gapY}" style="cursor:pointer;" onclick="toggleCustomDiagramNote(${progIdx}, ${strIdx}, ${relFret})" />`;
                     }
                 }
-                
-                // 🔥 화살표 버튼을 SVG 내부 요소(<g>, <rect>, <text>)로 삽입하여 다이어그램 크기와 1:1로 축소/확대되도록 완벽 대응!
                 svg += `
                 <g class="no-capture custom-fret-svg-btn" onclick="shiftCustomFret(${progIdx}, -1)">
                     <rect x="8" y="115" width="26" height="26" rx="4" fill="rgba(255,255,255,0.25)" />
@@ -734,8 +890,7 @@
                 <g class="no-capture custom-fret-svg-btn" onclick="shiftCustomFret(${progIdx}, 1)">
                     <rect x="8" y="145" width="26" height="26" rx="4" fill="rgba(255,255,255,0.25)" />
                     <text x="21" y="163" fill="white" font-size="14" font-family="sans-serif" text-anchor="middle">▼</text>
-                </g>
-                `;
+                </g>`;
             }
             return svg + `</svg>`;
         }
@@ -743,12 +898,12 @@
         function generateScaleBoardHTML(item, idx) {
             let intervals = MUSIC_DATA.allScales[item.scaleName] || [];
             const activeNotes = intervals.map(interval => (item.rootIdx + interval) % 12);
-            let html = `<div class="scale-item" draggable="true" data-index="${idx}" style="position:relative; padding:15px; background:#fff; border:1px solid #ddd; border-radius:8px; cursor:grab; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing:border-box;">`;
-            html += `<button class="no-capture" onclick="removeScale(${idx})" style="position:absolute; top:10px; right:10px; background:#f44336; color:white; border:none; border-radius:50%; width:28px; height:28px; font-size:14px; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center; z-index:10;">X</button>`;
+            let html = `<div class="scale-item" draggable="true" data-index="${idx}">`;
+            html += `<button class="no-capture scale-item-close" onclick="removeScale(${idx})">X</button>`;
             
             let t_instrument = item.instrument === 'keyboard' ? 'Keyboard' : item.instrument === 'guitar' ? 'Guitar' : 'Bass';
             if (item.instrument !== 'keyboard' && item.tuningVal !== 'standard') t_instrument += ` [${MUSIC_DATA.tuningPresets[item.instrument][item.tuningVal][AppState.currentLang] || 'Standard'}]`;
-            html += `<h3 style="text-align:center; margin-top:0; margin-bottom:15px; color:#333;">${t_instrument} ${MUSIC_DATA.notes[item.rootIdx]} ${item.scaleName}</h3>`;
+            html += `<h3 class="scale-item-title">${t_instrument} ${MUSIC_DATA.notes[item.rootIdx]} ${item.scaleName}</h3>`;
             html += `<div style="overflow-x:auto; width:100%; padding-bottom:10px;">`;
             
             if (item.instrument === 'keyboard') {
@@ -761,7 +916,7 @@
                     let f1 = ((item.rootIdx - 3 + 12) % 12 - ((MUSIC_DATA.tunings[item.instrument][lowestStrIdx] + tuningOffsets[lowestStrIdx] + 120) % 12) + 12) % 12;
                     let offsets = [...CONFIG.FORM_OFFSETS[DOM_CACHE.formSelect.value]];
                     if (item.instrument === 'bass' && DOM_CACHE.formSelect.value === '3') offsets = [4, 5, 6, 7]; 
-                    offsets.map(o => f1 + o).forEach(f => CONFIG.FRET_OCTAVE_SHIFTS.forEach(s => { if (f+s >= 0 && f+s <= CONFIG.TOTAL_FRETS) anchorFrets.add(f+s); }));
+                    offsets.map(o => f1 + o).forEach(f => CONFIG.FRET_OCTAVE_SHIFTS.forEach(s => { if (f+s >= 0 && f+s <= getTotalFrets()) anchorFrets.add(f+s); }));
                 }
                 html += generateFretboardHTML(item.instrument, item.tuningVal, activeNotes, item.rootIdx, anchorFrets);
             }
@@ -782,19 +937,19 @@
 
         function applyLanguage() {
             const t = getSafeI18n();
-            DOM_CACHE.langBtn.textContent = t.langBtn; DOM_CACHE.guitarBtn.textContent = t.guitarBtn;
-            DOM_CACHE.bassBtn.textContent = t.bassBtn; DOM_CACHE.keyboardBtn.textContent = t.keyboardBtn;
-            document.getElementById('lbl-tuning').textContent = t.lblTuning; DOM_CACHE.scaleModeBtn.textContent = t.scaleModeBtn;
-            DOM_CACHE.chordModeBtn.textContent = t.chordModeBtn; DOM_CACHE.captureBtn.textContent = t.captureBtn;
+            DOM_CACHE.langBtn.innerHTML = t.langBtn; DOM_CACHE.guitarBtn.innerHTML = t.guitarBtn;
+            DOM_CACHE.bassBtn.innerHTML = t.bassBtn; DOM_CACHE.keyboardBtn.innerHTML = t.keyboardBtn;
+            document.getElementById('lbl-tuning').textContent = t.lblTuning; DOM_CACHE.scaleModeBtn.innerHTML = t.scaleModeBtn;
+            DOM_CACHE.chordModeBtn.innerHTML = t.chordModeBtn; DOM_CACHE.captureBtn.innerHTML = t.captureBtn;
             document.getElementById('lbl-key').textContent = t.lblKey; document.getElementById('lbl-major').textContent = t.lblMajor;
             document.getElementById('lbl-minor').textContent = t.lblMinor; document.getElementById('lbl-chord').textContent = t.lblChord;
             document.getElementById('lbl-find-note').textContent = t.lblFindNote; document.getElementById('lbl-form-toggle').textContent = t.lblFormToggle;
             DOM_CACHE.formToggleBtn.textContent = AppState.showFormHighlight ? t.btnOn : t.btnOff;
-            DOM_CACHE.toggleDiagramBtn.textContent = AppState.showChordDiagram ? t.btnFretboard : t.btnDiagram;
-            DOM_CACHE.addScaleBtn.textContent = t.btnAddScale; DOM_CACHE.addChordBtn.textContent = t.btnAddChord;
-            DOM_CACHE.addCustomBtn.textContent = t.btnAddCustom; DOM_CACHE.addLinebreakBtn.textContent = t.btnAddLinebreak; 
-            DOM_CACHE.saveJsonBtn.textContent = t.btnSaveJson;
-            DOM_CACHE.loadJsonBtn.textContent = t.btnLoadJson; DOM_CACHE.clearProgBtn.textContent = t.btnClear;
+            DOM_CACHE.toggleDiagramBtn.innerHTML = AppState.showChordDiagram ? t.btnFretboard : t.btnDiagram;
+            DOM_CACHE.addScaleBtn.innerHTML = t.btnAddScale; DOM_CACHE.addChordBtn.innerHTML = t.btnAddChord;
+            DOM_CACHE.addCustomBtn.innerHTML = t.btnAddCustom; DOM_CACHE.addLinebreakBtn.innerHTML = t.btnAddLinebreak; 
+            DOM_CACHE.saveJsonBtn.innerHTML = t.btnSaveJson;
+            DOM_CACHE.loadJsonBtn.innerHTML = t.btnLoadJson; DOM_CACHE.clearProgBtn.innerHTML = t.btnClear;
             
             DOM_CACHE.formSelect.options[0].text = t.form1; DOM_CACHE.formSelect.options[1].text = t.form2; DOM_CACHE.formSelect.options[2].text = t.form3; DOM_CACHE.formSelect.options[3].text = t.form4; DOM_CACHE.formSelect.options[4].text = t.form5;
             document.getElementById('lbl-analyzer-title').innerHTML = t.analyzerTitle; DOM_CACHE.clearCustomBtn.innerText = t.clearBtn;
@@ -820,8 +975,12 @@
         function switchInstrument(instrument) {
             if (AppState.instrument === instrument) return; AppState.instrument = instrument;
             DOM_CACHE.guitarBtn.classList.toggle('active', instrument === 'guitar'); DOM_CACHE.bassBtn.classList.toggle('active', instrument === 'bass'); DOM_CACHE.keyboardBtn.classList.toggle('active', instrument === 'keyboard');
-            if (instrument === 'keyboard') { DOM_CACHE.tuningControls.style.display = 'none'; DOM_CACHE.formToggleRow.style.display = 'none'; DOM_CACHE.formToggleDivider.style.display = 'none'; } 
-            else { DOM_CACHE.tuningControls.style.display = 'inline-flex'; DOM_CACHE.formToggleRow.style.display = 'flex'; DOM_CACHE.formToggleDivider.style.display = 'block'; }
+            
+            if (instrument === 'keyboard') { 
+                DOM_CACHE.tuningControls.style.display = 'none'; 
+            } else { 
+                DOM_CACHE.tuningControls.style.display = ''; 
+            }
             resetSelections(); updateTuningOptions(); 
             renderFretboard(); DOM_CACHE.updateDynamicElements(); 
             updateFretboard(); analyzeCustomNotes();
@@ -830,8 +989,11 @@
         function switchMode(mode) {
             if (AppState.mode === mode) return; AppState.mode = mode;
             DOM_CACHE.scaleModeBtn.classList.toggle('active', mode === CONFIG.MODES.SCALE); DOM_CACHE.chordModeBtn.classList.toggle('active', mode === CONFIG.MODES.CHORD);
-            DOM_CACHE.scaleControls.style.display = mode === CONFIG.MODES.SCALE ? 'inline-flex' : 'none'; DOM_CACHE.chordControls.style.display = mode === CONFIG.MODES.CHORD ? 'inline-flex' : 'none';
-            if (mode !== CONFIG.MODES.CHORD) { AppState.showChordDiagram = false; DOM_CACHE.toggleDiagramBtn.textContent = getSafeI18n().btnDiagram; }
+            
+            DOM_CACHE.scaleControls.style.display = mode === CONFIG.MODES.SCALE ? '' : 'none'; 
+            DOM_CACHE.chordControls.style.display = mode === CONFIG.MODES.CHORD ? '' : 'none';
+            
+            if (mode !== CONFIG.MODES.CHORD) { AppState.showChordDiagram = false; DOM_CACHE.toggleDiagramBtn.innerHTML = getSafeI18n().btnDiagram; }
             resetSelections(); updateFretboard();
         }
 
@@ -927,7 +1089,7 @@
                     let f1 = (anchorNote - ((MUSIC_DATA.tunings[AppState.instrument][lowestStrIdx] + tuningOffsets[lowestStrIdx] + 120) % 12) + 12) % 12;
                     const formSelectVal = DOM_CACHE.formSelect.value;
                     let offsets = CONFIG.BASS_FORM_SPECIAL_OFFSETS[formSelectVal] || [...CONFIG.FORM_OFFSETS[formSelectVal]];
-                    offsets.map(o => f1 + o).forEach(f => CONFIG.FRET_OCTAVE_SHIFTS.forEach(s => { if (f+s >= 0 && f+s <= CONFIG.TOTAL_FRETS) anchorFrets.add(f+s); }));
+                    offsets.map(o => f1 + o).forEach(f => CONFIG.FRET_OCTAVE_SHIFTS.forEach(s => { if (f+s >= 0 && f+s <= getTotalFrets()) anchorFrets.add(f+s); }));
                 }
                 updateAnchorFrets(anchorFrets);
             }
@@ -951,7 +1113,7 @@
                                 <div class="no-capture" style="width:100%; height:2px; background:#ccc; position:relative;">
                                     <span style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:#f4f4f4; padding:0 10px; color:#888; font-size:12px; font-weight:bold;">${getSafeI18n().txtLineBreak}</span>
                                 </div>
-                                <button class="no-capture" onclick="removeChord(${idx})" style="position:absolute; right:10px; top:-12px; background:#f44336; color:white; border:none; border-radius:50%; width:24px; height:24px; font-size:12px; font-weight:bold; cursor:pointer; display:flex; justify-content:center; align-items:center;">X</button>
+                                <button class="no-capture scale-item-close" style="top:-12px; right:10px;" onclick="removeChord(${idx})">X</button>
                              </div>`;
                     return;
                 }
@@ -964,12 +1126,11 @@
                         svgContent = generateChordDiagramSVG(voicing, `${MUSIC_DATA.notes[c.rootIdx]}${shortSymbol}`, false, idx);
                     }
                 } else if (c.type === 'custom') {
-                    // 🔥 HTML customControls 삭제 완료. SVG 안에 화살표가 그려집니다.
                     svgContent = generateChordDiagramSVG(c.voicing, c.title, true, idx, c.startFret);
                 }
                 
                 if (svgContent) {
-                    html += `<div class="chord-item" draggable="true" data-index="${idx}" style="position:relative; margin-bottom: 10px; cursor: grab;">${svgContent}<button class="no-capture" onclick="removeChord(${idx})" style="position:absolute; top:-10px; right:-10px; background:#f44336; color:white; border:none; border-radius:50%; width:28px; height:28px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3); display:flex; justify-content:center; align-items:center;">X</button></div>`;
+                    html += `<div class="chord-item" draggable="true" data-index="${idx}" style="position:relative; margin-bottom: 10px; cursor: grab;">${svgContent}<button class="no-capture scale-item-close" style="top:-10px; right:-10px;" onclick="removeChord(${idx})">X</button></div>`;
                 }
             });
             
