@@ -1,0 +1,174 @@
+/* styles.css */
+body { font-family: sans-serif; background-color: #f4f4f4; padding: 15px; margin: 0; }
+.controls-container { background-color: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px; }
+.controls-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 15px; width: 100%; }
+.controls-row:last-child { margin-bottom: 0; }
+.divider { width: 100%; height: 1px; background-color: #eee; margin: 10px 0 15px 0; }
+select { padding: 8px 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; background-color: #fff; box-sizing: border-box; }
+
+.instrument-group, .mode-group { display: inline-flex; gap: 10px; }
+
+#capture-btn { margin-left: auto; }
+
+#tuning-controls, #key-controls { display: inline-flex; align-items: center; gap: 8px; }
+#scale-controls, #chord-controls { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+#shared-controls { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-left: auto; }
+
+.fretboard-scroll-wrapper { width: 100%; margin-bottom: 20px; border-radius: 8px; }
+#capture-area { width: 100%; box-sizing: border-box; display: flex; flex-direction: column; background-color: #f4f4f4; padding: 20px 15px 15px 15px; }
+#capture-title, #fretboard-title { text-align: center; color: #333; margin-top: 0; margin-bottom: 15px; font-size: 24px; font-weight: bold; }
+#fretboard-view { background-color: #fff; padding: 20px 15px; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; width: 100%; margin-bottom: 20px; }
+
+.fretboard { display: flex; flex-direction: column; background-color: #3e3e3e; padding: 10px 0; border-radius: 5px; user-select: none; width: 100%; }
+.string { display: flex; height: clamp(30px, 5vw, 40px); position: relative; align-items: center; }
+.string::before { content: ''; position: absolute; left: 0; right: 0; height: 2px; background-color: #b0b0b0; z-index: 1; }
+.fretboard.instrument-guitar .string:nth-last-child(1)::before { height: 4px; } 
+.fretboard.instrument-guitar .string:nth-last-child(2)::before { height: 3px; }
+.fretboard.instrument-bass .string:nth-last-child(1)::before { height: 5px; } 
+.fretboard.instrument-bass .string:nth-last-child(2)::before { height: 4px; } 
+.fretboard.instrument-bass .string:nth-last-child(3)::before { height: 3px; } 
+.fretboard.instrument-bass .string:nth-last-child(4)::before { height: 2px; } 
+
+.fret { flex: 1 1 0; min-width: 0; height: 100%; border-right: 2px solid #a8a8a8; display: flex; justify-content: center; align-items: center; position: relative; z-index: 2; cursor: pointer; transition: background-color 0.2s ease; }
+.fret:hover { background-color: rgba(255, 255, 255, 0.1); }
+.fret:first-child { flex: 0.8 1 0; border-left: 6px solid #e0e0e0; min-width: 0; }
+.fret.anchor-highlight { background-color: rgba(255, 255, 255, 0.18); }
+
+.fret-numbers { display: flex; height: 30px; align-items: center; color: #333; font-weight: bold; width: 100%; }
+.fret-number { flex: 1 1 0; text-align: center; min-width: 0; }
+.fret-number:first-child { flex: 0.8 1 0; min-width: 0; }
+.fret-number.highlight-12 span { background-color: #888; color: #fff; padding: 2px 6px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.fret-number.inlay-mark span { border-bottom: 3px solid #999; padding-bottom: 1px; }
+
+.keyboard-container { display: flex; background-color: #333; padding: 10px; border-radius: 5px; width: 100%; box-sizing: border-box; user-select: none; }
+.piano-key-wrapper { flex: 1 1 0; min-width: 0; position: relative; }
+.white-key { width: 100%; height: 200px; background-color: #fff; border: 1px solid #ccc; border-radius: 0 0 4px 4px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 15px; cursor: pointer; z-index: 1; }
+.white-key:hover { background-color: #eaeaea; }
+.black-key { width: 66%; height: 120px; background-color: #222; position: absolute; top: 0; right: -33%; z-index: 2; border-radius: 0 0 4px 4px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 15px; cursor: pointer; }
+.black-key:hover { background-color: #444; }
+
+.note { width: 80%; max-width: 24px; aspect-ratio: 1; border-radius: 50%; background-color: #ff9800; color: white; display: none; justify-content: center; align-items: center; font-size: clamp(7px, 1.8vw, 11px); font-weight: bold; z-index: 3; box-shadow: 0 2px 4px rgba(0,0,0,0.3); pointer-events: none; }
+.note.active { display: flex; }
+.note.root { background-color: #f44336; }
+.note.custom { display: flex !important; background-color: #4CAF50 !important; color: white; border: 2px solid #fff; }
+.note.highlight { display: flex !important; background-color: #9c27b0 !important; color: white; border: 2px solid #fff; z-index: 4; box-shadow: 0 0 8px rgba(156, 39, 176, 0.8); }
+
+.analyzer { margin-top: 10px; padding: 15px; background-color: #fff; border: 1px solid #ddd; border-radius: 5px; line-height: 1.6; }
+.analyzer h3 { margin-top: 0; color: #333; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.analyzer-content { font-size: 15px; color: #555; word-break: keep-all; }
+
+.btn { background-color: #e0e0e0; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; color: #333; touch-action: manipulation; box-sizing: border-box; }
+.btn:hover { background-color: #ccc; }
+.lang-btn { background-color: #333; color: white; }
+.lang-btn:hover { background-color: #111; }
+.instrument-btn { background-color: #616161; color: white; }
+.instrument-btn.active { background-color: #4CAF50; box-shadow: 0 0 8px rgba(76,175,80,0.5); }
+.mode-btn { background-color: #616161; color: white; }
+.mode-btn.active { background-color: #ff9800; box-shadow: 0 0 8px rgba(255,152,0,0.5); }
+.find-note-btn { padding: 6px 12px; font-size: 14px; background-color: #e0e0e0; text-align: center; }
+.find-note-btn.active { background-color: #9c27b0; color: white; box-shadow: 0 0 6px rgba(156, 39, 176, 0.6); }
+.capture-btn { background-color: #1a73e8; color: white; }
+.capture-btn:hover { background-color: #1152a3; }
+
+.clickable-scale { cursor: pointer; color: #1a73e8; text-decoration: underline; display: inline-block; margin-right: 15px; margin-bottom: 5px; }
+.clickable-scale:hover { color: #1152a3; font-weight: bold; }
+
+.youtube-footer { margin-top: 30px; text-align: center; padding: 20px; }
+.youtube-link { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #333; font-weight: bold; font-size: 16px; padding: 10px 20px; border: 1px solid #ddd; border-radius: 30px; background-color: #fff; transition: all 0.2s ease; }
+.youtube-link:hover { background-color: #ff0000; color: #fff; border-color: #ff0000; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+.chord-item { transition: opacity 0.2s; flex: 1 1 120px; max-width: 220px; }
+.chord-item svg { width: 100%; height: auto; }
+.scale-item { position: relative; padding: 15px; background: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: grab; box-shadow: 0 4px 6px rgba(0,0,0,0.05); box-sizing: border-box; width: 100%; transition: opacity 0.2s; }
+.scale-item-title { text-align: center; margin-top: 0; margin-bottom: 15px; color: #333; font-size: 20px; }
+.scale-item-close { position: absolute; top: 10px; right: 10px; background: #f44336; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 14px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; z-index: 10; }
+
+.linebreak-item { flex-basis: 100% !important; max-width: 100% !important; height: 35px; display:flex; align-items:center; justify-content:center; cursor:grab; position:relative; margin: 5px 0; }
+.chord-item.over, .scale-item.over { border: 2px dashed #4CAF50 !important; border-radius: 12px; opacity: 0.7; }
+.custom-click-zone { fill: transparent; }
+.custom-click-zone:hover { fill: rgba(255, 255, 255, 0.15); }
+.custom-fret-svg-btn { cursor: pointer; }
+.custom-fret-svg-btn rect { transition: fill 0.2s; }
+.custom-fret-svg-btn:hover rect { fill: rgba(255, 255, 255, 0.5) !important; }
+
+.control-group { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+@media (max-width: 768px) {
+    .hide-on-mobile { display: none !important; }
+    .show-on-mobile { display: inline !important; }
+    
+    #app-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
+    #main-controls, #pc-row-1, #pc-row-2 { display: contents; }
+    #main-divider { display: none; }
+    
+    #m-grp-inst, #tuning-controls, #key-controls, #scale-controls, #chord-controls, #m-grp-mode, #shared-controls {
+        background-color: #fff; padding: 12px; border-radius: 8px; border: 1px solid #ddd;
+        box-sizing: border-box; width: 100%; margin: 0;
+    }
+
+    #lang-btn { order: 1; grid-column: 1; width: 100%; padding: 12px 0; text-align: center; margin: 0; }
+    #capture-btn { order: 2; grid-column: 2; width: 100%; padding: 12px 0; text-align: center; margin: 0 !important; }
+    
+    #m-grp-inst { order: 3; grid-column: 1 / 3; display: flex; width: 100%; gap: 5px; }
+    #m-grp-inst .btn { flex: 1; margin: 0; padding: 12px 0; font-size: 13px; }
+
+    #tuning-controls { order: 4; grid-column: 1 / 3; display: flex; flex-direction: column; align-items: stretch !important; gap: 4px; }
+    #tuning-controls label { font-size: 14px; font-weight: bold; margin: 0; white-space: nowrap; }
+    #tuning-select { width: 100%; height: 40px; margin: 0; }
+
+    #key-controls { 
+        order: 5; grid-column: 1 / 3; display: flex; flex-direction: column; align-items: stretch; gap: 4px; 
+        padding-bottom: 0; border-bottom: none; border-radius: 8px 8px 0 0; 
+    }
+    #key-controls label { font-size: 14px; font-weight: bold; margin: 0; white-space: nowrap; }
+    #key-select { width: 100%; height: 40px; margin: 0; }
+
+    #scale-controls { 
+        order: 6; grid-column: 1 / 3; display: grid !important; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: -10px !important; 
+        border-top: none; border-radius: 0 0 8px 8px; padding-top: 5px;
+    }
+    #scale-controls > span { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
+    #scale-controls label { font-size: 13px; font-weight: bold; margin: 0; }
+    #major-select, #minor-select { width: 100%; height: 40px; margin: 0; }
+    #add-scale-btn { grid-column: 1 / 3; width: 100%; margin: 0; padding: 12px 0; margin-top: 5px; }
+
+    #chord-controls { 
+        order: 6; grid-column: 1 / 3; display: grid !important; grid-template-columns: 1fr 1fr 1fr; gap: 8px; 
+        margin-top: -10px !important; border-top: none; border-radius: 0 0 8px 8px; padding-top: 5px;
+    }
+    #chord-controls > span { grid-column: 1 / 4; display: flex; flex-direction: column; align-items: stretch; gap: 4px; margin-bottom: 5px; }
+    #chord-controls label { font-size: 13px; font-weight: bold; margin: 0; }
+    #chord-select { width: 100%; height: 40px; margin: 0; }
+    #add-chord-btn, #add-custom-btn, #add-linebreak-btn { margin: 0; padding: 10px 2px; font-size: 12px; }
+    #toggle-diagram-btn { grid-column: 1 / 4; width: 100%; margin: 0; padding: 12px 0; }
+
+    #panel-fretboard { order: 7; grid-column: 1 / 3; margin: 5px 0; }
+
+    #m-grp-mode { order: 8; grid-column: 1 / 3; display: flex; width: 100%; gap: 5px; margin-left: 0 !important; }
+    #m-grp-mode .btn { flex: 1; margin: 0; padding: 12px 0; font-size: 14px; }
+
+    #shared-controls { order: 9; grid-column: 1 / 3; display: flex; flex-direction: row; gap: 8px; margin-left: 0 !important; }
+    #shared-controls .btn { flex: 1; margin: 0; padding: 12px 0; font-size: 13px; }
+
+    #capture-title { order: 1; }
+    #fretboard-view { order: 2; margin-bottom: 10px; } 
+    #scale-progression-view { order: 3; }
+    #chord-diagram-view { order: 4; }
+
+    #note-buttons-container { display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+    .find-note-btn { width: 100%; padding: 10px 0; }
+    .analyzer h3 { flex-direction: column; align-items: stretch; }
+    #clear-custom-btn { width: 100%; margin-top: 10px; }
+    
+    #capture-title, #fretboard-title { font-size: 20px; margin-bottom: 14px; }
+    .scale-item-title { font-size: 18px; }
+    .piano-key-wrapper { min-width: 0; }
+    .white-key { height: 150px; padding-bottom: 10px; }
+    .black-key { height: 90px; padding-bottom: 10px; }
+
+    .fret-number.highlight-12 span { padding: 1px 3px; font-size: 0.85em; border-radius: 2px; box-shadow: none; letter-spacing: -0.5px; }
+}
+
+@media (max-width: 479px) {
+    .fret-number.highlight-12 span { padding: 0px 2px; font-size: 0.75em; letter-spacing: -1px; }
+}
