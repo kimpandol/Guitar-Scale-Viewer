@@ -155,7 +155,6 @@ export interface I18nStrings {
   msgLoadFail: string;
   txtLineBreak: string;
 }
-//test
 export type I18nDict = {
   [key in Language]: I18nStrings;
 };
