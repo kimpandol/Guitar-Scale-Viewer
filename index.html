@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2ZD42Y9WN8"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-2ZD42Y9WN8');
+    </script>
+    <title>기타 & 베이스 & 키보드 스케일/코드 뷰어</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+    <div id="app-wrapper">
+        <div class="controls-container no-capture" id="main-controls" role="region" aria-label="메인 컨트롤 패널">
+            <div class="controls-row" id="pc-row-1">
+                <button id="lang-btn" class="btn lang-btn" aria-label="언어 변경">🌐<span class="hide-on-mobile"> English</span><span class="show-on-mobile" style="display:none;"> EN</span></button>
+                
+                <span class="instrument-group" id="m-grp-inst">
+                    <button id="guitar-btn" class="btn instrument-btn active" aria-label="기타 선택">🎸 기타<span class="hide-on-mobile"> (6줄)</span></button>
+                    <button id="bass-btn" class="btn instrument-btn" aria-label="베이스 선택">🎸 베이스<span class="hide-on-mobile"> (4줄)</span></button>
+                    <button id="keyboard-btn" class="btn instrument-btn" aria-label="키보드 선택">🎹<span class="hide-on-mobile"> 키보드 (피아노)</span><span class="show-on-mobile" style="display:none;"> 피아노</span></button>
+                </span>
+                
+                <span id="tuning-controls">
+                    <label id="lbl-tuning" for="tuning-select">튜닝: </label>
+                    <select id="tuning-select" aria-label="튜닝 옵션 선택"></select>
+                </span>
+                
+                <span class="mode-group" id="m-grp-mode">
+                    <button id="scale-mode-btn" class="btn mode-btn active" aria-label="스케일 모드 선택">🎶 스케일<span class="hide-on-mobile"> 모드</span></button>
+                    <button id="chord-mode-btn" class="btn mode-btn" aria-label="코드 모드 선택">🎹 코드<span class="hide-on-mobile"> 모드</span></button>
+                </span>
+                
+                <button id="capture-btn" class="btn capture-btn" aria-label="화면 캡처하여 저장">📸<span class="hide-on-mobile"> 지판/악보 저장</span><span class="show-on-mobile" style="display:none;"> 저장</span></button>
+            </div>
+
+            <div class="divider" id="main-divider"></div>
+
+            <div class="controls-row" id="pc-row-2">
+                <span id="key-controls">
+                    <label id="lbl-key" for="key-select">조(Key/Root): </label>
+                    <select id="key-select" aria-label="기준음 선택"></select>
+                </span>
+                
+                <span id="scale-controls">
+                    <span style="display:inline-flex; align-items:center; gap:8px;">
+                        <label id="lbl-major" for="major-select">메이저 계열: </label>
+                        <select id="major-select" aria-label="메이저 스케일 선택"><option value="">-- 선택 --</option></select>
+                    </span>
+                    <span style="display:inline-flex; align-items:center; gap:8px;">
+                        <label id="lbl-minor" for="minor-select">마이너 계열: </label>
+                        <select id="minor-select" aria-label="마이너 스케일 선택"><option value="">-- 선택 --</option></select>
+                    </span>
+                    <button id="add-scale-btn" class="btn" style="background-color:#4CAF50; color:white; display:none;" aria-label="스케일 악보에 추가">➕ 지판 추가</button>
+                </span>
+
+                <span id="chord-controls" style="display:none;">
+                    <span style="display:inline-flex; align-items:center; gap:8px;">
+                        <label id="lbl-chord" for="chord-select">코드 종류: </label>
+                        <select id="chord-select" aria-label="코드 종류 선택"><option value="">-- 선택 --</option></select>
+                    </span>
+                    <button id="add-chord-btn" class="btn" style="background-color:#4CAF50; color:white; display:none;" aria-label="코드 악보에 추가">➕ 악보에 추가</button>
+                    <button id="add-custom-btn" class="btn" style="background-color:#2196F3; color:white; display:none;" aria-label="빈 다이어그램 추가">➕ 빈 지판 추가</button>
+                    <button id="add-linebreak-btn" class="btn" style="background-color:#9E9E9E; color:white; display:none;" aria-label="악보 줄바꿈 추가">⏎ 줄바꿈</button>
+                    <button id="toggle-diagram-btn" class="btn" style="background-color:#9c27b0; color:white; display:none;" aria-label="코드표/지판 보기 전환">📋 코드표로 보기</button>
+                </span>
+                
+                <span id="shared-controls">
+                    <button id="save-json-btn" class="btn" style="background-color:#FF9800; color:white; display:none;" aria-label="현재 악보 JSON으로 저장">💾 악보 저장</button>
+                    <button id="load-json-btn" class="btn" style="background-color:#00BCD4; color:white; display:inline-block;" aria-label="저장된 JSON 악보 불러오기">📂 불러오기</button>
+                    <input type="file" id="load-json-input" accept=".json" style="display:none;" aria-hidden="true">
+                    <button id="clear-progression-btn" class="btn" style="background-color:#f44336; color:white; display:none;" aria-label="추가된 모든 악보 지우기">🗑️ 비우기</button>
+                </span>
+            </div>
+        </div>
+
+        <div class="fretboard-scroll-wrapper" id="panel-fretboard" role="region" aria-label="악보 및 지판 표시 영역">
+            <div id="capture-area">
+                <h2 id="capture-title" class="no-capture" style="display:none;" aria-live="polite"></h2>
+                
+                <div id="fretboard-view">
+                    <h2 id="fretboard-title" aria-live="polite"></h2>
+                    <div class="fret-numbers" id="fret-numbers" aria-hidden="true"></div>
+                    <div id="fretboard" class="fretboard instrument-guitar" aria-label="인터랙티브 지판"></div>
+                </div>
+                
+                <div id="scale-progression-view" style="display:none; flex-direction:column; gap:25px; margin-top:30px;" aria-label="스케일 모음 악보"></div>
+                <div id="chord-diagram-view" style="display:none; padding: 20px 0;" aria-label="코드 다이어그램 모음"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="analyzer" role="region" aria-label="화성 분석 영역">
+        <h3>
+            <span id="lbl-analyzer-title">🔍 화성 분석기 (코드 & 스케일)</span>
+            <button id="clear-custom-btn" class="btn" aria-label="분석용으로 찍은 음표 모두 지우기">초록/보라색 초기화</button>
+        </h3>
+        <div id="scale-analysis-result" class="analyzer-content" aria-live="polite"></div>
+    </div>
+
+    <div class="controls-container" style="margin-top: 20px;" role="region" aria-label="부가 기능 패널">
+        <div class="controls-row">
+            <label id="lbl-find-note" style="min-width: 160px;">특정 음 찾기 (보라색): </label>
+            <div id="note-buttons-container" style="display:flex; gap:8px; flex-wrap:wrap; width: 100%;" role="group" aria-label="강조할 특정 음 선택"></div>
+        </div>
+
+        <div class="divider" id="form-toggle-divider"></div>
+
+        <div class="controls-row" id="form-toggle-row">
+            <label id="lbl-form-toggle">🎸 폼(포지션) 영역 표시: </label>
+            <button id="toggle-form-btn" class="btn" style="background-color: #e0e0e0; color: #333;" aria-label="기타/베이스 포지션 폼 강조 켜기/끄기">OFF</button>
+            <select id="form-select" style="display:none;" aria-label="강조할 포지션 폼 선택">
+                <option value="1">1번 폼 (Root-6)</option>
+                <option value="2">2번 폼</option>
+                <option value="3">3번 폼</option>
+                <option value="4">4번 폼</option>
+                <option value="5">5번 폼 (Root-5)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="youtube-footer">
+        <a href="https://www.youtube.com/@kimpandol123" target="_blank" rel="noopener noreferrer" class="youtube-link" aria-label="개발자 유튜브 채널로 이동">
+            🎬 kimpandol YouTube Channel
+        </a>
+    </div>
+
+    <!-- TypeScript 엔트리 포인트 -->
+    <script type="module" src="/src/app.ts"></script>
+
+</body>
+</html>
