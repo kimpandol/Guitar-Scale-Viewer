@@ -1,6 +1,6 @@
 import { AppStateType, DOMElements, Language, I18nDict } from './types';
 import { CONFIG, MUSIC_DATA, i18n } from './data';
-
+//
 // (html2canvas 전역 선언)
 declare const html2canvas: any;
 
