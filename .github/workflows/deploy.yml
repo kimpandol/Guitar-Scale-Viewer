@@ -2,32 +2,37 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["main"] # 내 브랜치가 master라면 master로 수정!
+    branches: ["main"] # 내 브랜치명이 master면 master로 수정!
   workflow_dispatch:
 
+# 2026년 기준 권한 설정 강화
 permissions:
-  contents: read
+  contents: write  # 빌드 후 결과물을 써야 하므로 write 권한 필요
   pages: write
   id-token: write
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # 2026년 Node.js 24 강제 환경 설정 추가
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24 # 경고 메시지에 따라 Node.js 24로 업그레이드
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci # install보다 더 엄격하고 정확한 ci 권장
 
       - name: Build
-        run: npm run build
+        run: npm run build # package.json에 build 명령어가 있는지 확인!
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -35,7 +40,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist' # Vite는 결과물이 dist 폴더에 생겨!
+          path: './dist' # Vite 빌드 결과물 경로
 
       - name: Deploy to GitHub Pages
         id: deployment
