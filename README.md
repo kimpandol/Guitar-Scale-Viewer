@@ -14,7 +14,6 @@ This project is a comprehensive visualization and analysis tool for guitar, bass
 
 ## Tech Stack
 - **Language:** TypeScript (Static typing and interface-based architecture)
-- **State Management:** Centralized state management for harmony logic (Zustand)
 - **Build Tool:** Vite
 - **Libraries:** `html2canvas` for high-resolution image capturing
 
@@ -39,7 +38,6 @@ This project is a comprehensive visualization and analysis tool for guitar, bass
 
 ## 기술 스택
 - **Language:** TypeScript (정적 타이핑 및 인터페이스 기반 설계)
-- **State Management:** 중앙 집중식 상태 관리 (Zustand)
 - **Build Tool:** Vite
 - **Libraries:** `html2canvas` (이미지 캡처)
 
