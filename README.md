@@ -41,6 +41,6 @@ This project is a comprehensive visualization and analysis tool for guitar, bass
 - **Build Tool:** Vite
 - **Libraries:** `html2canvas` (이미지 캡처)
 
-## 📱 UI 및 레이아웃
+## UI 및 레이아웃
 - **반응형 디자인:** PC와 모바일 환경 모두에 최적화된 레이아웃을 제공합니다.
 - **모바일 UX 최우선:** 모바일 접근성을 고려한 직관적인 배치: 튜닝 → 조(Key) → 스케일/코드 선택 → 지판 → 저장/불러오기 → 악기 선택 → 모드 전환 → 분석기 순서로 구성되었습니다.
