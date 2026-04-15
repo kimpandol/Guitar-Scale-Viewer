@@ -95,17 +95,17 @@ const MUSIC_DATA: any = {
     majorScales: {
         "Major (Ionian)": [0, 2, 4, 5, 7, 9, 11], "Lydian": [0, 2, 4, 6, 7, 9, 11], "Mixolydian": [0, 2, 4, 5, 7, 9, 10],
         "Major Pentatonic": [0, 2, 4, 7, 9], "Bebop Major": [0, 2, 4, 5, 7, 8, 9, 11], "Phrygian Dominant": [0, 1, 4, 5, 7, 8, 10], "Lydian Dominant": [0, 2, 4, 6, 7, 9, 10],
-        "Whole Tone": [0, 2, 4, 6, 8, 10]
+        "Whole Tone": [0, 2, 4, 6, 8, 10], "Bebop Dominant": [0, 2, 4, 5, 7, 9, 10, 11], "Altered Dominant": [0, 1, 4, 5, 6, 8, 10], "Enigmatic": [0, 1, 4, 6, 8, 10, 11]
     },
     minorScales: {
         "Minor (Aeolian)": [0, 2, 3, 5, 7, 8, 10], "Dorian": [0, 2, 3, 5, 7, 9, 10], "Phrygian": [0, 1, 3, 5, 7, 8, 10], "Locrian": [0, 1, 3, 5, 6, 8, 10],
         "Minor Pentatonic": [0, 3, 5, 7, 10], "Blues": [0, 3, 5, 6, 7, 10], "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11], "Melodic Minor": [0, 2, 3, 5, 7, 9, 11], 
-        "Diminished (W-H)": [0, 2, 3, 5, 6, 8, 9, 11], "Bebop Minor": [0, 2, 3, 4, 5, 7, 9, 10], "Altered": [0, 1, 3, 4, 6, 8, 10]
+        "Diminished (W-H)": [0, 2, 3, 5, 6, 8, 9, 11], "Bebop Minor": [0, 2, 3, 4, 5, 7, 9, 10], "Altered": [0, 1, 3, 4, 6, 8, 10], "Hungarian Minor": [0, 2, 3, 6, 7, 8, 11]
     },
     allChords: {
         "Major (M)": [0, 4, 7], "Minor (m)": [0, 3, 7], "Dominant 7 (7)": [0, 4, 7, 10], "Major 7 (maj7)": [0, 4, 7, 11], "Minor 7 (m7)": [0, 3, 7, 10],
         "Sus 4 (sus4)": [0, 5, 7], "Sus 2 (sus2)": [0, 2, 7], "Diminished (dim)": [0, 3, 6], "Augmented (aug)": [0, 4, 8], "Half Diminished (m7b5)": [0, 3, 6, 10],
-        "Diminished 7 (dim7)": [0, 3, 6, 9], "Minor Major 7 (mM7)": [0, 3, 7, 11]
+        "Diminished 7 (dim7)": [0, 3, 6, 9], "Minor Major 7 (mM7)": [0, 3, 7, 11], "Add9": [0, 4, 7, 14], "Minor Add9 (mAdd9)": [0, 3, 7, 14], "6": [0, 4, 7, 9], "Minor 6 (m6)": [0, 3, 7, 9]
     },
     openChords: {
         "0_Major (M)": ['x', 3, 2, 0, 1, 0], "2_Major (M)": ['x', 'x', 0, 2, 3, 2], "4_Major (M)": [0, 2, 2, 1, 0, 0], "7_Major (M)": [3, 2, 0, 0, 0, 3], "9_Major (M)": ['x', 0, 2, 2, 2, 0], 
@@ -113,7 +113,7 @@ const MUSIC_DATA: any = {
         "4_Dominant 7 (7)": [0, 2, 0, 1, 0, 0], "7_Dominant 7 (7)": [3, 2, 0, 0, 0, 1], "9_Dominant 7 (7)": ['x', 0, 2, 0, 2, 0], "11_Dominant 7 (7)": ['x', 2, 1, 2, 0, 2], 
         "0_Major 7 (maj7)": ['x', 3, 2, 0, 0, 0], "2_Major 7 (maj7)": ['x', 'x', 0, 2, 2, 2], "5_Major 7 (maj7)": ['x', 'x', 3, 2, 1, 0], "7_Major 7 (maj7)": [3, 'x', 0, 0, 0, 2], "9_Major 7 (maj7)": ['x', 0, 2, 1, 2, 0], 
         "2_Minor 7 (m7)": ['x', 'x', 0, 2, 1, 1], "4_Minor 7 (m7)": [0, 2, 0, 0, 0, 0], "9_Minor 7 (m7)": ['x', 0, 2, 0, 1, 0], "2_Sus 4 (sus4)": ['x', 'x', 0, 2, 3, 3], "4_Sus 4 (sus4)": [0, 2, 2, 2, 0, 0], 
-        "9_Sus 4 (sus4)": ['x', 0, 2, 2, 3, 0], "2_Sus 2 (sus2)": ['x', 'x', 0, 2, 3, 0], "9_Sus 2 (sus2)": ['x', 0, 2, 2, 0, 0] 
+        "9_Sus 4 (sus4)": ['x', 0, 2, 2, 3, 0], "2_Sus 2 (sus2)": ['x', 'x', 0, 2, 3, 0], "9_Sus 2 (sus2)": ['x', 0, 2, 2, 0, 0]
     },
     chordShapes: {
         "Major (M)": { E: [0, 2, 2, 1, 0, 0], A: ['x', 0, 2, 2, 2, 0] }, "Minor (m)": { E: [0, 2, 2, 0, 0, 0], A: ['x', 0, 2, 2, 1, 0] }, "Dominant 7 (7)": { E: [0, 2, 0, 1, 0, 0], A: ['x', 0, 2, 0, 2, 0] },
