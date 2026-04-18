@@ -11,6 +11,7 @@ This project is a comprehensive visualization and analysis tool for guitar, bass
 - **Position Form Highlighting:** Algorithmic calculation and display of the 1st through 5th fretboard forms (positions).
 - **Data Persistence:** Supports serializing work sessions into JSON format for saving and loading data.
 - **Image Capture:** Exports the current fretboard and notation area as a high-quality PNG file.
+- **MIDI Analysis:** Analyze scales in Midi.
 
 ## Tech Stack
 - **Language:** TypeScript (Static typing and interface-based architecture)
@@ -35,6 +36,7 @@ This project is a comprehensive visualization and analysis tool for guitar, bass
 - **포지션 폼 강조:** 기타 지판의 1~5번 포지션(Form) 하이라이트 기능을 지원합니다.
 - **데이터 영속성:** 작업 내역을 JSON 데이터로 저장하고 불러올 수 있습니다.
 - **이미지 캡처:** 현재 지판 영역을 PNG 파일로 저장할 수 있습니다.
+- **미디 분석:** Midi에서 스케일을 분석할 수 있습니다.
 
 ## 기술 스택
 - **Language:** TypeScript (정적 타이핑 및 인터페이스 기반 설계)
