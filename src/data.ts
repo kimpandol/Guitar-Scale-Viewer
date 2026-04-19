@@ -105,7 +105,8 @@ const MUSIC_DATA: any = {
     allChords: {
         "Major (M)": [0, 4, 7], "Minor (m)": [0, 3, 7], "Dominant 7 (7)": [0, 4, 7, 10], "Major 7 (maj7)": [0, 4, 7, 11], "Minor 7 (m7)": [0, 3, 7, 10],
         "Sus 4 (sus4)": [0, 5, 7], "Sus 2 (sus2)": [0, 2, 7], "Diminished (dim)": [0, 3, 6], "Augmented (aug)": [0, 4, 8], "Half Diminished (m7b5)": [0, 3, 6, 10],
-        "Diminished 7 (dim7)": [0, 3, 6, 9], "Minor Major 7 (mM7)": [0, 3, 7, 11], "Add9": [0, 4, 7, 14], "Minor Add9 (mAdd9)": [0, 3, 7, 14], "6": [0, 4, 7, 9], "Minor 6 (m6)": [0, 3, 7, 9]
+        "Diminished 7 (dim7)": [0, 3, 6, 9], "Minor Major 7 (mM7)": [0, 3, 7, 11], "Add9": [0, 4, 7, 14], "Minor Add9 (mAdd9)": [0, 3, 7, 14], "6": [0, 4, 7, 9], "Minor 6 (m6)": [0, 3, 7, 9],
+        "Power Chord (5)": [0, 7] // 🚀 여기에 파워코드 추가!
     },
     openChords: {
         "0_Major (M)": ['x', 3, 2, 0, 1, 0], "2_Major (M)": ['x', 'x', 0, 2, 3, 2], "4_Major (M)": [0, 2, 2, 1, 0, 0], "7_Major (M)": [3, 2, 0, 0, 0, 3], "9_Major (M)": ['x', 0, 2, 2, 2, 0], 
@@ -116,10 +117,9 @@ const MUSIC_DATA: any = {
         "9_Sus 4 (sus4)": ['x', 0, 2, 2, 3, 0], "2_Sus 2 (sus2)": ['x', 'x', 0, 2, 3, 0], "9_Sus 2 (sus2)": ['x', 0, 2, 2, 0, 0]
     },
     chordShapes: {
-        "Major (M)": { E: [0, 2, 2, 1, 0, 0], A: ['x', 0, 2, 2, 2, 0] }, "Minor (m)": { E: [0, 2, 2, 0, 0, 0], A: ['x', 0, 2, 2, 1, 0] }, "Dominant 7 (7)": { E: [0, 2, 0, 1, 0, 0], A: ['x', 0, 2, 0, 2, 0] },
-        "Major 7 (maj7)": { E: [0, 'x', 1, 1, 0, 'x'], A: ['x', 0, 2, 1, 2, 0] }, "Minor 7 (m7)": { E: [0, 'x', 0, 0, 0, 'x'], A: ['x', 0, 2, 0, 1, 0] }, "Sus 4 (sus4)": { E: [0, 2, 2, 2, 0, 0], A: ['x', 0, 2, 2, 3, 0] },
-        "Sus 2 (sus2)": { E: [0, 2, 4, 4, 0, 0], A: ['x', 0, 2, 2, 0, 0] }, "Diminished (dim)": { E: [0, 'x', 2, 0, -1, 'x'], A: ['x', 0, 1, 2, 1, 'x'] }, "Augmented (aug)": { E: [0, 'x', 2, 1, 1, 'x'], A: ['x', 0, 3, 2, 2, 'x'] },
-        "Half Diminished (m7b5)": { E: [0, 'x', 0, 0, -1, 'x'], A: ['x', 0, 1, 0, 1, 'x'] }, "Diminished 7 (dim7)": { E: [0, 'x', -1, 0, -1, 'x'], A: ['x', 0, 1, 2, 1, 2] }, "Minor Major 7 (mM7)": { E: [0, 'x', 1, 0, 0, 'x'], A: ['x', 0, 2, 1, 1, 0] }
+        // ... (앞에 기존 코드들 유지) ...
+        "Half Diminished (m7b5)": { E: [0, 'x', 0, 0, -1, 'x'], A: ['x', 0, 1, 0, 1, 'x'] }, "Diminished 7 (dim7)": { E: [0, 'x', -1, 0, -1, 'x'], A: ['x', 0, 1, 2, 1, 2] }, "Minor Major 7 (mM7)": { E: [0, 'x', 1, 0, 0, 'x'], A: ['x', 0, 2, 1, 1, 0] },
+        "Power Chord (5)": { E: [0, 2, 2, 'x', 'x', 'x'], A: ['x', 0, 2, 2, 'x', 'x'] } // 🚀 파워코드 폼 추가!
     }
 };
 MUSIC_DATA.allScales = { ...MUSIC_DATA.majorScales, ...MUSIC_DATA.minorScales };
