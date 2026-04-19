@@ -154,6 +154,15 @@ export interface I18nStrings {
   msgNoData: string;
   msgLoadFail: string;
   txtLineBreak: string;
+  midiBtn: string;
+  midiAnalyzing: string;
+  midiTitle: string;
+  midiTotal: (n: number, note: string) => string;
+  midiClickHint: string;
+  midiChartTitle: string;
+  midiMatchTitle: string;
+  midiMajor: string;
+  midiMinor: string;
 }
 export type I18nDict = {
   [key in Language]: I18nStrings;

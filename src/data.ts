@@ -41,7 +41,16 @@ const i18n: I18nDict = {
         txtCurrentNotes: "현재 찍은 음: ", txtExactChords: "🎹 <strong>일치하는 코드:</strong>", txtExactScales: "🎯 <strong>정확히 일치하는 스케일:</strong>",
         txtPartialScales: "🧩 <strong>이 음들을 포함하는 스케일 (일부 일치):</strong>", txtNone: "없음", txtEtc: " 등등...", txtCustom: "커스텀",
         promptCustomTitle: "표시할 코드/스케일 이름을 입력하세요:", msgNoData: "저장할 데이터가 없습니다.", msgLoadFail: "파일을 불러오는 데 실패했습니다.",
-        txtLineBreak: "줄바꿈"
+        txtLineBreak: "줄바꿈",
+        midiBtn: '🎵<span class="hide-on-mobile"> MIDI 분석</span><span class="show-on-mobile" style="display:none;">MIDI</span>',
+        midiAnalyzing: '⏳ 분석 중...',
+        midiTitle: '🎵 MIDI 스케일 탐지 결과',
+        midiTotal: (n: number, note: string) => `총 <strong>${n}</strong>개 음표 분석 · 최다 등장음: <strong>${note}</strong>`,
+        midiClickHint: '클릭하면 지판에 바로 적용됩니다.',
+        midiChartTitle: '음 분포:',
+        midiMatchTitle: '스케일 매칭 결과 (상위 5개):',
+        midiMajor: '메이저',
+        midiMinor: '마이너'
     },
     en: {
         langBtn: '🌐<span class="hide-on-mobile"> 한국어</span><span class="show-on-mobile" style="display:none;"> KO</span>', 
@@ -69,7 +78,16 @@ const i18n: I18nDict = {
         txtCurrentNotes: "Current Notes: ", txtExactChords: "🎹 <strong>Exact Chords:</strong>", txtExactScales: "🎯 <strong>Exact Scales:</strong>",
         txtPartialScales: "🧩 <strong>Scales Containing These Notes:</strong>", txtNone: "None", txtEtc: " etc...", txtCustom: "Custom",
         promptCustomTitle: "Enter name:", msgNoData: "No data to save.", msgLoadFail: "Failed to load the file.",
-        txtLineBreak: "Line Break"
+        txtLineBreak: "Line Break",
+        midiBtn: '🎵<span class="hide-on-mobile"> MIDI Analysis</span><span class="show-on-mobile" style="display:none;">MIDI</span>',
+        midiAnalyzing: '⏳ Analyzing...',
+        midiTitle: '🎵 MIDI Scale Detection Result',
+        midiTotal: (n: number, note: string) => `Analyzed <strong>${n}</strong> notes · Most played: <strong>${note}</strong>`,
+        midiClickHint: 'Click any scale to apply to the fretboard.',
+        midiChartTitle: 'Note distribution:',
+        midiMatchTitle: 'Scale matches (top 5):',
+        midiMajor: 'Major',
+        midiMinor: 'Minor'
     }
 };
 

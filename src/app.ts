@@ -825,27 +825,23 @@ function renderMidiAnalysisResult(result: MidiAnalysisResult): void {
     const analyzerResult = document.getElementById('scale-analysis-result');
     if (!analyzerResult) return;
 
-    const notes = (MUSIC_DATA.notes as string[]);
-    const lang = AppState.currentLang;
+    const notes = MUSIC_DATA.notes as string[];
+    const t = getSafeI18n();
 
-    // 피치 클래스 분포 바 차트 (텍스트 기반)
     const maxCount = Math.max(...result.pitchClassCounts, 1);
     const barChart = notes.map((note, idx) => {
         const count = result.pitchClassCounts[idx];
         const barLen = Math.round((count / maxCount) * 10);
         const bar = '█'.repeat(barLen) + '░'.repeat(10 - barLen);
         const isMax = count === maxCount;
-        return `<span style="font-family:monospace; ${isMax ? 'color:#f44336;font-weight:bold;' : 'color:#555;'}">
-            ${note.padEnd(2, ' ')} ${bar} ${count}
-        </span>`;
+        return `<span style="font-family:monospace; ${isMax ? 'color:#f44336;font-weight:bold;' : 'color:#555;'}">${note.padEnd(2, ' ')} ${bar} ${count}</span>`;
     }).join('<br>');
 
-    // 상위 5개 매칭 결과
     const top5 = result.matches.slice(0, 5);
-const matchRows = top5.map((m: MidiScaleMatch, idx: number) => {
+    const matchRows = top5.map((m: MidiScaleMatch, idx: number) => {
         const confidenceColor = m.confidence >= 80 ? '#4CAF50' : m.confidence >= 60 ? '#FF9800' : '#9E9E9E';
         const isMajor = m.category === 'major';
-        const categoryBadge = `<span style="background:${isMajor ? '#1976D2' : '#7B1FA2'};color:white;padding:1px 7px;border-radius:10px;font-size:11px;">${isMajor ? (lang === 'ko' ? '메이저' : 'Major') : (lang === 'ko' ? '마이너' : 'Minor')}</span>`;
+        const badge = `<span style="background:${isMajor ? '#1976D2' : '#7B1FA2'};color:white;padding:1px 7px;border-radius:10px;font-size:11px;">${isMajor ? t.midiMajor : t.midiMinor}</span>`;
         const rankEmoji = ['🥇','🥈','🥉','4️⃣','5️⃣'][idx];
         return `
         <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #eee;flex-wrap:wrap;">
@@ -853,35 +849,24 @@ const matchRows = top5.map((m: MidiScaleMatch, idx: number) => {
             <span class="clickable-scale" onclick="applyView(${m.rootIndex}, '${m.scaleName}', 'scale')" style="font-weight:bold;font-size:15px;">
                 ${m.rootNote} ${m.scaleName}
             </span>
-            ${categoryBadge}
+            ${badge}
             <span style="margin-left:auto;background:${confidenceColor};color:white;padding:2px 10px;border-radius:12px;font-weight:bold;">
                 ${m.confidence}%
             </span>
         </div>`;
     }).join('');
 
-    const titleText = lang === 'ko'
-        ? `🎵 MIDI 스케일 탐지 결과`
-        : `🎵 MIDI Scale Detection Result`;
-    const totalText = lang === 'ko'
-        ? `총 <strong>${result.totalNotes}</strong>개 음표 분석 · 최다 등장음: <strong>${result.dominantNote}</strong>`
-        : `Analyzed <strong>${result.totalNotes}</strong> notes · Most played: <strong>${result.dominantNote}</strong>`;
-    const detailText = lang === 'ko' ? '클릭하면 지판에 바로 적용됩니다.' : 'Click any scale to apply to the fretboard.';
-    const chartTitle = lang === 'ko' ? '음 분포:' : 'Note distribution:';
-    const matchTitle = lang === 'ko' ? '스케일 매칭 결과 (상위 5개):' : 'Scale matches (top 5):';
-
     analyzerResult.innerHTML = `
-        <div style="margin-bottom:10px;">${titleText}</div>
-        <div style="color:#666;margin-bottom:12px;font-size:13px;">${totalText}<br><span style="color:#1a73e8;">${detailText}</span></div>
+        <div style="margin-bottom:10px;">${t.midiTitle}</div>
+        <div style="color:#666;margin-bottom:12px;font-size:13px;">${t.midiTotal(result.totalNotes, result.dominantNote)}<br><span style="color:#1a73e8;">${t.midiClickHint}</span></div>
         <details style="margin-bottom:12px;">
-            <summary style="cursor:pointer;color:#555;font-size:13px;">${chartTitle}</summary>
+            <summary style="cursor:pointer;color:#555;font-size:13px;">${t.midiChartTitle}</summary>
             <div style="margin-top:8px;font-size:12px;line-height:1.8;">${barChart}</div>
         </details>
-        <div style="font-weight:bold;margin-bottom:6px;">${matchTitle}</div>
+        <div style="font-weight:bold;margin-bottom:6px;">${t.midiMatchTitle}</div>
         ${matchRows}
     `;
 
-    // 분석기 패널 스크롤
     analyzerResult.closest('.analyzer')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -898,7 +883,7 @@ function initMidiAnalyzer(): void {
         if (!file) return;
 
         const originalText = midiBtn.innerHTML;
-        midiBtn.innerHTML = AppState.currentLang === 'ko' ? '⏳ 분석 중...' : '⏳ Analyzing...';
+        midiBtn.innerHTML = getSafeI18n().midiAnalyzing;
         midiBtn.disabled = true;
 
         try {
