@@ -6,6 +6,8 @@ import { analyzeMidiFile, MidiAnalysisResult, MidiScaleMatch } from './midi-anal
 declare const html2canvas: any;
 
 let currentLang: Language = 'en';
+let currentMidiResult: MidiAnalysisResult | null = null;
+let isShowingMidi: boolean = false;
 const browserLang = navigator.language || (navigator as any).userLanguage;
 if (browserLang && browserLang.toLowerCase().includes('ko')) currentLang = 'ko';
 
@@ -531,6 +533,11 @@ function applyLanguage() {
     if(DOM_CACHE.clearCustomBtn) DOM_CACHE.clearCustomBtn.innerText = t.clearBtn;
     document.querySelectorAll('select option[value=""]').forEach((opt: any) => opt.innerText = t.selectDefault);
     updateTuningOptions(); updateFretboard();
+    if (isShowingMidi && currentMidiResult) {
+        renderMidiAnalysisResult(currentMidiResult);
+    } else {
+        analyzeCustomNotes();
+    }
 }
 
 function setupNoteButtons() {
@@ -768,6 +775,7 @@ function renderChordDiagrams(progression: any[], rootIndex: number, chordVal: st
 
 function analyzeCustomNotes() {
     if (!DOM_CACHE.allNoteElements || !DOM_CACHE.analyzerResult) return;
+    isShowingMidi = false;
     const customElements = Array.from(DOM_CACHE.allNoteElements).filter(el => el.classList.contains('custom'));
     const selectedNotesSet = new Set<number>(); const t = getSafeI18n();
     customElements.forEach(el => selectedNotesSet.add(parseInt(el.dataset.noteIndex || "0"))); 
@@ -828,6 +836,8 @@ function captureFretboard() {
 function renderMidiAnalysisResult(result: MidiAnalysisResult): void {
     const analyzerResult = document.getElementById('scale-analysis-result');
     if (!analyzerResult) return;
+    currentMidiResult = result;
+    isShowingMidi = true;
 
     const notes = MUSIC_DATA.notes as string[];
     const t = getSafeI18n();
