@@ -48,7 +48,7 @@ const DOM_CACHE: DOMElements = {
     scaleModeBtn: null, chordModeBtn: null, captureBtn: null,
     toggleDiagramBtn: null, addChordBtn: null, addCustomBtn: null, addLinebreakBtn: null,
     addScaleBtn: null, saveJsonBtn: null, loadJsonBtn: null, clearProgBtn: null,
-    clearCustomBtn: null, formToggleBtn: null, loadJsonInput: null,
+    clearCustomBtn: null, formToggleBtn: null, loadJsonInput: null, midiBtn: null,
     tuningSelect: null, keySelect: null, majorSelect: null, minorSelect: null, 
     chordSelect: null, formSelect: null,
     allNoteElements: [] as any, allFretElements: [] as any, findNoteBtns: [] as HTMLButtonElement[],
@@ -96,6 +96,9 @@ const DOM_CACHE: DOMElements = {
         this.minorSelect = document.getElementById('minor-select') as HTMLSelectElement;
         this.chordSelect = document.getElementById('chord-select') as HTMLSelectElement;
         this.formSelect = document.getElementById('form-select') as HTMLSelectElement;
+        this.formToggleBtn = document.getElementById('toggle-form-btn') as HTMLButtonElement;
+        this.loadJsonInput = document.getElementById('load-json-input') as HTMLInputElement;
+        this.midiBtn = document.getElementById('midi-analyze-btn') as HTMLButtonElement;
     },
 
     updateDynamicElements() {
@@ -517,6 +520,7 @@ function applyLanguage() {
     if(DOM_CACHE.saveJsonBtn) DOM_CACHE.saveJsonBtn.innerHTML = t.btnSaveJson;
     if(DOM_CACHE.loadJsonBtn) DOM_CACHE.loadJsonBtn.innerHTML = t.btnLoadJson; 
     if(DOM_CACHE.clearProgBtn) DOM_CACHE.clearProgBtn.innerHTML = t.btnClear;
+    if(DOM_CACHE.midiBtn) DOM_CACHE.midiBtn.innerHTML = t.midiBtn;
     
     if(DOM_CACHE.formSelect) {
         DOM_CACHE.formSelect.options[0].text = t.form1; DOM_CACHE.formSelect.options[1].text = t.form2; 
@@ -892,11 +896,8 @@ function initMidiAnalyzer(): void {
         } catch (err) {
             const analyzerResult = document.getElementById('scale-analysis-result');
             if (analyzerResult) {
-                analyzerResult.innerHTML = `<span style="color:#f44336;">⚠️ ${
-                    AppState.currentLang === 'ko'
-                        ? `MIDI 분석 실패: ${(err as Error).message}`
-                        : `MIDI analysis failed: ${(err as Error).message}`
-                }</span>`;
+                // 🚀 하드코딩 제거하고 번역 파일에서 텍스트를 가져오게 변경
+                analyzerResult.innerHTML = `<span style="color:#f44336;">⚠️ ${getSafeI18n().midiError((err as Error).message)}</span>`;
             }
         } finally {
             midiBtn.innerHTML = originalText;

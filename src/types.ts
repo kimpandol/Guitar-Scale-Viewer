@@ -84,6 +84,7 @@ export interface DOMElements {
   clearProgBtn: HTMLButtonElement | null;
   clearCustomBtn: HTMLButtonElement | null;
   formToggleBtn: HTMLButtonElement | null;
+  midiBtn: HTMLButtonElement | null;
   
   // 셀렉트들
   tuningSelect: HTMLSelectElement | null;
@@ -163,6 +164,7 @@ export interface I18nStrings {
   midiMatchTitle: string;
   midiMajor: string;
   midiMinor: string;
+  midiError: (msg: string) => string; // 🚀 맨 아랫줄에 추가!
 }
 export type I18nDict = {
   [key in Language]: I18nStrings;

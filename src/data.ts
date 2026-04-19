@@ -50,7 +50,8 @@ const i18n: I18nDict = {
         midiChartTitle: '음 분포:',
         midiMatchTitle: '스케일 매칭 결과 (상위 5개):',
         midiMajor: '메이저',
-        midiMinor: '마이너'
+        midiMinor: '마이너',
+        midiError: (msg: string) => `MIDI 분석 실패: ${msg}` // 🚀 추가!
     },
     en: {
         langBtn: '🌐<span class="hide-on-mobile"> 한국어</span><span class="show-on-mobile" style="display:none;"> KO</span>', 
@@ -87,7 +88,8 @@ const i18n: I18nDict = {
         midiChartTitle: 'Note distribution:',
         midiMatchTitle: 'Scale matches (top 5):',
         midiMajor: 'Major',
-        midiMinor: 'Minor'
+        midiMinor: 'Minor',
+        midiError: (msg: string) => `MIDI analysis failed: ${msg}` // 🚀 추가!
     }
 };
 
